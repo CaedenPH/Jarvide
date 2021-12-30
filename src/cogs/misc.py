@@ -8,7 +8,7 @@ class Misc(commands.Cog):
         self.bot = bot
         
 
-    @commands.command()
+    @commands.command(aliases=["latency"])
     async def ping(self, ctx):
         if round(self.bot.latency * 1000) > 150:
             health = "Unhealthy"
