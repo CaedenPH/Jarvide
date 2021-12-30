@@ -1,10 +1,14 @@
 import disnake
-from disnake.ext import commands
+from disnake.ext.commands import Bot
 
-bot = commands.Bot(command_prefix=["hey jarvide, ", "hey jarvide", "jarvide, ", "!"], help_command=None)
+bot = Bot(command_prefix=['hey jarvis, ', 'hey ', '!'], help_command=None)
 
-
-# on ready event 
-@bot.event
+@bot.command()
 async def on_ready():
-    print("jarvide is ready")
+    print('Jarvide is ready.')
+
+@bot.command()
+async def ping(ctx):
+    await ctx.send(f'{bot.latency*1000: .2f}')
+
+bot.run(TOKEN)
