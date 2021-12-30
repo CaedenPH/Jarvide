@@ -27,12 +27,19 @@ class Jarvide(commands.Bot):
 
     def parse_message(self, message: disnake.Message) -> str:
         content = message.content.lower()
+        parse_list = []
 
         if "jarvide" in content:
             for word in REMOVE_WORDS:
                 content = content.replace(
                     word + " " if len(word) >= 2 else word, ""
                 )
+            for words in content.split():
+                parse_list.append(words)
+                for parsed in parse_list:
+                    if parsed not in REMOVE_WORDS:
+                        REMOVE_WORDS.append(parsed)
+                
             return f"jarvide {content}"
         return message.content
     
