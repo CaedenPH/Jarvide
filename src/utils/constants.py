@@ -2,7 +2,6 @@ REMOVE_WORDS = [
     "?",
     "!",
     "\"",
-    
     "'",
     ",",
     "what",
@@ -14,6 +13,8 @@ REMOVE_WORDS = [
     "the",
     "tf",
     "give",
+    "youre",
     "your",
-    "is",
+    "you",
+    "is"
     ]
