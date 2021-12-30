@@ -16,5 +16,7 @@ REMOVE_WORDS = [
     "youre",
     "your",
     "you",
-    "is"
+    "is",
+    "may",
+    "say"
     ]
