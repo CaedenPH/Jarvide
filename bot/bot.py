@@ -30,7 +30,7 @@ async def ping(ctx):
 async def prefix(ctx):
     prefixes = disnake.Embed(
         title="prefixes:",
-        description="`hey jarvide, `, `hey `, `!`, `jarvide `",
+        description=f"`{'`, `'.join(bot.command_prefix)}`",
         color=disnake.Color.green()
     )
     await ctx.send(embed=prefixes)
