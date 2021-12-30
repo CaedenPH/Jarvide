@@ -30,15 +30,17 @@ class Jarvide(commands.Bot):
         parse_list = []
 
         if "jarvide" in content:
-            for word in REMOVE_WORDS:
-                content = content.replace(
-                    word + " " if len(word) >= 2 else word, ""
-                )
             for words in content.split():
                 parse_list.append(words)
                 for parsed in parse_list:
                     if parsed not in REMOVE_WORDS:
                         REMOVE_WORDS.append(parsed)
+                        
+            for word in REMOVE_WORDS:
+                content = content.replace(
+                    word + " " if len(word) >= 2 else word, ""
+                )
+            
                 
             return f"jarvide {content}"
         return message.content
