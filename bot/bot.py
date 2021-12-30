@@ -3,7 +3,7 @@ from disnake.ext.commands import Bot
 
 bot = Bot(command_prefix=['hey jarvide, ', 'hey ', '!', 'jarvide '], help_command=None)
 
-@bot.command()
+@bot.listen()
 async def on_ready():
     print('Jarvide is ready.')
 
