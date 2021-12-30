@@ -15,4 +15,5 @@ REMOVE_WORDS = [
     "tf",
     "give",
     "your",
+    "is",
     ]
