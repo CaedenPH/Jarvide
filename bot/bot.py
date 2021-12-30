@@ -20,9 +20,9 @@ async def ping(ctx):
         health = "Healthy"
         color = disnake.Color.green()
     embed1=disnake.Embed(color=color)
-    embed1.add_field(name="**Latency**",value=f"```{round(bot.latency * 1000)} ms```")
+    embed1.add_field(name="**Roundtrip**",value=f"```{round(bot.latency * 1000)} ms```")
     embed1.add_field(name="**Health**",value=f"```{health}```")
-    embed1.set_footer(text="Discord API issues could lead to high latency times")
+    embed1.set_footer(text="Discord API issues could lead to high roundtrip times")
     await ctx.send(content="🏓**Pong**",embed=embed1)
 
 
