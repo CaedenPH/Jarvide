@@ -1,7 +1,7 @@
 import disnake
 from disnake.ext.commands import Bot
 
-bot = Bot(command_prefix=['hey jarvis, ', 'hey ', '!'], help_command=None)
+bot = Bot(command_prefix=['hey jarvide, ', 'hey ', '!', 'jarvide '], help_command=None)
 
 @bot.command()
 async def on_ready():
@@ -24,6 +24,15 @@ async def ping(ctx):
     embed1.add_field(name="**Health**",value=f"```{health}```")
     embed1.set_footer(text="Discord API issues could lead to high roundtrip times")
     await ctx.send(content="🏓**Pong**",embed=embed1)
+    
+
+@bot.command()
+async def prefix(ctx):
+    prefixes = disnake.Embed(
+        title="prefixes:"
+        description="`hey jarvide, `, `hey `, `!`, `jarvide `"
+        color=disnake.Color.green()
+    )
 
 
 bot.run(TOKEN)
