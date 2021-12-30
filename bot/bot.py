@@ -35,5 +35,5 @@ class Jarvide(Bot):
 if __name__ == "__main__":
     bot = Jarvide()
     bot.run(
-        "OTI0MjE3OTY4MTE4ODg2NDEw.YcbXDg.kKYc71LnpLhdDC2oDS94qHrroNs"
+        TOKEN
     )
