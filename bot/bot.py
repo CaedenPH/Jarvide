@@ -11,20 +11,19 @@ async def on_ready():
 @bot.command()
 async def ping(ctx):
     if round(bot.latency * 1000) > 150:
-        health = "unhealthy"
-        color = "disnake.Color.red()
+        health = "Unhealthy"
+        color = disnake.Color.red()
     elif round(bot.latency * 1000) in range(70,99):
-        health = "unhealthy" 
+        health = "Unhealthy"
         color = disnake.Color.yellow()
     else:
-        health = "healthy"
+        health = "Healthy"
         color = disnake.Color.green()
-    ping_embed = disnake.Embed(
-        title="Pong!",
-        description=f"Jarvide ping: **{round(bot.latency * 1000)}ms** \n**health**: \n {health}",
-        color=color
-    )
-    await ctx.send(embed=ping_embed)
+    embed1=disnake.Embed(color=color)
+    embed1.add_field(name="**Latency**",value=f"```{round(bot.latency * 1000)} ms```")
+    embed1.add_field(name="**Health**",value=f"```{health}```")
+    embed1.set_footer(text="Discord API issues could lead to high latency times")
+    await ctx.send(content="🏓**Pong**",embed=embed1)
 
 
 bot.run(TOKEN)
