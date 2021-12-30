@@ -9,10 +9,11 @@ REMOVE_WORDS = [
     'me',
     'jarvide',
     ','
+    'the'
     ]
 
 class Jarvide(commands.Bot):
-    TOKEN = "OTI2MTIyMDY1OTczNjE2Njkw.Yc3EYw.98P2SO0CS8JHXCDp0oDzhPiZ-OM"
+    TOKEN = "OTI2MTIyMDY1OTczNjE2Njkw.Yc3EYw.lzUTaXaxQPfF-tUIBNlm9hADoSo"
 
     def __init__(self):
         super().__init__(
@@ -53,7 +54,7 @@ class Jarvide(commands.Bot):
     async def on_ready(self) -> None:
         guild = self.get_guild(926115595307614249)
         role = guild.get_role(926115630497800193)
-        
+
         for k in role.members:
             self.owner_ids.append(k.id)
 
