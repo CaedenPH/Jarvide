@@ -56,5 +56,8 @@ class Jarvide(commands.Bot):
 
         print("Set up")
 
+    async def on_command_error(self, ctx, error):
+        await ctx.send(error)
+
 
 
