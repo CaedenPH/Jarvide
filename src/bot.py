@@ -2,21 +2,18 @@ import disnake
 import os
 
 from .HIDDEN import TOKEN
-from .utils import REMOVE_WORDS
 
 from disnake.ext import commands
+
 
 class Jarvide(commands.Bot):
     def __init__(self):
         super().__init__(
-
-            command_prefix = "jarvide",
-            case_insensitive = True,
-            strip_after_prefix = True,
-            help_command = None,
-            intents=disnake.Intents.all(),
-            owner_ids = [298043305927639041]
-
+            command_prefix="jarvide",
+            case_insensitive=True,
+            strip_after_prefix=True,
+            help_command=None,
+            intents=disnake.Intents.all()
         )
     
     def setup(self) -> None:
@@ -25,26 +22,6 @@ class Jarvide(commands.Bot):
                 self.load_extension(f"src.cogs.{filename[:-3]}")
         self.load_extension("jishaku")
 
-    def parse_message(self, message: disnake.Message) -> str:
-        content = message.content.lower()
-        parse_list = []
-
-        if "jarvide" in content:
-            for words in content.split():
-                parse_list.append(words)
-                for parsed in parse_list:
-                    if parsed not in REMOVE_WORDS:
-                        REMOVE_WORDS.append(parsed)
-                        
-            for word in REMOVE_WORDS:
-                content = content.replace(
-                    word + " " if len(word) >= 2 else word, ""
-                )
-            
-                
-            return f"jarvide {content}"
-        return message.content
-    
     def run(self) -> None:
         self.setup()
         super().run(TOKEN, reconnect=True)
@@ -53,20 +30,10 @@ class Jarvide(commands.Bot):
         if message.author.bot:
             return 
 
-        message.content = self.parse_message(message)
         return await super().on_message(message)
 
     async def on_ready(self) -> None:
-        guild = self.get_guild(926115595307614249)
-        role = guild.get_role(926115630497800193)
-
-        for k in role.members:
-            self.owner_ids.append(k.id)
-
         print("Set up")
 
     async def on_command_error(self, ctx, error):
         await ctx.send(error)
-
-
-
