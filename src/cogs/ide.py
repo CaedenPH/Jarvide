@@ -72,7 +72,7 @@ class FileView(disnake.ui.View):
         async with aiohttp.ClientSession() as session:
             async with session.post(
                 url="https://emkc.org/api/v1/piston/execute",
-                json={"language": name[1], "source": content},
+                json={"language": name[-1], "source": content},
             ) as data:
                 await interaction.response.send_message(
                     (await data.json())['output'], ephemeral=True
