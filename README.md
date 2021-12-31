@@ -20,7 +20,7 @@
 | Dekriel     |likes coding and cats|
 | Sasuke 暁   |        | 
 | Snowy       |
-| okimii      |love coding and cats|  
+| okimii      |love coding and capybaras|  
 
 </div>
 
