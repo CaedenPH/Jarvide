@@ -17,7 +17,7 @@ class EmbedFactory:
             name=ctx.author.name,
             icon_url=ctx.author.display_avatar.url
         ).set_footer(
-            text="The official jarvide text editor and ide"
+            text="The official jarvide text editor and ide. Expires in 5min"
         )
 
     @staticmethod
@@ -53,6 +53,18 @@ class FileView(disnake.ui.View):
             embed = EmbedFactory.ide_embed(self.ctx, await self.file.read())
             return await interaction.response.send_message(embed=embed)
 
+    @disnake.ui.button(label="Run", style=disnake.ButtonStyle.green)
+    async def first_button(
+            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+    ):
+        ...
+
+    @disnake.ui.button(label="Edit", style=disnake.ButtonStyle.green)
+    async def first_button(
+            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+    ):
+        ...
+
 
 class OpenView(disnake.ui.View):
     def __init__(self, ctx):
@@ -86,7 +98,7 @@ class OpenView(disnake.ui.View):
     async def second_button(
             self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
-        await interaction.response.send_message("Send a github link!")
+        await interaction.response.send_message("Send a github repository link!", ephemeral=True)
         while True:
             url = await self.bot.wait_for("message",
                                           check=lambda m: self.ctx.author == m.author and m.channel == self.ctx.channel
@@ -110,8 +122,9 @@ class OpenView(disnake.ui.View):
             number = ("0" * (len(str(enumerated[-1][0])) - len(str(number)))) + str(number)
             line = f"\n{number} | {line}"
             lines.append(line)
+
         embed = EmbedFactory.code_embed(self.ctx, code="".join(lines), format_="py", path=path)
-        await interaction.edit_original_message(embed=embed)
+        await interaction.edit_original_message(embed=embed, view=)
 
     @disnake.ui.button(label="Saved", style=disnake.ButtonStyle.green)
     async def third_button(
@@ -125,30 +138,13 @@ class OpenView(disnake.ui.View):
     ):
         ...
 
-    @disnake.ui.button(label="Exit", style=disnake.ButtonStyle.red)
+    @disnake.ui.button(label="Create", style=disnake.ButtonStyle.green)
     async def fifth_button(
             self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
-        await interaction.response.defer()
-        await interaction.delete_original_message()
+        await interaction.response.send_message("What would you like the filename to be?", ephemeral=True)
 
 
-class StartView(disnake.ui.View):
-    def __init__(self, ctx):
-        super().__init__()
-        self.ctx = ctx
-
-    async def interaction_check(self, interaction: disnake.MessageInteraction) -> bool:
-        return interaction.author == self.ctx.author and interaction.channel == self.ctx.channel
-
-    @disnake.ui.button(label="Open", style=disnake.ButtonStyle.green)
-    async def first_button(
-            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
-    ):
-        embed = EmbedFactory.ide_embed(self.ctx, "How would you like to open your file?")
-
-        await interaction.response.defer()
-        await interaction.edit_original_message(embed=embed, view=OpenView(self.ctx))
 
 
 class Ide(commands.Cog):
@@ -158,8 +154,8 @@ class Ide(commands.Cog):
 
     @commands.command()
     async def ide(self, ctx: commands.Context) -> None:
-        embed = EmbedFactory.ide_embed(ctx, "No file currently open")
-        await ctx.send(embed=embed, view=StartView(ctx))
+        embed = EmbedFactory.ide_embed(ctx, "File open: No file currently open")
+        await ctx.send(embed=embed, view=OpenView(ctx))
 
 
 def setup(bot: commands.Bot) -> None:

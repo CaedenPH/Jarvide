@@ -1,10 +1,9 @@
 import disnake
 import os
+import string
 
 from .HIDDEN import TOKEN
-
 from disnake.ext import commands
-
 
 class Jarvide(commands.Bot):
     def __init__(self):
@@ -29,6 +28,12 @@ class Jarvide(commands.Bot):
     async def on_message(self, message: disnake.Message) -> None:
         if message.author.bot:
             return 
+        
+        message.content = ''.join(list(filter(lambda m: m in string.ascii_letters or m.isspace(), message.content)))
+        for command_name in [k.name for k in self.commands]:
+            if command_name in message.content.lower().split():
+                message.content = "jarvide " + command_name 
+                break
 
         return await super().on_message(message)
 
