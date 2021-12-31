@@ -12,7 +12,7 @@
 |Name         | Info   |
 |:-----------:|:------:|
 | Caeden      |        |
-| Kayle       |        |
+| Kayle       | ok       |
 | Krutoy      |        |
 | Stealthninja|hates coding and cats|
 | Sarthak     |        |
