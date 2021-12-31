@@ -1,10 +1,10 @@
 import disnake
 import os
 
-from .HIDDEN import TOKEN
-
 from disnake.ext import commands
+from dotenv import load_dotenv
 
+load_dotenv()
 
 class Jarvide(commands.Bot):
     def __init__(self):
@@ -24,7 +24,7 @@ class Jarvide(commands.Bot):
 
     def run(self) -> None:
         self.setup()
-        super().run(TOKEN, reconnect=True)
+        super().run(os.environ["TOKEN"], reconnect=True)
 
     async def on_message(self, message: disnake.Message) -> None:
         if message.author.bot:
