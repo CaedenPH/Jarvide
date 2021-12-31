@@ -14,11 +14,14 @@ class Misc(commands.Cog):
             health = "Unhealthy"
             color = disnake.Color.red()
         elif round(self.bot.latency * 1000) in range(70, 99):
-            health = "Unhealthy"
+            health = "Almost unhealthy"
             color = disnake.Color.yellow()
-        else:
+        elif round(self.bot.latency * 1000) in range(45, 69):
             health = "Healthy"
             color = disnake.Color.green()
+        else:
+            health = "Very Healthy"
+            color = 0x90EE90
 
         embed = disnake.Embed(
             color=color
