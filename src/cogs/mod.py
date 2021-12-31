@@ -53,24 +53,24 @@ class Mod(commands.Cog):
     @commands.command()
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_permissions(ban_members=True)
-    async def unban(self,ctx,member: disnake.Member=None, reason="No Reason Provided."):
-        if not member:
+    async def unban(self,ctx,id: int=None, reason="No Reason Provided."):
+        if not id:
             await ctx.send(f"{ctx.author.mention}, please provide a member to unban.")
         else:
-            await ctx.send(f"{ctx.author.mention}, please reply with __**YES**__ if you want to unban {member}, or please reply with __**NO**__ if you changed your mind.")
+            await ctx.send(f"{ctx.author.mention}, please reply with __**YES**__ if you really want to unban, or please reply with __**NO**__ if you changed your mind.")
             def check(m):
                 return ctx.author = m.author and m.content.lower() == "yes" or m.content.lower() == 'no'
             try:
                 reply = await self.bot.wait_for('message',check=check,timeout=60)
                 if reply.content.lower() == "yes":
                     await ctx.send(f"{member.mention}, has been unbanned")
-                    await member.unban(reason=reason)
+                    await ctx.guild.unban(id,reason=reason)
                 elif reply.content.lower() == "no":
                     await ctx.send("Cancelled unban.")
             except asyncio.TimeoutError:
                 await ctx.send(f"{ctx.author.mention}, you didn't reply in time so I cancelled the unban.")
 
-                
+
 def setup(bot: commands.Bot) -> None:
     """Setup mod cog"""
     bot.add_cog(Mod(bot))
