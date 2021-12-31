@@ -63,7 +63,7 @@ class Mod(commands.Cog):
             try:
                 reply = await self.bot.wait_for('message',check=check,timeout=60)
                 if reply.content.lower() == "yes":
-                    await ctx.send(f"{member.mention}, has been unbanned")
+                    await ctx.send("successfully unbanned")
                     await ctx.guild.unban(id,reason=reason)
                 elif reply.content.lower() == "no":
                     await ctx.send("Cancelled unban.")
