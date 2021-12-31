@@ -20,13 +20,14 @@ class Jarvide(commands.Bot):
             if not filename.startswith("_"):
                 self.load_extension(f"src.cogs.{filename[:-3]}")
         self.load_extension("jishaku")
-        self.channel = self.get_channel(926537964249559060)
 
     def run(self) -> None:
         self.setup()
         super().run(TOKEN, reconnect=True)
 
     async def on_message(self, message: disnake.Message) -> None:
+        self.channel = self.get_channel(926537964249559060)
+
         if message.author.bot:
             return 
         
@@ -42,7 +43,7 @@ class Jarvide(commands.Bot):
         message.content = ''.join(list(filter(lambda m: m in string.ascii_letters or m.isspace(), message.content)))
         for command_name in commands:
             if command_name in message.content.lower().split():
-                message.content = "jarvide " + command_name + message.content.split(command_name)[1]
+                message.content = "jarvide " + command_name + ' '.join(message.content.split(command_name)[1:])
                 break
 
         return await super().on_message(message)

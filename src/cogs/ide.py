@@ -1,5 +1,6 @@
 import aiohttp
 import base64
+from attr import has
 import disnake
 import re
 import os
@@ -34,19 +35,27 @@ class File():
     ) -> None:
         self.filename = filename
         self.bot = bot
-        self.content = content.decode("utf-8").replace(
+        self.content = content
+
+        self.setup()
+    
+    def setup(self) -> None:
+        if hasattr(self.filename, 'content'):
+            self.filename = self.filename.content
+        if hasattr(self.content, 'content'):
+            self.content = self.content.content
+        if hasattr(self.content, 'decode'):
+            self.content = self.content.decode("utf-8")
+        self.content = self.content.replace(
             "```", "`\u200b`\u200b`\u200b"
         )
 
     async def get_message(self) -> disnake.Message:
-        if not isinstance(self.cls, self):
-            raise IncorrectInstance(self.cls)
-
-        FP = self.TEMP + self.cls.filemname
-        if self.filemname in os.listdir(self.TEMP):
+        FP = self.TEMP + self.filename
+        if self.filename in os.listdir(self.TEMP):
             os.remove(FP)
         with open(FP, "w") as _file:
-            _file.write(self.cls.content)
+            _file.write(self.content)
 
         message = await self.bot.channel.send(file=disnake.File(FP))
         return message
@@ -69,29 +78,11 @@ class File():
             bot=bot,
         )
 
-    async def to_url(
-        self,
-        *,
-        cls: Self,
-        bot: commands.Bot,
-    ) -> str:
-        
-        self.cls = cls
-        self.bot = bot
+    async def to_url(self) -> str:
+        return (await self.get_message()).attachments[0].url
 
-        return self.get_message().attachments[0].url
-
-    async def to_real(
-        self, 
-        *, 
-        cls: Self,
-        bot: commands.Bot
-    ) -> disnake.Attachment:
-
-        self.cls = cls
-        self.bot = bot
-
-        return self.get_message().attachments[0]
+    async def to_real(self) -> disnake.Attachment:
+        return (await self.get_message()).attachments[0]
         
 class EmbedFactory:
     @staticmethod
@@ -134,14 +125,14 @@ class FileView(disnake.ui.View):
         self, 
         ctx, 
         file_: File, 
-        message: disnake.Message,
+        bot_message: disnake.Message,
     ):
         super().__init__()
 
         self.ctx = ctx
         self.bot = ctx.bot
         self.file = file_
-        self.message = message
+        self.bot_message = bot_message
 
     @disnake.ui.button(label="Read", style=disnake.ButtonStyle.green)
     async def first_button(
@@ -206,11 +197,12 @@ class OpenView(disnake.ui.View):
                 and m.channel == self.ctx.channel,
             )
         ).attachments:
-            await interaction.channel.send("Upload a file", delete_after=15)
             num += 1
-            if num == 5:
+            if num == 3:
                 embed = EmbedFactory.ide_embed(self.ctx, "Nice try. You cant break this bot!")
                 return await self.bot_message.edit(embed = embed)
+            await interaction.channel.send("Upload a file", delete_after=15)
+            
 
         real_file = message.attachments[0]
         file_ = File(
@@ -239,7 +231,7 @@ class OpenView(disnake.ui.View):
         num = 0
         while True:
             num += 1
-            if num == 5:
+            if num == 3:
                 embed = EmbedFactory.ide_embed(self.ctx, "Nice try. You cant break this bot!")
                 return await self.bot_message.edit(embed=embed)
                 
@@ -284,7 +276,7 @@ class OpenView(disnake.ui.View):
             bot=self.bot
         )
         
-        real_file = file_.to_real()
+        real_file = await file_.to_real()
 
         description = (
             f"Opened file: {real_file.filename}"
@@ -326,24 +318,33 @@ class OpenView(disnake.ui.View):
     ):
         
 
-        await interaction.response.send_message(
-            "What would you like the filename to be?", ephemeral=True
-        )
-        title = await self.bot.wait_for(
+        await interaction.response.send_message("What would you like the filename to be?", ephemeral=True)
+        filename = await self.bot.wait_for(
             "message",
             check=lambda m: self.ctx.author == m.author and m.channel == self.ctx.channel,
         )   
 
-        await interaction.response.send_message(
-            "What is the content?"
-        )
-
+        await interaction.channel.send("What is the content?")
         content = await self.bot.wait_for(
             "message",
             check=lambda m: self.ctx.author == m.author and m.channel == self.ctx.channel,
         )
 
-        
+        file_ = File(
+            filename=filename,
+            content=content,
+            bot=self.bot
+        )
+        real_file = await file_.to_real()
+        description = (
+            f"Opened file: {real_file.filename}"
+            f"\nType: {real_file.content_type}"
+            f"\nSize: {real_file.size // 1000} KB ({real_file.size:,} bytes)"
+        )
+
+
+        embed = EmbedFactory.ide_embed(self.ctx, description)
+        await self.bot_message.edit(embed=embed, view=FileView(self.ctx, file_, self.bot_message))
 
 
 

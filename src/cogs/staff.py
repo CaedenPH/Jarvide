@@ -25,7 +25,7 @@ class Staff(commands.Cog, command_attrs={"hidden": True}):
         embed.add_field(name="Unload Extension", value=f"Unloaded cog: ``{extension}`` successfully")
         await ctx.send(embed=embed)
 
-    @commands.command(aliases=["r"])
+    @commands.command(aliases=["re"])
     async def reload(self, ctx: commands.Context, extension: str = None):
         if not extension:
             for cog in tuple(self.bot.extensions):
