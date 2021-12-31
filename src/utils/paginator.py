@@ -1,4 +1,6 @@
-from disnake import MessageInteraction, Embed, ButtonStyle
+from typing import Union
+
+from disnake import MessageInteraction, ApplicationCommandInteraction, Embed, ButtonStyle
 from disnake.ui import View, Button, button
 from disnake.ext.commands import Context
 
@@ -25,11 +27,18 @@ class TextPaginator(View):
 
         timeout: :class:`float`
             The time for how long the paginator is supposed to wait for an interaction until it times out.
+
+    Methods
+    -------
+        `start`
+            |coro|
+
+            Starts the paginator.
     """
 
     def __init__(
         self,
-        ctx: Context,
+        ctx: Union[Context, MessageInteraction, ApplicationCommandInteraction],
         text: str,
         *,
         breakpoint: int = 2000,
@@ -99,7 +108,7 @@ class TextPaginator(View):
         self.message = await self.ctx.send(embed=em, view=self)
 
     async def interaction_check(self, inter: MessageInteraction) -> bool:
-        owners = self.ctx.bot.owner_ids or self.ctx.bot.owner_id
+        owners = self.ctx.bot.owner_ids or self.ctx.bot.owner_id if self.ctx.bot else 0
         if inter.author.id not in (self.ctx.author.id, owners):
             await inter.send(
                 'You cannot use the buttons on this paginator because you '
