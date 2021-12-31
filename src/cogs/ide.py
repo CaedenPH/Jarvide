@@ -2,11 +2,97 @@ import aiohttp
 import base64
 import disnake
 import re
+import os
+
 from disnake import message
+from disnake.ext.commands import bot
 
+from ..utils import TextPaginator
 from disnake.ext import commands
+from typing import TypeVar
+
+Self = TypeVar("Self")
 
 
+class IncorrectInstance(Exception):
+    """User passed incorrect instance"""
+
+    def __init__(self, argument: str) -> None:
+        print(self, dir(self))
+        super().__init__(f"{argument}")
+
+
+class File():
+    TEMP = "./temp/"
+
+    def __init__(
+        self,
+        *,
+        filename,
+        content,
+        bot,
+    ) -> None:
+        self.filename = filename
+        self.bot = bot
+        self.content = content.decode("utf-8").replace(
+            "```", "`\u200b`\u200b`\u200b"
+        )
+
+    async def get_message(self) -> disnake.Message:
+        if not isinstance(self.cls, self):
+            raise IncorrectInstance(self.cls)
+
+        FP = self.TEMP + self.cls.filemname
+        if self.filemname in os.listdir(self.TEMP):
+            os.remove(FP)
+        with open(FP, "w") as _file:
+            _file.write(self.cls.content)
+
+        message = await self.bot.channel.send(file=disnake.File(FP))
+        return message
+
+    @classmethod
+    async def from_url(
+        cls: Self,
+        *,
+        bot: commands.Bot,
+        url,
+    ) -> Self:
+
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                content = await response.read()
+                filename = url.split("?")[0].split("/")[-1]
+        return cls(
+            filename=filename,
+            content=content,
+            bot=bot,
+        )
+
+    async def to_url(
+        self,
+        *,
+        cls: Self,
+        bot: commands.Bot,
+    ) -> str:
+        
+        self.cls = cls
+        self.bot = bot
+
+        return self.get_message().attachments[0].url
+
+    async def to_real(
+        self, 
+        *, 
+        cls: Self,
+        bot: commands.Bot
+    ) -> disnake.Attachment:
+
+        self.cls = cls
+        self.bot = bot
+
+        return self.get_message().attachments[0]
+        
 class EmbedFactory:
     @staticmethod
     def ide_embed(
@@ -44,25 +130,26 @@ class FileView(disnake.ui.View):
             and interaction.channel == self.ctx.channel
         )
 
-    def __init__(self, ctx, file_):
+    def __init__(
+        self, 
+        ctx, 
+        file_: File, 
+        message: disnake.Message,
+    ):
         super().__init__()
 
         self.ctx = ctx
         self.bot = ctx.bot
         self.file = file_
+        self.message = message
 
     @disnake.ui.button(label="Read", style=disnake.ButtonStyle.green)
     async def first_button(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
-        content = await self.file.read()
-        content = content.decode('utf-8')
-
-        content = content.replace(
-            '```', '`\u200b`\u200b`\u200b'
-        )
+        content = self.file.content
         if len(content) < 2000:
-            embed = EmbedFactory.ide_embed(self.ctx, content)
+            embed = EmbedFactory.ide_embed(self.ctx, content, format_=self.file.filename.split('.')[-1])
             return await interaction.response.send_message(embed=embed)
 
     @disnake.ui.button(label="Run", style=disnake.ButtonStyle.green)
@@ -70,8 +157,7 @@ class FileView(disnake.ui.View):
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
 
-        file = await self.file.read()
-        content = file.decode("utf-8")
+        content = self.file.content
         name = self.file.filename.split(".")
 
         async with aiohttp.ClientSession() as session:
@@ -79,9 +165,9 @@ class FileView(disnake.ui.View):
                 url="https://emkc.org/api/v1/piston/execute",
                 json={"language": name[-1], "source": content},
             ) as data:
-                await interaction.response.send_message(
-                    (await data.json())['output']
-                )  # I used v1 since v2 required a version key in the json kwarg, i don't exactly know how to do that lmfao
+
+                paginator = await TextPaginator(interaction, f"```yaml\n{(await data.json())['output']}```").start()
+                
 
     @disnake.ui.button(label="Edit", style=disnake.ButtonStyle.green)
     async def third_button(
@@ -91,7 +177,10 @@ class FileView(disnake.ui.View):
 
 
 class OpenView(disnake.ui.View):
-    def __init__(self, ctx):
+    def __init__(
+        self, 
+        ctx, 
+    ):
         super().__init__()
         self.ctx = ctx
         self.bot = ctx.bot
@@ -106,10 +195,12 @@ class OpenView(disnake.ui.View):
     async def first_button(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
+        
+
         num = 0
         await interaction.response.send_message("Upload a file!", ephemeral=True)
         while not (
-            file_ := await self.bot.wait_for(
+            message := await self.bot.wait_for(
                 "message",
                 check=lambda m: self.ctx.author == m.author
                 and m.channel == self.ctx.channel,
@@ -118,19 +209,24 @@ class OpenView(disnake.ui.View):
             await interaction.channel.send("Upload a file", delete_after=15)
             num += 1
             if num == 5:
-                return await interaction.channel.send(
-                    "Nice try. You cant break this bot!"
-                )
+                embed = EmbedFactory.ide_embed(self.ctx, "Nice try. You cant break this bot!")
+                return await self.bot_message.edit(embed = embed)
 
-        file_ = file_.attachments[0]
+        real_file = message.attachments[0]
+        file_ = File(
+            content=await real_file.read(), 
+            filename=real_file.filename,
+            bot=self.bot,
+        )
+
         description = (
-            f"Opened file: {file_.filename}"
-            f"\nType: {file_.content_type}"
-            f"\nSize: {file_.size // 1000} KB ({file_.size:,} bytes)"
+            f"Opened file: {real_file.filename}"
+            f"\nType: {real_file.content_type}"
+            f"\nSize: {real_file.size // 1000} KB ({real_file.size:,} bytes)"
         )
         embed = EmbedFactory.ide_embed(self.ctx, description)
-        await interaction.edit_original_message(
-            content=None, embed=embed, view=FileView(self.ctx, file_)
+        await self.bot_message.edit(
+            content=None, embed=embed, view=FileView(self.ctx, file_, self.bot_message)
         )
 
     @disnake.ui.button(label="Github", style=disnake.ButtonStyle.green)
@@ -140,7 +236,13 @@ class OpenView(disnake.ui.View):
         await interaction.response.send_message(
             "Send a github repository link!", ephemeral=True
         )
+        num = 0
         while True:
+            num += 1
+            if num == 5:
+                embed = EmbedFactory.ide_embed(self.ctx, "Nice try. You cant break this bot!")
+                return await self.bot_message.edit(embed=embed)
+                
             url = await self.bot.wait_for(
                 "message",
                 check=lambda m: self.ctx.author == m.author
@@ -174,10 +276,24 @@ class OpenView(disnake.ui.View):
             line = f"\n{number} | {line}"
             lines.append(line)
 
-        embed = EmbedFactory.code_embed(
-            self.ctx, code="".join(lines), format_="py", path=path
+        lines = "".join(lines)
+
+        file_ = File(
+            content=lines, 
+            filename=url.split('/')[-1],
+            bot=self.bot
         )
-        await interaction.edit_original_message(embed=embed)
+        
+        real_file = file_.to_real()
+
+        description = (
+            f"Opened file: {real_file.filename}"
+            f"\nType: {real_file.file_.content_type}"
+            f"\nSize: {real_file.file_.size // 1000} KB ({file_.size:,} bytes)"
+        )
+        embed = EmbedFactory.ide_embed(self.ctx, description)
+
+        await self.bot_message.edit(embed=embed, view=FileView(self.ctx, file_, self.bot_message))
 
     @disnake.ui.button(label="Saved", style=disnake.ButtonStyle.green)
     async def third_button(
@@ -196,8 +312,7 @@ class OpenView(disnake.ui.View):
         while not (
             message := await self.bot.wait_for(
                 "message",
-                check=lambda m: self.ctx.author == m.author
-                and m.channel == self.ctx.channel,
+                check=lambda m: self.ctx.author == m.author and m.channel == self.ctx.channel,
             )).content.startswith(PASTE_URLS):
             await interaction.response.send_message(f"That url is not supported! Our supported urls are {PASTE_URLS}")
 
@@ -209,9 +324,27 @@ class OpenView(disnake.ui.View):
     async def fifth_button(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
+        
+
         await interaction.response.send_message(
             "What would you like the filename to be?", ephemeral=True
         )
+        title = await self.bot.wait_for(
+            "message",
+            check=lambda m: self.ctx.author == m.author and m.channel == self.ctx.channel,
+        )   
+
+        await interaction.response.send_message(
+            "What is the content?"
+        )
+
+        content = await self.bot.wait_for(
+            "message",
+            check=lambda m: self.ctx.author == m.author and m.channel == self.ctx.channel,
+        )
+
+        
+
 
 
 class Ide(commands.Cog):
@@ -223,7 +356,8 @@ class Ide(commands.Cog):
     @commands.command()
     async def ide(self, ctx: commands.Context) -> None:
         embed = EmbedFactory.ide_embed(ctx, "File open: No file currently open")
-        await ctx.send(embed=embed, view=OpenView(ctx))
+        view = OpenView(ctx)
+        view.bot_message = await ctx.send(embed=embed, view=view)
 
 
 def setup(bot: commands.Bot) -> None:

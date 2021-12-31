@@ -1,4 +1,5 @@
 import disnake
+import asyncio
 
 from disnake.ext import commands
 
@@ -18,7 +19,7 @@ class Mod(commands.Cog):
         else:
             await ctx.send(f"{ctx.author.mention}, please reply with __**YES**__ if you want to kick {member}, or please reply with __**NO**__ if you changed your mind.")
             def check(m):
-                return ctx.author = m.author and m.content.lower() == "yes" or m.content.lower() == 'no'
+                return ctx.author == m.author and m.content.lower() == "yes" or m.content.lower() == 'no'
             try:
                 reply = await self.bot.wait_for('message',check=check,timeout=60)
                 if reply.content.lower() == "yes":

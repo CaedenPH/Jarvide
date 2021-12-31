@@ -14,13 +14,13 @@ class Staff(commands.Cog, command_attrs={"hidden": True}):
     @commands.command()
     async def load(self, ctx: commands.Context, extension):
         embed = disnake.Embed(color=disnake.Color.dark_gold())
-        self.bot.load_extension(f"cogs.{extension}")
+        self.bot.load_extension(f"src.cogs.{extension}")
         embed.add_field(name="Load Extension", value=f"Loaded cog: ``{extension}`` successfully")
         await ctx.send(embed=embed)
 
     @commands.command()
     async def unload(self, ctx: commands.Context, extension):
-        self.bot.unload_extension(f"cogs.{extension}")
+        self.bot.unload_extension(f"src.cogs.{extension}")
         embed = disnake.Embed(color=disnake.Color.dark_gold())
         embed.add_field(name="Unload Extension", value=f"Unloaded cog: ``{extension}`` successfully")
         await ctx.send(embed=embed)
@@ -29,12 +29,13 @@ class Staff(commands.Cog, command_attrs={"hidden": True}):
     async def reload(self, ctx: commands.Context, extension: str = None):
         if not extension:
             for cog in tuple(self.bot.extensions):
-                if cog.split(".")[-1].lower() not in ["misc", "economy", "mod"]:
-                    self.bot.reload_extension(cog)
+                self.bot.reload_extension(cog)
             embed = disnake.Embed(color=disnake.Color.dark_gold())
             embed.add_field(name="Reload Extension", value=f"Reloaded cogs successfully")
+            print("----------------------------------------")
             return await ctx.send(embed=embed)
-            
+
+        print("----------------------------------------")
         self.bot.reload_extension(f"cogs.{extension}")
         embed = disnake.Embed(color=disnake.Color.dark_gold())
         embed.add_field(name="Reload Extension", value=f"Reloaded cog: ``{extension}`` successfully")
