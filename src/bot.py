@@ -29,6 +29,9 @@ class Jarvide(commands.Bot):
         if message.author.bot:
             return 
         
+        if "jarvide" not in message.content.lower():
+            return 
+            
         message.content = ''.join(list(filter(lambda m: m in string.ascii_letters or m.isspace(), message.content)))
         for command_name in [k.name for k in self.commands]:
             if command_name in message.content.lower().split():

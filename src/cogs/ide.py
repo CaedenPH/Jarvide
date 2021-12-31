@@ -49,22 +49,30 @@ class FileView(disnake.ui.View):
     async def first_button(
             self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
-        if len(await self.file.read()) < 2000:
-            embed = EmbedFactory.ide_embed(self.ctx, await self.file.read())
+        content = await self.file.read()
+        content = content.decode('utf-8')
+        if len(content) < 2000:
+            embed = EmbedFactory.ide_embed(self.ctx, content)
             return await interaction.response.send_message(embed=embed)
 
     @disnake.ui.button(label="Run", style=disnake.ButtonStyle.green)
-    async def first_button(
+    async def second_button(
             self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         ...
 
     @disnake.ui.button(label="Edit", style=disnake.ButtonStyle.green)
-    async def first_button(
+    async def third_button(
             self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         ...
-
+    
+    @disnake.ui.button(label="Save", style=disnake.ButtonStyle.green)
+    async def fourth_button(
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+    ):
+        ...
+    
 
 class OpenView(disnake.ui.View):
     def __init__(self, ctx):
@@ -124,7 +132,7 @@ class OpenView(disnake.ui.View):
             lines.append(line)
 
         embed = EmbedFactory.code_embed(self.ctx, code="".join(lines), format_="py", path=path)
-        await interaction.edit_original_message(embed=embed, view=)
+        await interaction.edit_original_message(embed=embed)
 
     @disnake.ui.button(label="Saved", style=disnake.ButtonStyle.green)
     async def third_button(
