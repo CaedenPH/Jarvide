@@ -2,6 +2,7 @@ import aiohttp
 import base64
 import disnake
 import re
+from disnake import message
 
 from disnake.ext import commands
 
@@ -54,16 +55,20 @@ class FileView(disnake.ui.View):
     async def first_button(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
-        if len(await self.file.read()) < 2000:
-            embed = EmbedFactory.ide_embed(self.ctx, await self.file.read())
+        content = await self.file.read()
+        content = content.decode('utf-8')
+
+        content = content.replace(
+            '```', '`\u200b`\u200b`\u200b'
+        )
+        if len(content) < 2000:
+            embed = EmbedFactory.ide_embed(self.ctx, content)
             return await interaction.response.send_message(embed=embed)
 
     @disnake.ui.button(label="Run", style=disnake.ButtonStyle.green)
     async def second_button(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
-
-      #  await interaction.response.defer()
 
         file = await self.file.read()
         content = file.decode("utf-8")
@@ -75,7 +80,7 @@ class FileView(disnake.ui.View):
                 json={"language": name[-1], "source": content},
             ) as data:
                 await interaction.response.send_message(
-                    (await data.json())['output'], ephemeral=True
+                    (await data.json())['output']
                 )  # I used v1 since v2 required a version key in the json kwarg, i don't exactly know how to do that lmfao
 
     @disnake.ui.button(label="Edit", style=disnake.ButtonStyle.green)
@@ -184,7 +189,21 @@ class OpenView(disnake.ui.View):
     async def fourth_button(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
-        ...
+        PASTE_URLS = ("https://www.toptal.com/developers/hastebin/", "https://pastebin.com/",
+                                 "https://ghostbin.com/")
+
+        await interaction.response.send_message("Send a url with code in it", ephemeral=True)
+        while not (
+            message := await self.bot.wait_for(
+                "message",
+                check=lambda m: self.ctx.author == m.author
+                and m.channel == self.ctx.channel,
+            )).content.startswith(PASTE_URLS):
+            await interaction.response.send_message(f"That url is not supported! Our supported urls are {PASTE_URLS}")
+
+        async with aiohttp.ClientSession() as session:
+            async with session.get(message.content) as response:
+                print(await response.read())
 
     @disnake.ui.button(label="Create", style=disnake.ButtonStyle.green)
     async def fifth_button(

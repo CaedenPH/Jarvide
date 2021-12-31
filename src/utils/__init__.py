@@ -1,1 +1,1 @@
-from .constants import *
+from .paginator import TextPaginator
