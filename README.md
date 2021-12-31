@@ -19,7 +19,8 @@
 | Icy         |        |
 | Dekriel     |likes coding and cats|
 | Sasuke 暁   |        | 
-| Snowy       |  
+| Snowy       |
+| okimii      |love coding and capybaras|  
 
 </div>
 
