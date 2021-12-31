@@ -1,6 +1,9 @@
+import typing
 import disnake
-
 from disnake.ext import commands
+from src.utils.confirmation import prompt
+
+import asyncio
 
 
 class Mod(commands.Cog):
@@ -8,67 +11,52 @@ class Mod(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-
     @commands.command()
     @commands.has_permissions(kick_members=True)
     @commands.bot_has_permissions(kick_members=True)
-    async def kick(self,ctx,member: disnake.Member=None, reason="No Reason Provided."):
+    async def kick(self, ctx: commands.Context, member: disnake.Member=None, reason: str="No Reason Provided."):
         if not member:
+            print(type(member))
             await ctx.send(f"{ctx.author.mention}, please provide a member to kick.")
+            return
+        
+        choice = await prompt(ctx, message="Are you sure you want to kick this user?", timeout=60)
+        if choice:
+            await member.kick(reason=reason)
+            await ctx.send(f'{member.mention} has been kicked.')
         else:
-            await ctx.send(f"{ctx.author.mention}, please reply with __**YES**__ if you want to kick {member}, or please reply with __**NO**__ if you changed your mind.")
-            def check(m):
-                return ctx.author = m.author and m.content.lower() == "yes" or m.content.lower() == 'no'
-            try:
-                reply = await self.bot.wait_for('message',check=check,timeout=60)
-                if reply.content.lower() == "yes":
-                    await ctx.send(f"{member.mention}, has been kicked.")
-                    await member.kick(reason=reason)
-                elif reply.content.lower() == "no":
-                    await ctx.send("Cancelled kick.")
-            except asyncio.TimeoutError:
-                await ctx.send(f"{ctx.author.mention}, you didn't reply in time so I cancelled the kick.")
+            await ctx.send(f'Cancelled kick.')
 
     @commands.command()
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_permissions(ban_members=True)
-    async def ban(self,ctx,member: disnake.Member=None, reason="No Reason Provided."):
+    async def ban(self,ctx: commands.Context, member: disnake.Member=None, reason="No Reason Provided."):
         if not member:
             await ctx.send(f"{ctx.author.mention}, please provide a member to ban.")
+            return
+        
+        choice = await prompt(ctx, message="Are you sure you want to ban this user?", timeout=60)
+        if choice:
+            await member.ban(reason=reason)
+            await ctx.send(f'{member.mention} has been banned.')
         else:
-            await ctx.send(f"{ctx.author.mention}, please reply with __**YES**__ if you want to ban {member}, or please reply with __**NO**__ if you changed your mind.")
-            def check(m):
-                return ctx.author = m.author and m.content.lower() == "yes" or m.content.lower() == 'no'
-            try:
-                reply = await self.bot.wait_for('message',check=check,timeout=60)
-                if reply.content.lower() == "yes":
-                    await ctx.send(f"{member.mention}, has been banned. Deleted `2` days of messages.")
-                    await member.ban(delete_message_days = 2,reason=reason)
-                elif reply.content.lower() == "no":
-                    await ctx.send("Cancelled ban.")
-            except asyncio.TimeoutError:
-                await ctx.send(f"{ctx.author.mention}, you didn't reply in time so I cancelled the ban.")
+            await ctx.send(f'Cancelled ban.')
 
 
     @commands.command()
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_permissions(ban_members=True)
-    async def unban(self,ctx,id: int=None, reason="No Reason Provided."):
+    async def unban(self, ctx:commands.Context, id: int=None, reason="No Reason Provided."):
         if not id:
-            await ctx.send(f"{ctx.author.mention}, please provide a member to unban.")
+            await ctx.send(f"{ctx.author.mention}, please provide an ID of a user to unban.")
+            return
+        
+        choice = await prompt(ctx, message="Are you sure you want to ban this user?", timeout=60)
+        if choice:
+            await ctx.guild.unban(id, reason=reason)
+            await ctx.send("Successfully unbanned that user.")
         else:
-            await ctx.send(f"{ctx.author.mention}, please reply with __**YES**__ if you really want to unban, or please reply with __**NO**__ if you changed your mind.")
-            def check(m):
-                return ctx.author = m.author and m.content.lower() == "yes" or m.content.lower() == 'no'
-            try:
-                reply = await self.bot.wait_for('message',check=check,timeout=60)
-                if reply.content.lower() == "yes":
-                    await ctx.send("successfully unbanned")
-                    await ctx.guild.unban(id,reason=reason)
-                elif reply.content.lower() == "no":
-                    await ctx.send("Cancelled unban.")
-            except asyncio.TimeoutError:
-                await ctx.send(f"{ctx.author.mention}, you didn't reply in time so I cancelled the unban.")
+            await ctx.send("Cancelled the unban")
 
 
 def setup(bot: commands.Bot) -> None:
