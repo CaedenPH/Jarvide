@@ -16,7 +16,7 @@ class Jarvide(commands.Bot):
             case_insensitive=True,
             strip_after_prefix=True,
             help_command=None,
-            intents=disnake.Intents.all()
+            intents=disnake.Intents.all(),
         )
 
     def setup(self) -> None:
@@ -28,27 +28,35 @@ class Jarvide(commands.Bot):
         self.load_extension("jishaku")
 
     def load_extension(self, name: str, *, package: Optional[str] = None) -> None:
-        path = name.replace('.', '/')
+        path = name.replace(".", "/")
         if os.path.isdir(path):
             for root, dir_, files in os.walk(path):
                 for file in files:
                     if not file.startswith("_") and file.endswith(".py"):
                         try:
-                            super().load_extension(os.path.join(root, file).replace("\\", "/").replace("/", ".")[:-3])
+                            super().load_extension(
+                                os.path.join(root, file)
+                                .replace("\\", "/")
+                                .replace("/", ".")[:-3]
+                            )
                         except Exception as e:
                             if not str(e).endswith("has no 'setup' function."):
-                                print(e)    
+                                print(e)
             return
-        super().load_extension(name, package=package) 
+        super().load_extension(name, package=package)
 
     def unload_extension(self, name: str, *, package: Optional[str] = None) -> None:
-        path = name.replace('.', '/')
+        path = name.replace(".", "/")
         if os.path.isdir(path):
             for root, dir_, files in os.walk(path):
                 for file in files:
                     if not file.startswith("_") and file.endswith(".py"):
                         try:
-                            super().load_extension(os.path.join(root, file).replace("\\", "/").replace("/", ".")[:-3])
+                            super().load_extension(
+                                os.path.join(root, file)
+                                .replace("\\", "/")
+                                .replace("/", ".")[:-3]
+                            )
                         except Exception as e:
                             if not str(e).endswith("has no 'setup' function."):
                                 print(e)
@@ -75,14 +83,24 @@ class Jarvide(commands.Bot):
             for alias in command.aliases:
                 commands_.append(alias)
 
-        message.content = ''.join(list(filter(lambda m: m in string.ascii_letters or m.isspace(), message.content)))
+        message.content = "".join(
+            list(
+                filter(
+                    lambda m: m in string.ascii_letters or m.isspace(), message.content
+                )
+            )
+        )
         for command_name in commands_:
             if command_name in message.content.lower().split():
-                message.content = "jarvide " + command_name + ' '.join(original_message.content.split(command_name)[1:])
+                message.content = (
+                    "jarvide "
+                    + command_name
+                    + " ".join(original_message.content.split(command_name)[1:])
+                )
                 break
         return await super().on_message(message)
 
-    async def on_ready(self) -> None: 
+    async def on_ready(self) -> None:
         print("Set up")
 
     async def on_command_error(self, ctx, error):

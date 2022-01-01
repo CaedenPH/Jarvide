@@ -5,6 +5,7 @@ from disnake.ext import commands
 
 class Misc(commands.Cog):
     """Misc cog for randomly assorted commands that dont fall into any specific category."""
+
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
@@ -19,16 +20,13 @@ class Misc(commands.Cog):
         else:
             health, color = "Very Healthy", 0x90EE90
 
-        embed = disnake.Embed(
-            color=color
-        ).add_field(
-            name="**Roundtrip**",
-            value=f"```{round(self.bot.latency * 1000)} ms```"
-        ).add_field(
-            name="**Health**",
-            value=f"```{health}```"
-        ).set_footer(
-            text="Discord API issues could lead to high roundtrip times"
+        embed = (
+            disnake.Embed(color=color)
+            .add_field(
+                name="**Roundtrip**", value=f"```{round(self.bot.latency * 1000)} ms```"
+            )
+            .add_field(name="**Health**", value=f"```{health}```")
+            .set_footer(text="Discord API issues could lead to high roundtrip times")
         )
         await ctx.send(content="🏓**Pong**", embed=embed)
 
