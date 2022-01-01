@@ -1,4 +1,4 @@
-### **Jaris**
+### **Jarvis**
 > Jarvide is an A.I from Iron Man that executes commands and retrieves informaton via normal, logical speaking. A phrase like "hey jarvide, can you kick Caeden please" would kick the member Caeden, or if there are multiple give an option of which one.
 
 
