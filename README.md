@@ -14,7 +14,7 @@ Learn more about Jarvide [here.](ABOUT.md)
 
 |Name         | Info   |
 |:-----------:|:------:|
-| Caeden      |        |
+| Caeden      | papa   |
 | Kayle       | ok       |
 | Krutoy      |        |
 | Stealthninja|fucking sucks at coding|
