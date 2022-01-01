@@ -76,6 +76,7 @@ class Jarvide(commands.Bot):
 
         if "jarvide" not in message.content.lower():
             return
+            
         commands_ = [k.name for k in self.commands]
         for command in self.commands:
             if not command.aliases:

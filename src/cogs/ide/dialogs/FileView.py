@@ -53,31 +53,37 @@ class FileView(disnake.ui.View):
         async with aiohttp.ClientSession() as session:
             async with session.post(
                 url="https://emkc.org/api/v1/piston/execute",
-                json={"language": name[-1], "source": content},
+                json={"language": name, "source": content},
             ) as data:
 
                 json = await data.json()
-                print(json)
+                output = json['output']
 
-            await TextPaginator(interaction, f"```yaml\n{json['output']}```").start()
+                if not output:
+                    output = "[No output]"
+
+            await TextPaginator(interaction, f"```yaml\n{output}```").start()
 
     @disnake.ui.button(label="Edit", style=disnake.ButtonStyle.green)
     async def third_button(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
+        await interaction.response.defer()
         content = self.file.content
-        if len(content) < 4000:
-            return await self.bot_message.edit(
-                embed=EmbedFactory.code_embed(
-                    self.ctx, add_lines(content), self.file.filename
-                ),
-                view=EditView(self.ctx, self.file, self.bot_message),
-            )
-        await LinePaginator(
-            interaction,
-            content.split("\n"),
-            prefix=f"```{self.extension}",
-            suffix="```",
-            line_limit=60,
-            timeout=None,
-        ).start()
+        if len(content) > 4000:
+            return await LinePaginator(
+                interaction,
+                content.split("\n"),
+                prefix=f"```{self.extension}",
+                suffix="```",
+                line_limit=60,
+                timeout=None,
+            ).start()
+
+        await self.bot_message.edit(
+            embed=EmbedFactory.code_embed(
+                self.ctx, add_lines(content), self.file.filename
+            ),
+            view=EditView(self.ctx, self.file, self.bot_message),
+        )
+        

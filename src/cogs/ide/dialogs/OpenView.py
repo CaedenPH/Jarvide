@@ -2,6 +2,8 @@ import disnake
 import re
 import base64
 
+from disnake import message
+
 from src.utils import *
 from .FileView import FileView
 
@@ -109,13 +111,7 @@ class OpenView(disnake.ui.View):
         content = base64.b64decode(content).decode("utf-8").replace("`", "`​")
         file_ = File(content=content, filename=url.content.split("/")[-1], bot=self.bot)
 
-        real_file = await file_.to_real()
-
-        description = (
-            f"Opened file: {real_file.filename}"
-            f"\nType: {real_file.content_type}"
-            f"\nSize: {real_file.size // 1000} KB ({real_file.size:,} bytes)"
-        )
+        description = await get_info(file_)
         embed = EmbedFactory.ide_embed(self.ctx, description)
         view = FileView(self.ctx, file_)
         view.bot_message = await self.bot_message.edit(embed=embed, view=view)
@@ -168,20 +164,20 @@ class OpenView(disnake.ui.View):
         )
 
         await interaction.channel.send("What is the content?")
-        content = await self.bot.wait_for(
+        message = await self.bot.wait_for(
             "message",
             check=lambda m: self.ctx.author == m.author
             and m.channel == self.ctx.channel,
         )
-        await content.add_reaction(THUMBS_UP)
+        await message.add_reaction(THUMBS_UP)
+        content = message.content
 
-        file_ = File(filename=filename, content=content, bot=self.bot)
-        real_file = await file_.to_real()
-        description = (
-            f"Opened file: {real_file.filename}"
-            f"\nType: {real_file.content_type}"
-            f"\nSize: {real_file.size // 1000} KB ({real_file.size:,} bytes)"
-        )
+        clean_content = content
+        if content.startswith('```') and content.endswith('```'):
+            clean_content = '\n'.join(disnake.utils.remove_markdown(content).split('\n')[1:])
+
+        file_ = File(filename=filename, content=clean_content, bot=self.bot)
+        description = await get_info(file_)
 
         embed = EmbedFactory.ide_embed(self.ctx, description)
         view = FileView(self.ctx, file_, self.bot_message)

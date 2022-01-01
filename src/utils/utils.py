@@ -16,7 +16,6 @@ def add_lines(content: str) -> None:
 
     return "".join(lines)
 
-
 Self = TypeVar("Self")
 
 
@@ -103,3 +102,13 @@ class EmbedFactory:
             .set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
             .set_footer(text="The official jarvide text editor and ide")
         )
+
+
+async def get_info(file_: File) -> str:
+    real_file = await file_.to_real()
+
+    return (
+        f"Opened file: {real_file.filename}"
+        f"\nType: {real_file.content_type}"
+        f"\nSize: {real_file.size // 1000} KB ({real_file.size:,} bytes)"
+    )
