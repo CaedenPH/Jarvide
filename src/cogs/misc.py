@@ -11,17 +11,13 @@ class Misc(commands.Cog):
     @commands.command(aliases=["latency"])
     async def ping(self, ctx):
         if round(self.bot.latency * 1000) > 150:
-            health = "Unhealthy"
-            color = disnake.Color.red()
+            health, color = "Unhealthy", disnake.Color.red()
         elif round(self.bot.latency * 1000) in range(90, 150):
-            health = "Almost unhealthy"
-            color = disnake.Color.yellow()
+            health, color = "Almost unhealthy", disnake.Color.yellow()
         elif round(self.bot.latency * 1000) in range(55, 90):
-            health = "Healthy"
-            color = disnake.Color.green()
+            health, color = "Healthy", disnake.Color.green()
         else:
-            health = "Very Healthy"
-            color = 0x90EE90
+            health, color = "Very Healthy", 0x90EE90
 
         embed = disnake.Embed(
             color=color

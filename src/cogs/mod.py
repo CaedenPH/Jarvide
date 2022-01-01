@@ -1,9 +1,9 @@
-import typing
 import disnake
-from disnake.ext import commands
-from src.utils.confirmation import prompt
+import typing
 
-import asyncio
+from disnake.ext import commands
+
+from src.utils.confirmation import prompt
 
 
 class Mod(commands.Cog):
@@ -14,11 +14,9 @@ class Mod(commands.Cog):
     @commands.command()
     @commands.has_permissions(kick_members=True)
     @commands.bot_has_permissions(kick_members=True)
-    async def kick(self, ctx: commands.Context, member: disnake.Member=None, reason: str="No Reason Provided."):
+    async def kick(self, ctx: commands.Context, member: disnake.Member = None, reason: str = "No Reason Provided."):
         if not member:
-            print(type(member))
-            await ctx.send(f"{ctx.author.mention}, please provide a member to kick.")
-            return
+            return await ctx.send(f"{ctx.author.mention}, please provide a member to kick.")
         
         choice = await prompt(ctx, message="Are you sure you want to kick this user?", timeout=60)
         if choice:
@@ -30,7 +28,7 @@ class Mod(commands.Cog):
     @commands.command()
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_permissions(ban_members=True)
-    async def ban(self,ctx: commands.Context, member: disnake.Member=None, reason="No Reason Provided."):
+    async def ban(self, ctx: commands.Context, member: disnake.Member = None, reason="No Reason Provided."):
         if not member:
             await ctx.send(f"{ctx.author.mention}, please provide a member to ban.")
             return
@@ -42,22 +40,24 @@ class Mod(commands.Cog):
         else:
             await ctx.send(f'Cancelled ban.')
 
-
     @commands.command()
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_permissions(ban_members=True)
-    async def unban(self, ctx:commands.Context, id: int=None, reason="No Reason Provided."):
-        if not id:
+    async def unban(self,
+                    ctx: commands.Context,
+                    user: typing.Union[disnake.User, int] = None,
+                    reason="No Reason Provided."
+                    ):
+        if not user:
             await ctx.send(f"{ctx.author.mention}, please provide an ID of a user to unban.")
             return
         
         choice = await prompt(ctx, message="Are you sure you want to ban this user?", timeout=60)
         if choice:
-            await ctx.guild.unban(id, reason=reason)
+            await ctx.guild.unban(user if isinstance(user, disnake.User) else disnake.Object(user), reason=reason)
             await ctx.send("Successfully unbanned that user.")
         else:
             await ctx.send("Cancelled the unban")
-
 
 
 def setup(bot: commands.Bot) -> None:
