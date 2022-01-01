@@ -1,4 +1,5 @@
 from typing import Union
+from abc import abstractmethod
 
 from disnake import MessageInteraction, ApplicationCommandInteraction, Embed, ButtonStyle
 from disnake.ui import View, Button, button
@@ -48,6 +49,7 @@ class _AbstractPaginator(View):
         self.current_page = 0
         self.pages = []
 
+    @abstractmethod
     def get_pages(self):
         pass
 
