@@ -74,9 +74,9 @@ class Jarvide(commands.Bot):
     async def connect_database(self):
         self.db = await aiosqlite.connect('./db/database.db')
 
-    async def on_message(self, original_message: disnake.Message) -> None:
+    async def on_message(self, original_message: disnake.Message) -> None:  
+        self.send_guild = self.get_guild(926811692019626064)
         message = copy.copy(original_message)
-        self.channel = self.get_channel(926811692019626067)
 
         if message.author.bot:
             return

@@ -1,6 +1,7 @@
 import disnake
 import io
 import aiohttp
+import random
 
 from disnake.ext import commands
 from typing import TypeVar
@@ -14,7 +15,7 @@ def add_lines(content: str) -> None:
         line = f"\n{number} | {line}"
         lines.append(line)
 
-    return "".join(lines)
+    return lines
 
 Self = TypeVar("Self")
 
@@ -46,7 +47,8 @@ class File:
     async def get_message(self) -> disnake.Message:
         f = io.StringIO(self.content)
 
-        message = await self.bot.channel.send(file=disnake.File(fp=f, filename=self.filename))  # type: ignore
+        channel = random.choice(self.bot.send_guild.text_channels)
+        message = await channel.send(file=disnake.File(fp=f, filename=self.filename))  # type: ignore
         return message
 
     @classmethod

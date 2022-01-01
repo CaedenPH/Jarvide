@@ -1,7 +1,4 @@
-from datetime import time
 import disnake
-from disnake import file
-from disnake.permissions import P
 
 from src.utils import *
 from .EditView import EditView
@@ -27,20 +24,24 @@ class FileView(disnake.ui.View):
     async def first_button(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
-        content = self.file.content
-        if len(content) < 2000:
+        content = add_lines(self.file.content)
+        if len("".join(content)) < 2000:
             embed = EmbedFactory.ide_embed(
-                self.ctx, add_lines(content), format_=self.extension
+                self.ctx, "".join(content), format_=self.extension
             )
             return await interaction.response.send_message(embed=embed)
 
         await LinePaginator(
             interaction,
-            content.split("\n"),
+            [line.strip("\n") for line in content],
             prefix=f"```{self.extension}",
             suffix="```",
-            line_limit=60,
+            line_limit=50,
             timeout=None,
+            embed_author_kwargs={
+                'name': f"{self.ctx.author.name}'s automated paginator for {self.file.filename}.",
+                'icon_url': self.ctx.author.avatar.url
+            }
         ).start()
 
     @disnake.ui.button(label="Run", style=disnake.ButtonStyle.green)
@@ -73,16 +74,20 @@ class FileView(disnake.ui.View):
         if len(content) > 4000:
             return await LinePaginator(
                 interaction,
-                content.split("\n"),
+                [line.strip("\n") for line in content],
                 prefix=f"```{self.extension}",
                 suffix="```",
                 line_limit=60,
                 timeout=None,
+                embed_author_kwargs={
+                'name': f"{self.ctx.author.name}'s automated paginator for {self.file.filename}.",
+                'icon_url': self.ctx.author.avatar.url
+            }
             ).start()
 
         await self.bot_message.edit(
             embed=EmbedFactory.code_embed(
-                self.ctx, add_lines(content), self.file.filename
+                self.ctx, "".join(add_lines(content)), self.file.filename
             ),
             view=EditView(self.ctx, self.file, self.bot_message),
         )

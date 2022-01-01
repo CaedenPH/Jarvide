@@ -3,8 +3,6 @@ import disnake
 from disnake.ext import commands
 from typing import TYPE_CHECKING
 
-from disnake.permissions import P
-
 from src.utils.utils import *
 
 if TYPE_CHECKING:
@@ -39,7 +37,7 @@ class EditView(disnake.ui.View):
 
         await self.bot_message.edit(
             embed=EmbedFactory.code_embed(
-                self.ctx, add_lines(self.content), self.file.filename
+                self.ctx, "".join(add_lines(self.content)), self.file.filename
             ),
         )
 
@@ -93,7 +91,7 @@ class EditView(disnake.ui.View):
             return await interaction.response.send_message("You have made no changes and have nothing to undo!", ephemeral=True)
 
         self.undo.append(self.content)
-        self.content = self.redo[-1]
+        self.content = self.redo[-1]    
         await self.edit(interaction)
 
     @disnake.ui.button(label="Save", style=disnake.ButtonStyle.green, row=2)
