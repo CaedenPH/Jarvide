@@ -5,17 +5,17 @@ import aiohttp
 from disnake.ext import commands
 from typing import TypeVar
 
+
 def add_lines(content: str) -> None:
     enumerated = list(enumerate(content.split("\n")))
     lines = []
     for number, line in enumerated:
-        number = ("0" * (len(str(enumerated[-1][0])) - len(str(number)))) + str(
-            number
-        )
+        number = ("0" * (len(str(enumerated[-1][0])) - len(str(number)))) + str(number)
         line = f"\n{number} | {line}"
         lines.append(line)
 
     return "".join(lines)
+
 
 Self = TypeVar("Self")
 
@@ -36,15 +36,13 @@ class File:
         self.setup()
 
     def setup(self) -> None:
-        if hasattr(self.filename, 'content'):
+        if hasattr(self.filename, "content"):
             self.filename = self.filename.content
-        if hasattr(self.content, 'content'):
+        if hasattr(self.content, "content"):
             self.content = self.content.content
-        if hasattr(self.content, 'decode'):
+        if hasattr(self.content, "decode"):
             self.content = self.content.decode("utf-8")
-        self.content = self.content.replace(
-            "```", "`\u200b`\u200b`\u200b"
-        )
+        self.content = self.content.replace("```", "`\u200b`\u200b`\u200b")
 
     async def get_message(self) -> disnake.Message:
         f = io.StringIO(self.content)
@@ -54,10 +52,10 @@ class File:
 
     @classmethod
     async def from_url(
-            cls: Self,
-            *,
-            bot: commands.Bot,
-            url,
+        cls: Self,
+        *,
+        bot: commands.Bot,
+        url,
     ) -> Self:
 
         async with aiohttp.ClientSession() as session:
@@ -80,16 +78,16 @@ class File:
 class EmbedFactory:
     @staticmethod
     def ide_embed(
-            ctx: commands.Context, description: str, format_: str = "yaml"
+        ctx: commands.Context, description: str, format_: str = "yaml"
     ) -> disnake.Embed:
         return (
             disnake.Embed(
                 title="Jarvide Text Editor",
                 description=f"```{format_}\n{description}```",
                 timestamp=ctx.message.created_at,
-            ).set_author(
-                name=ctx.author.name, icon_url=ctx.author.display_avatar.url
-                         ).set_footer(
+            )
+            .set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+            .set_footer(
                 text="The official jarvide text editor and ide. Expires in 5min"
             )
         )
@@ -101,9 +99,7 @@ class EmbedFactory:
                 title="Jarvide Text Editor",
                 description=f"**{path}**\n```{format_}\n{code}```",
                 timestamp=ctx.message.created_at,
-            ).set_author(
-                name=ctx.author.name, icon_url=ctx.author.display_avatar.url
-            ).set_footer(
-                text="The official jarvide text editor and ide"
             )
+            .set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+            .set_footer(text="The official jarvide text editor and ide")
         )

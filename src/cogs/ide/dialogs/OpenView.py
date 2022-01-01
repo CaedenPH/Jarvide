@@ -7,6 +7,7 @@ from .FileView import FileView
 
 THUMBS_UP = "👍"
 
+
 class OpenView(disnake.ui.View):
     def __init__(self, ctx, bot_message: disnake.Message = None):
         super().__init__()
@@ -20,28 +21,31 @@ class OpenView(disnake.ui.View):
         if self.ctx.author == interaction.author:
             self.clicked_num += 1
         return (
-                interaction.author == self.ctx.author
-                and interaction.channel == self.ctx.channel
-                and self.clicked_num <= 2
+            interaction.author == self.ctx.author
+            and interaction.channel == self.ctx.channel
+            and self.clicked_num <= 2
         )
 
     @disnake.ui.button(label="Upload", style=disnake.ButtonStyle.green)
     async def first_button(
-            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         num = 0
         await interaction.response.send_message("Upload a file!", ephemeral=True)
         while not (
-                message := await self.bot.wait_for(
-                    "message",
-                    check=lambda m: self.ctx.author == m.author and m.channel == self.ctx.channel,
-                )
+            message := await self.bot.wait_for(
+                "message",
+                check=lambda m: self.ctx.author == m.author
+                and m.channel == self.ctx.channel,
+            )
         ).attachments:
             num += 1
             if num == 3:
-                embed = EmbedFactory.ide_embed(self.ctx, "Nice try. You cant break this bot!")
+                embed = EmbedFactory.ide_embed(
+                    self.ctx, "Nice try. You cant break this bot!"
+                )
                 return await self.bot_message.edit(embed=embed)
-            await interaction.channel.send("Upload a file", delete_after=15)    
+            await interaction.channel.send("Upload a file", delete_after=15)
         await message.add_reaction(THUMBS_UP)
 
         real_file = message.attachments[0]
@@ -63,7 +67,7 @@ class OpenView(disnake.ui.View):
 
     @disnake.ui.button(label="Github", style=disnake.ButtonStyle.green)
     async def second_button(
-            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.send_message(
             "Send a github repository link!", ephemeral=True
@@ -72,12 +76,15 @@ class OpenView(disnake.ui.View):
         while True:
             num += 1
             if num == 3:
-                embed = EmbedFactory.ide_embed(self.ctx, "Nice try. You cant break this bot!")
+                embed = EmbedFactory.ide_embed(
+                    self.ctx, "Nice try. You cant break this bot!"
+                )
                 return await self.bot_message.edit(embed=embed)
 
             url = await self.bot.wait_for(
                 "message",
-                check=lambda m: self.ctx.author == m.author and m.channel == self.ctx.channel,
+                check=lambda m: self.ctx.author == m.author
+                and m.channel == self.ctx.channel,
             )
             await url.edit(suppress=True)
             regex = re.compile(
@@ -100,11 +107,7 @@ class OpenView(disnake.ui.View):
         await url.add_reaction(THUMBS_UP)
 
         content = base64.b64decode(content).decode("utf-8").replace("`", "`​")
-        file_ = File(
-            content=content,
-            filename=url.content.split('/')[-1],
-            bot=self.bot
-        )
+        file_ = File(content=content, filename=url.content.split("/")[-1], bot=self.bot)
 
         real_file = await file_.to_real()
 
@@ -119,24 +122,33 @@ class OpenView(disnake.ui.View):
 
     @disnake.ui.button(label="Saved", style=disnake.ButtonStyle.green)
     async def third_button(
-            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         ...
 
     @disnake.ui.button(label="Link", style=disnake.ButtonStyle.green)
     async def fourth_button(
-            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
-        PASTE_URLS = ("https://www.toptal.com/developers/hastebin/", "https://pastebin.com/",
-                      "https://ghostbin.com/")
+        PASTE_URLS = (
+            "https://www.toptal.com/developers/hastebin/",
+            "https://pastebin.com/",
+            "https://ghostbin.com/",
+        )
 
-        await interaction.response.send_message("Send a url with code in it", ephemeral=True)
+        await interaction.response.send_message(
+            "Send a url with code in it", ephemeral=True
+        )
         while not (
-                message := await self.bot.wait_for(
-                    "message",
-                    check=lambda m: self.ctx.author == m.author and m.channel == self.ctx.channel,
-                )).content.startswith(PASTE_URLS):
-            await interaction.response.send_message(f"That url is not supported! Our supported urls are {PASTE_URLS}")
+            message := await self.bot.wait_for(
+                "message",
+                check=lambda m: self.ctx.author == m.author
+                and m.channel == self.ctx.channel,
+            )
+        ).content.startswith(PASTE_URLS):
+            await interaction.response.send_message(
+                f"That url is not supported! Our supported urls are {PASTE_URLS}"
+            )
 
         async with aiohttp.ClientSession() as session:
             async with session.get(message.content) as response:
@@ -144,26 +156,26 @@ class OpenView(disnake.ui.View):
 
     @disnake.ui.button(label="Create", style=disnake.ButtonStyle.green)
     async def fifth_button(
-            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
-        await interaction.response.send_message("What would you like the filename to be?", ephemeral=True)
+        await interaction.response.send_message(
+            "What would you like the filename to be?", ephemeral=True
+        )
         filename = await self.bot.wait_for(
             "message",
-            check=lambda m: self.ctx.author == m.author and m.channel == self.ctx.channel,
+            check=lambda m: self.ctx.author == m.author
+            and m.channel == self.ctx.channel,
         )
 
         await interaction.channel.send("What is the content?")
         content = await self.bot.wait_for(
             "message",
-            check=lambda m: self.ctx.author == m.author and m.channel == self.ctx.channel,
+            check=lambda m: self.ctx.author == m.author
+            and m.channel == self.ctx.channel,
         )
         await content.add_reaction(THUMBS_UP)
 
-        file_ = File(
-            filename=filename,
-            content=content,
-            bot=self.bot
-        )
+        file_ = File(filename=filename, content=content, bot=self.bot)
         real_file = await file_.to_real()
         description = (
             f"Opened file: {real_file.filename}"

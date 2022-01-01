@@ -2,6 +2,7 @@ from .dialogs import OpenView
 from src.utils import EmbedFactory
 from disnake.ext import commands
 
+
 class Ide(commands.Cog):
     """Ide cog"""
 
@@ -19,5 +20,5 @@ class Ide(commands.Cog):
 
 def setup(bot: commands.Bot) -> None:
     """Setup Ide cog"""
-    
+
     bot.add_cog(Ide(bot))

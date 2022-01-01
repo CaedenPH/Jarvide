@@ -5,6 +5,7 @@ import random
 
 class Fun(commands.Cog):
     """Fun cog for fun related commands"""
+
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
@@ -38,8 +39,10 @@ class Fun(commands.Cog):
         if not member:
             return await ctx.send(f"{ctx.author.mention} has kissed himself")
         embed1 = disnake.Embed(
-            title=f"how cute, {ctx.author.mention} has kissed {member.name}").set_image(
-            url="https://media.tenor.co/videos/fc567d93fe70d2e0567325df0410959b/mp4")
+            title=f"how cute, {ctx.author.mention} has kissed {member.name}"
+        ).set_image(
+            url="https://media.tenor.co/videos/fc567d93fe70d2e0567325df0410959b/mp4"
+        )
 
         await ctx.send(embed=embed1)
 
@@ -49,8 +52,10 @@ class Fun(commands.Cog):
             return await ctx.send(f"{ctx.author.mention} has slapped himself")
 
         embed2 = disnake.Embed(
-            title=f"{ctx.author.mention} has slapped {member.name}").set_image(
-            url="https://media.tenor.co/videos/318d19d23b24c54ab51cacf5ef4bfccf/mp4")
+            title=f"{ctx.author.mention} has slapped {member.name}"
+        ).set_image(
+            url="https://media.tenor.co/videos/318d19d23b24c54ab51cacf5ef4bfccf/mp4"
+        )
 
         await ctx.send(embed=embed2)
 
@@ -67,9 +72,13 @@ class Fun(commands.Cog):
             member = ctx.author
         size = random.randint(1, 12)
         if size <= 6:
-            await ctx.send(f"{member.mention} is packing {size}inches, wow such a small pp")
+            await ctx.send(
+                f"{member.mention} is packing {size}inches, wow such a small pp"
+            )
         elif size >= 6:
-            await ctx.send(f"{member.mention} is packing {size}inches, wow such a big pp")
+            await ctx.send(
+                f"{member.mention} is packing {size}inches, wow such a big pp"
+            )
 
 
 def setup(bot: commands.Bot) -> None:

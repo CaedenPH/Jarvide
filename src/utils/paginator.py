@@ -1,7 +1,12 @@
 from typing import Union
 from abc import abstractmethod, ABC
 
-from disnake import MessageInteraction, ApplicationCommandInteraction, Embed, ButtonStyle
+from disnake import (
+    MessageInteraction,
+    ApplicationCommandInteraction,
+    Embed,
+    ButtonStyle,
+)
 from disnake.ui import View, Button, button
 from disnake.ext.commands import Context
 
@@ -41,7 +46,7 @@ class _AbstractPaginator(View, ABC):
         self,
         ctx: Union[Context, MessageInteraction, ApplicationCommandInteraction],
         *,
-        timeout: float = 180.0
+        timeout: float = 180.0,
     ):
         super().__init__(timeout=timeout)
         self.ctx = ctx
@@ -77,7 +82,7 @@ class _AbstractPaginator(View, ABC):
 
         self.current_page = page_number
         em = Embed(description=self.pages[self.current_page])
-        em.set_footer(text=f'Page {self.current_page + 1}/{len(self.pages)}')
+        em.set_footer(text=f"Page {self.current_page + 1}/{len(self.pages)}")
 
         self._update_labels()
         await self.message.edit(embed=em, view=self)
@@ -85,7 +90,7 @@ class _AbstractPaginator(View, ABC):
     async def start(self):
         self.get_pages()
         em = Embed(description=self.pages[self.current_page])
-        em.set_footer(text=f'Page {self.current_page + 1}/{len(self.pages)}')
+        em.set_footer(text=f"Page {self.current_page + 1}/{len(self.pages)}")
 
         self._update_labels()
         if isinstance(self.ctx, Context):
@@ -98,38 +103,38 @@ class _AbstractPaginator(View, ABC):
         owners = self.ctx.bot.owner_ids or self.ctx.bot.owner_id if self.ctx.bot else 0
         if inter.author.id not in (self.ctx.author.id, owners):
             await inter.send(
-                'You cannot use the buttons on this paginator because you '
-                'are not the one who invoked the command!',
-                ephemeral=True
+                "You cannot use the buttons on this paginator because you "
+                "are not the one who invoked the command!",
+                ephemeral=True,
             )
             return False
         return True
 
-    @button(label='≪')
+    @button(label="≪")
     async def first_page(self, button: Button, inter: MessageInteraction):
         """Goes to the first page."""
         await inter.response.defer()
         await self._show_page(0)
 
-    @button(label='Back', style=ButtonStyle.blurple)
+    @button(label="Back", style=ButtonStyle.blurple)
     async def previous_page(self, button: Button, inter: MessageInteraction):
         """Goes to the previous page."""
         await inter.response.defer()
         await self._show_page(self.current_page - 1)
 
-    @button(label='Next', style=ButtonStyle.blurple)
+    @button(label="Next", style=ButtonStyle.blurple)
     async def next_page(self, button: Button, inter: MessageInteraction):
         """Goes to the next page."""
         await inter.response.defer()
         await self._show_page(self.current_page + 1)
 
-    @button(label='≫')
+    @button(label="≫")
     async def last_page(self, button: Button, inter: MessageInteraction):
         """Goes to the last page."""
         await inter.response.defer()
         await self._show_page(len(self.pages) - 1)
 
-    @button(label='Exit', style=ButtonStyle.red)
+    @button(label="Exit", style=ButtonStyle.red)
     async def exit(self, button: Button, inter: MessageInteraction):
         """Exits the paginator by deleting the paginator message."""
         await inter.response.defer()
@@ -174,14 +179,11 @@ class TextPaginator(_AbstractPaginator):
         text: str,
         *,
         breakpoint: int = 2000,
-        prefix: str = '',
-        suffix: str = '',
-        timeout: float = 180.0
+        prefix: str = "",
+        suffix: str = "",
+        timeout: float = 180.0,
     ):
-        super().__init__(
-            ctx=ctx,
-            timeout=timeout
-        )
+        super().__init__(ctx=ctx, timeout=timeout)
         self.text = text
         self.breakpoint = breakpoint
         self.prefix = prefix
@@ -191,12 +193,12 @@ class TextPaginator(_AbstractPaginator):
         text = self.text
         while True:
             if len(text) != 0:
-                new_text = text[0:self.breakpoint]
+                new_text = text[0 : self.breakpoint]
                 if self.prefix:
-                    new_text = self.prefix + '\n' + new_text
+                    new_text = self.prefix + "\n" + new_text
                 if self.suffix:
-                    new_text = new_text + '\n' + self.suffix
-                text = text[self.breakpoint:]
+                    new_text = new_text + "\n" + self.suffix
+                text = text[self.breakpoint :]
                 self.pages.append(new_text)
             else:
                 break
@@ -239,25 +241,22 @@ class LinePaginator(_AbstractPaginator):
         lines: list[str],
         *,
         line_limit: int = 10,
-        prefix: str = '',
-        suffix: str = '',
-        timeout: float = 180.0
+        prefix: str = "",
+        suffix: str = "",
+        timeout: float = 180.0,
     ):
-        super().__init__(
-            ctx=ctx,
-            timeout=timeout
-        )
+        super().__init__(ctx=ctx, timeout=timeout)
         self.lines = lines
         self.line_limit = line_limit
         self.prefix = prefix
         self.suffix = suffix
 
     def _lines_to_page(self, lines: str):
-        page = '\n'.join(lines)
+        page = "\n".join(lines)
         if self.prefix:
-            page = self.prefix + '\n' + page
+            page = self.prefix + "\n" + page
         if self.suffix:
-            page = page + '\n' + self.suffix
+            page = page + "\n" + self.suffix
 
         return page
 
@@ -267,15 +266,17 @@ class LinePaginator(_AbstractPaginator):
         page_index = 0
         for line in self.lines:
             if len(line) > 4096:
-                raise LineTooLong(f'Pxpected the line at index {line_index} to be less than 4096 characters')
+                raise LineTooLong(
+                    f"Pxpected the line at index {line_index} to be less than 4096 characters"
+                )
 
             lines.append(line)
             if len(lines) >= self.line_limit:
                 page = self._lines_to_page(lines)
                 if len(page) > 4096:
                     raise PageTooLong(
-                        f'Page at index {page_index} has to be less than 4096 characters. '
-                        'Please lessen the \'line_limit\''
+                        f"Page at index {page_index} has to be less than 4096 characters. "
+                        "Please lessen the 'line_limit'"
                     )
                 page_index += 1
                 self.pages.append(page)
@@ -286,7 +287,7 @@ class LinePaginator(_AbstractPaginator):
                 page = self._lines_to_page(lines)
                 if len(page) > 4096:
                     raise PageTooLong(
-                        f'Page at index {page_index} has to be less than 4096 characters. '
-                        'Please lessen the \'line_limit\''
+                        f"Page at index {page_index} has to be less than 4096 characters. "
+                        "Please lessen the 'line_limit'"
                     )
                 self.pages.append(page)
