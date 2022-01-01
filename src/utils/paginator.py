@@ -10,8 +10,8 @@ class TextPaginator(View):
 
     Parameters
     ----------
-        ctx: :class:`.Context`
-            The context object to use for this paginator.
+        ctx: Union[:class:`.Context`, :class:`.MessageInteraction`, :class:`.ApplicationCommandInteraction`]
+            The context/interaction object to use for this paginator.
 
         text: :class:`str`
             The text to paginate.

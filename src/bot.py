@@ -40,6 +40,13 @@ class Jarvide(commands.Bot):
             for alias in command.aliases:
                 commands.append(alias)
 
+        commands = [k.name for k in self.commands]
+        for command in self.commands:
+            if not command.aliases:
+                continue
+            for alias in command.aliases:
+                commands.append(alias)
+
         message.content = ''.join(list(filter(lambda m: m in string.printable, message.content)))
         for command_name in commands:
             if command_name in message.content.lower().split():

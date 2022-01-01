@@ -59,6 +59,7 @@ class Mod(commands.Cog):
             await ctx.send("Cancelled the unban")
 
 
+
 def setup(bot: commands.Bot) -> None:
     """Setup mod cog"""
     bot.add_cog(Mod(bot))

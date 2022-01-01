@@ -13,10 +13,10 @@ class Misc(commands.Cog):
         if round(self.bot.latency * 1000) > 150:
             health = "Unhealthy"
             color = disnake.Color.red()
-        elif round(self.bot.latency * 1000) in range(70, 99):
+        elif round(self.bot.latency * 1000) in range(90, 150):
             health = "Almost unhealthy"
             color = disnake.Color.yellow()
-        elif round(self.bot.latency * 1000) in range(45, 69):
+        elif round(self.bot.latency * 1000) in range(55, 90):
             health = "Healthy"
             color = disnake.Color.green()
         else:
