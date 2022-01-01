@@ -1,2 +1,2 @@
-from .paginator import TextPaginator
+from .paginator import TextPaginator, LinePaginator
 from .confirmation import prompt
