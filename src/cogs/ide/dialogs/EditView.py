@@ -41,7 +41,6 @@ class EditView(disnake.ui.View):
             embed=EmbedFactory.code_embed(
                 self.ctx, add_lines(self.content), self.file.filename
             ),
-            view=EditView(self.ctx, self.file, self.bot_message),
         )
 
     @disnake.ui.button(label="Write", style=disnake.ButtonStyle.gray)
@@ -79,15 +78,23 @@ class EditView(disnake.ui.View):
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):  
 
-        print(self.undo)
         if not self.undo:
             return await interaction.response.send_message("You have made no changes and have nothing to undo!", ephemeral=True)
+
+        self.redo.append(self.content)
+        self.content = self.undo[-1]    
+        await self.edit(interaction)
 
     @disnake.ui.button(label="Redo", style=disnake.ButtonStyle.blurple, row=2)
     async def redo_button(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
-        ...
+        if not self.redo:
+            return await interaction.response.send_message("You have made no changes and have nothing to undo!", ephemeral=True)
+
+        self.undo.append(self.content)
+        self.content = self.redo[-1]
+        await self.edit(interaction)
 
     @disnake.ui.button(label="Save", style=disnake.ButtonStyle.green, row=2)
     async def save_button(
