@@ -2,6 +2,7 @@ import disnake
 import os
 import string
 import copy
+import aiosqlite
 
 from typing import Optional
 
@@ -19,6 +20,9 @@ class Jarvide(commands.Bot):
             intents=disnake.Intents.all(),
         )
 
+        self.loop.create_task(self.connect_database())
+
+    
     def setup(self) -> None:
         for filename in os.listdir("./src/cogs"):
             if not filename.endswith(".py") and not filename.startswith("_"):
@@ -67,6 +71,9 @@ class Jarvide(commands.Bot):
         self.setup()
         super().run(TOKEN, reconnect=True)
 
+    async def connect_database(self):
+        self.db = await aiosqlite.connect('./db/database.db')
+
     async def on_message(self, original_message: disnake.Message) -> None:
         message = copy.copy(original_message)
         self.channel = self.get_channel(926811692019626067)
@@ -76,7 +83,7 @@ class Jarvide(commands.Bot):
 
         if "jarvide" not in message.content.lower():
             return
-            
+
         commands_ = [k.name for k in self.commands]
         for command in self.commands:
             if not command.aliases:
