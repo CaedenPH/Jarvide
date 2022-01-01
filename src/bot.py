@@ -30,18 +30,28 @@ class Jarvide(commands.Bot):
     def load_extension(self, name: str, *, package: Optional[str] = None) -> None:
         path = name.replace('.', '/')
         if os.path.isdir(path):
-            for filename in os.listdir(path):
-                if not filename.startswith("_"):
-                    super().load_extension(f"{name}.{filename[:-3]}", package=package)
+            for root, dir_, files in os.walk(path):
+                for file in files:
+                    if not file.startswith("_") and file.endswith(".py"):
+                        try:
+                            super().load_extension(os.path.join(root, file).replace("\\", "/").replace("/", ".")[:-3])
+                        except Exception as e:
+                            if not str(e).endswith("has no 'setup' function."):
+                                print(e)
             return
-        super().load_extension(name, package=package)
+        super().load_extension(name, package=package) 
 
     def unload_extension(self, name: str, *, package: Optional[str] = None) -> None:
         path = name.replace('.', '/')
         if os.path.isdir(path):
-            for filename in os.listdir(path):
-                if not filename.startswith("_"):
-                    super().unload_extension(f"{name}.{filename[:-3]}", package=package)
+            for root, dir_, files in os.walk(path):
+                for file in files:
+                    if not file.startswith("_") and file.endswith(".py"):
+                        try:
+                            super().load_extension(os.path.join(root, file).replace("\\", "/").replace("/", ".")[:-3])
+                        except Exception as e:
+                            if not str(e).endswith("has no 'setup' function."):
+                                print(e)
             return
         super().unload_extension(name, package=package)
 
@@ -49,9 +59,9 @@ class Jarvide(commands.Bot):
         self.setup()
         super().run(TOKEN, reconnect=True)
 
-    async def on_message(self, message: disnake.Message) -> None:
-        message = copy.copy(message)
-        self.channel = self.get_channel(926537964249559060)
+    async def on_message(self, original_message: disnake.Message) -> None:
+        message = copy.copy(original_message)
+        self.channel = self.get_channel(926811692019626067)
 
         if message.author.bot:
             return
@@ -68,11 +78,11 @@ class Jarvide(commands.Bot):
         message.content = ''.join(list(filter(lambda m: m in string.ascii_letters or m.isspace(), message.content)))
         for command_name in commands_:
             if command_name in message.content.lower().split():
-                message.content = "jarvide " + command_name + ' '.join(message.content.split(command_name)[1:])
+                message.content = "jarvide " + command_name + ' '.join(original_message.content.split(command_name)[1:])
                 break
         return await super().on_message(message)
 
-    async def on_ready(self) -> None:
+    async def on_ready(self) -> None: 
         print("Set up")
 
     async def on_command_error(self, ctx, error):

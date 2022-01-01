@@ -4,7 +4,7 @@ from disnake.ext import commands
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from .ide import File
+    from ..ide import File
 
 
 class EditView(disnake.ui.View):
@@ -12,7 +12,7 @@ class EditView(disnake.ui.View):
             self,
             ctx,
             file_: "File",
-            bot_message=None,
+            bot_message=None,   
     ):
         self.ctx = ctx
         self.file = file_
@@ -63,9 +63,9 @@ class EditView(disnake.ui.View):
     async def settings_button(
             self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
-        from .ide import FileView
-        await interaction.response.send_message(
-            embed=disnake.Embed.from_dict(self.bot_message.embeds[0].to_dict()),
+        from ..ide import FileView
+        await self.bot_message.edit(
+            embed=self.bot_message.embeds[0],
             view=FileView(self.ctx, self.file, self.bot_message)
         )
 
