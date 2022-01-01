@@ -37,7 +37,7 @@ class Jarvide(commands.Bot):
                             super().load_extension(os.path.join(root, file).replace("\\", "/").replace("/", ".")[:-3])
                         except Exception as e:
                             if not str(e).endswith("has no 'setup' function."):
-                                print(e)
+                                print(e)    
             return
         super().load_extension(name, package=package) 
 
