@@ -6,6 +6,7 @@ from disnake import (
     ApplicationCommandInteraction,
     Embed,
     ButtonStyle,
+    Message
 )
 from disnake.ui import View, Button, button
 from disnake.ext.commands import Context
@@ -31,6 +32,15 @@ class _AbstractPaginator(View, ABC):
         ctx: Union[:class:`.Context`, :class:`.MessageInteraction`, :class:`.ApplicationCommandInteraction`]
             The context/interaction object to use for this paginator.
 
+        message: :class:`.Message`
+            The message object to use instead of sending another message.
+
+        embed_footer_kwargs: :class:`dict`
+            A dict containing the kwargs for the ``.set_footer`` embed method.
+
+        embed_author_kwargs: :class:`dict`
+            A dict containing the kwargs for the ``.set_author`` embed method.
+
         timeout: :class:`float`
             The time for how long the paginator is supposed to wait for an interaction until it times out.
 
@@ -46,10 +56,16 @@ class _AbstractPaginator(View, ABC):
         self,
         ctx: Union[Context, MessageInteraction, ApplicationCommandInteraction],
         *,
+        message: Message = None,
+        embed_footer_kwargs: dict[str, str] = None,
+        embed_author_kwargs: dict[str, str] = None,
         timeout: float = 180.0,
     ):
         super().__init__(timeout=timeout)
         self.ctx = ctx
+        self.message = message
+        self.embed_footer_kwargs = embed_footer_kwargs
+        self.embed_author_kwargs = embed_author_kwargs
 
         self.current_page = 0
         self.pages = []
@@ -82,7 +98,21 @@ class _AbstractPaginator(View, ABC):
 
         self.current_page = page_number
         em = Embed(description=self.pages[self.current_page])
-        em.set_footer(text=f"Page {self.current_page + 1}/{len(self.pages)}")
+
+        page_footer = f'Page {self.current_page + 1}/{len(self.pages)}'
+        footer_kwargs = {'text': page_footer}
+        if self.embed_footer_kwargs:
+            footer_text = self.embed_footer_kwargs.get('text')
+            icon_url = self.embed_footer_kwargs.get('icon_url')
+            if footer_text is not None:
+                page_footer = footer_text + ' • ' + page_footer
+                footer_kwargs['text'] = page_footer
+            if icon_url is not None:
+                footer_kwargs['icon_url'] = icon_url
+        em.set_footer(**footer_kwargs)
+
+        if self.embed_author_kwargs:
+            em.set_author(**self.embed_author_kwargs)
 
         self._update_labels()
         await self.message.edit(embed=em, view=self)
@@ -90,14 +120,31 @@ class _AbstractPaginator(View, ABC):
     async def start(self):
         self.get_pages()
         em = Embed(description=self.pages[self.current_page])
-        em.set_footer(text=f"Page {self.current_page + 1}/{len(self.pages)}")
+
+        page_footer = f'Page {self.current_page + 1}/{len(self.pages)}'
+        footer_kwargs = {'text': page_footer}
+        if self.embed_footer_kwargs:
+            footer_text = self.embed_footer_kwargs.get('text')
+            icon_url = self.embed_footer_kwargs.get('icon_url')
+            if footer_text is not None:
+                page_footer = footer_text + ' • ' + page_footer
+                footer_kwargs['text'] = page_footer
+            if icon_url is not None:
+                footer_kwargs['icon_url'] = icon_url
+        em.set_footer(**footer_kwargs)
+
+        if self.embed_author_kwargs:
+            em.set_author(**self.embed_author_kwargs)
 
         self._update_labels()
-        if isinstance(self.ctx, Context):
-            self.message = await self.ctx.send(embed=em, view=self)
+        if self.message is None:
+            if isinstance(self.ctx, Context):
+                self.message = await self.ctx.send(embed=em, view=self)
+            else:
+                await self.ctx.send(embed=em, view=self)
+                self.message = await self.ctx.original_message()
         else:
-            await self.ctx.send(embed=em, view=self)
-            self.message = await self.ctx.original_message()
+            await self.message.edit(embed=em, view=self)
 
     async def interaction_check(self, inter: MessageInteraction) -> bool:
         owners = self.ctx.bot.owner_ids or self.ctx.bot.owner_id if self.ctx.bot else 0
@@ -162,6 +209,15 @@ class TextPaginator(_AbstractPaginator):
         suffix: :class:`str`
             The suffix that appears at the end of every page.
 
+        message: :class:`.Message`
+            The message object to use instead of sending another message.
+
+        embed_footer_kwargs: :class:`dict`
+            A dict containing the kwargs for the ``.set_footer`` embed method.
+
+        embed_author_kwargs: :class:`dict`
+            A dict containing the kwargs for the ``.set_author`` embed method.
+
         timeout: :class:`float`
             The time for how long the paginator is supposed to wait for an interaction until it times out.
 
@@ -181,9 +237,18 @@ class TextPaginator(_AbstractPaginator):
         breakpoint: int = 2000,
         prefix: str = "",
         suffix: str = "",
+        message: Message = None,
+        embed_footer_kwargs: dict[str, str] = None,
+        embed_author_kwargs: dict[str, str] = None,
         timeout: float = 180.0,
     ):
-        super().__init__(ctx=ctx, timeout=timeout)
+        super().__init__(
+            ctx=ctx,
+            timeout=timeout,
+            message=message,
+            embed_footer_kwargs=embed_footer_kwargs,
+            embed_author_kwargs=embed_author_kwargs
+        )
         self.text = text
         self.breakpoint = breakpoint
         self.prefix = prefix
@@ -193,12 +258,12 @@ class TextPaginator(_AbstractPaginator):
         text = self.text
         while True:
             if len(text) != 0:
-                new_text = text[0 : self.breakpoint]
+                new_text = text[0:self.breakpoint]
                 if self.prefix:
                     new_text = self.prefix + "\n" + new_text
                 if self.suffix:
                     new_text = new_text + "\n" + self.suffix
-                text = text[self.breakpoint :]
+                text = text[self.breakpoint:]
                 self.pages.append(new_text)
             else:
                 break
@@ -224,6 +289,15 @@ class LinePaginator(_AbstractPaginator):
         suffix: :class:`str`
             The suffix that appears at the end of every page.
 
+        message: :class:`.Message`
+            The message object to use instead of sending another message.
+
+        embed_footer_kwargs: :class:`dict`
+            A dict containing the kwargs for the ``.set_footer`` embed method.
+
+        embed_author_kwargs: :class:`dict`
+            A dict containing the kwargs for the ``.set_author`` embed method.
+
         timeout: :class:`float`
             The time for how long the paginator is supposed to wait for an interaction until it times out.
 
@@ -243,9 +317,18 @@ class LinePaginator(_AbstractPaginator):
         line_limit: int = 10,
         prefix: str = "",
         suffix: str = "",
+        message: Message = None,
+        embed_footer_kwargs: dict[str, str] = None,
+        embed_author_kwargs: dict[str, str] = None,
         timeout: float = 180.0,
     ):
-        super().__init__(ctx=ctx, timeout=timeout)
+        super().__init__(
+            ctx=ctx,
+            timeout=timeout,
+            message=message,
+            embed_footer_kwargs=embed_footer_kwargs,
+            embed_author_kwargs=embed_author_kwargs
+        )
         self.lines = lines
         self.line_limit = line_limit
         self.prefix = prefix
