@@ -40,13 +40,23 @@ class Jarvide(commands.Bot):
             for alias in command.aliases:
                 commands.append(alias)
 
-        message.content = ''.join(list(filter(lambda m: m in string.ascii_letters or m.isspace(), message.content)))
+        commands = [k.name for k in self.commands]
+        for command in self.commands:
+            if not command.aliases:
+                continue
+            for alias in command.aliases:
+                commands.append(alias)
+
+        message.content = ''.join(list(filter(lambda m: m in string.printable, message.content)))
         for command_name in commands:
             if command_name in message.content.lower().split():
+                # For anyone confused, this rearranges the user-provided input into how it would be normally,
+                # becuase this bot is desinged so you can talk to it normally, the commands won't normally be in the
+                # [PREFIX] [COMMAND NAME] [ARGS] format. It's up to us to rearrange it so it is in that format
                 message.content = "jarvide " + command_name + ' '.join(message.content.split(command_name)[1:])
                 break
 
-        return await super().on_message(message)
+        await self.process_commands(message)
 
     async def on_ready(self) -> None:
         print("Set up")
