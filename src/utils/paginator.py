@@ -1,5 +1,5 @@
 from typing import Union
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 
 from disnake import MessageInteraction, ApplicationCommandInteraction, Embed, ButtonStyle
 from disnake.ui import View, Button, button
@@ -14,7 +14,7 @@ class PageTooLong(Exception):
     ...
 
 
-class _AbstractPaginator(View):
+class _AbstractPaginator(View, ABC):
     """The abstract class that every paginator should inherit from.
     In order to use this paginator, you need to subclass this object and override the `get_pages` method
     with your own that adds pages to ``self.pages``.
