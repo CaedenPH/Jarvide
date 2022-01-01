@@ -105,7 +105,11 @@ class TextPaginator(View):
         em.set_footer(text=f'Page {self.current_page + 1}/{len(self.pages)}')
 
         self._update_labels()
-        self.message = await self.ctx.send(embed=em, view=self)
+        if isinstance(self.ctx, Context):
+            self.message = await self.ctx.send(embed=em, view=self)
+        else:
+            await self.ctx.send(embed=em, view=self)
+            self.message = await self.ctx.original_message()
 
     async def interaction_check(self, inter: MessageInteraction) -> bool:
         owners = self.ctx.bot.owner_ids or self.ctx.bot.owner_id if self.ctx.bot else 0
