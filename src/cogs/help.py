@@ -158,23 +158,26 @@ class JarvideHelp(HelpCommand):
         embed.set_footer(text="[] : Required | {} : Optional")
         await self.context.reply(embed=embed, mention_author=False)
 
-    async def send_group_help(self, group:Group):
+    async def send_group_help(self, group: Group):
         """
-        Group Commands , would rarely be used 
+        Group Commands , would rarely be used
         """
-        desc = "\n".join(f"`{command.name}` **:** {command.short_doc or 'No help text'}"
-        for command in group.commands)
-        embed = Embed(description=group.description or F"{group.qualified_name.title()} Group"+desc,color=Color.og_blurple())
-        await self.context.reply(
-            embed = embed , 
-            mention_author=False
+        desc = "\n".join(
+            f"`{command.name}` **:** {command.short_doc or 'No help text'}"
+            for command in group.commands
         )
-       
+        embed = Embed(
+            description=group.description
+            or f"{group.qualified_name.title()} Group" + desc,
+            color=Color.og_blurple(),
+        )
+        await self.context.reply(embed=embed, mention_author=False)
+
     async def send_cog_help(self, cog: Cog):
         """
         Help for a specific cog , gets embed throgh `embed_from_cog` fn , which is used for both manual and drop menu cog help
         """
-        embed = await embed_for_cog(cog , self.context)
+        embed = await embed_for_cog(cog, self.context)
         await self.context.reply(embed=embed, mention_author=False)
 
 
@@ -212,7 +215,7 @@ class NavigatorMenu(Select):
             if interaction.values[0].lower().replace(" commands", "")
             == self.context.bot.get_cog(cog).qualified_name.lower()
         ]
-        embed = await embed_for_cog(cog_s[0],self.context)
+        embed = await embed_for_cog(cog_s[0], self.context)
         await interaction.message.edit(embed=embed)
         await interaction.response.send_message(
             f"Showing help for {cog_s[0].qualified_name.upper()} COMMANDS",
@@ -220,7 +223,7 @@ class NavigatorMenu(Select):
         )
 
 
-async def embed_for_cog(cog: Cog ,ctx : Context):
+async def embed_for_cog(cog: Cog, ctx: Context):
     desc = "\n".join(
         f"`{command.name}` **:** {command.short_doc or 'No help text'}"
         for command in cog.get_commands()
@@ -231,8 +234,12 @@ async def embed_for_cog(cog: Cog ,ctx : Context):
             description="Use `jarvide help <command>` for more info about commands\n\n"
             + desc,
         )
-        .set_author(name=f"{cog.qualified_name.upper()} CATEGORY",icon_url=ctx.bot.user.display_avatar)
-        .set_footer(text=f"Requested by {ctx.author}",
-            icon_url=ctx.author.display_avatar)
+        .set_author(
+            name=f"{cog.qualified_name.upper()} CATEGORY",
+            icon_url=ctx.bot.user.display_avatar,
+        )
+        .set_footer(
+            text=f"Requested by {ctx.author}", icon_url=ctx.author.display_avatar
+        )
     )
     return embed
