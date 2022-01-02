@@ -75,55 +75,43 @@ class Jarvide(commands.Bot):
         self.db = await aiosqlite.connect('./db/database.db')
 
     async def on_message(self, original_message: disnake.Message) -> None:
-
         # Prevent bots from executing commands
-        if original_message.author.bot:
+        if original_message.author.bot or "jarvide" not in original_message.content.lower():
             return
 
-        # Prevent the bot from running commands if its name is never mentioned
-        if "jarvide" not in original_message.content.lower():
-            return await super().on_message(original_message)
-
-        # Stripping all of the "punctuation" characters out of the message
-        messageContent = "".join(
+        message_content = "".join(
             [char for char in original_message.content.lower() if char not in string.punctuation]
         )
 
-        # IDE command interferes with the jarvide prefix
-        # NOTE: This is what you'd replace if you were making another `REMOVE_WORDS` thing.
-        messageContent = " ".join(
-            word for word in messageContent.split() if word != "jarvide"
+        message_content = " ".join(
+            word for word in message_content.split() if word != "jarvide"
         )
 
-        # Create a dictionary for command lookup that also includes aliases (if any are present)
-        listOfCommands = {c : [c.name, *c.aliases] for c in self.commands}
+        list_of_commands = {c: [c.name, *c.aliases] for c in self.commands}
 
-        # Get a list of all of the command keywords that the user mentioned in their message
-        commandsInMessage = list(filter(
-            lambda c: any([x in messageContent.split() for x in c[1]]), 
-            listOfCommands.items()
+        commands_in_message = list(filter(
+            lambda c: any([x in message_content.split() for x in c[1]]),
+            list_of_commands.items()
         ))
 
-        if len(commandsInMessage) != 1:                     # Ensure that only one command is going to be ran.
-            return                                          # TODO: Maybe make the user know that they supplied too many commands?
+        if len(commands_in_message) != 1:           
+            return  # TODO: Maybe make the user know that they supplied too many commands?
 
-        cmd = commandsInMessage[0][0]                       # Get the actual command object
-        ctx = await super().get_context(original_message)   # Get the context from the message
+        cmd = commands_in_message[0][0]
+        ctx = await super().get_context(original_message)
         userAuthorized = await cmd.can_run(ctx)             
 
-        if userAuthorized:                                  # Ensure the user can actually run the command
-
-            # Grabbing all of the arguments after the used alias                              
+        if userAuthorized:
             args = original_message.content.partition(
-                [i for i in listOfCommands[cmd] if i in original_message.content.lower()][0]
+                [i for i in list_of_commands[cmd] if i in original_message.content.lower()][0]
             )[2]
 
-            
-            newMessage = copy.copy(original_message)
-            newMessage.content = f"jarvide {cmd.name} {args}"
-            await super().process_commands(newMessage)      # Process the actual command
+            new_message = copy.copy(original_message)
+            new_message.content = f"jarvide {cmd.name} {args}"
+            await super().process_commands(new_message)
 
     async def on_ready(self) -> None:
+        self.send_guild = self.get_guild(926811692019626064)
         print("Set up")
 
     async def on_command_error(self, ctx, error):

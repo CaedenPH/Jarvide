@@ -1,30 +1,14 @@
+import aiohttp
 import disnake
 import io
-import aiohttp
 import random
 
 from disnake.ext import commands
 from typing import TypeVar
 
 
-class ExitButton(disnake.ui.Button): 
-    def __init__(
-        self,
-        row=None,
-    ):
-        super().__init__(
-            style=disnake.ButtonStyle.danger, 
-            label="Exit",
-            row=row
-            )
-
-    async def callback(self, interaction: disnake.MessageInteraction):
-        await interaction.response.send_message("Goodbye!", delete_after=30)
-        self.view.stop()
-
-
 def add_lines(content: str) -> list[str]:
-    enumerated = list(enumerate(content.split("\n")))
+    enumerated = list(enumerate(content.split("\n"), 1))
     lines = []
     for number, line in enumerated:
         number = ("0" * (len(str(enumerated[-1][0])) - len(str(number)))) + str(number)
@@ -49,6 +33,8 @@ class File:
         self.filename = filename
         self.bot = bot
         self.content = content
+        self.undo = []  # passed in EditView
+        self.redo = []  # this too
 
         self.setup()
 
@@ -111,7 +97,9 @@ class EmbedFactory:
         )
 
     @staticmethod
-    def code_embed(ctx: commands.Context, code: str, path: str, format_: str = "py"):
+    def code_embed(
+        ctx: commands.Context, code: str, path: str, format_: str = "py"
+    ) -> disnake.Embed:
         return (
             disnake.Embed(
                 title="Jarvide Text Editor",
@@ -131,3 +119,23 @@ async def get_info(file_: File) -> str:
         f"\nType: {real_file.content_type}"
         f"\nSize: {real_file.size // 1000} KB ({real_file.size:,} bytes)"
     )
+
+
+class ExitButton(disnake.ui.Button): 
+    def __init__(self, ctx, bot_message, row=None):
+        super().__init__(
+            style=disnake.ButtonStyle.danger, 
+            label="Exit",
+            row=row
+            )
+        self.bot_message = bot_message
+        self.ctx = ctx
+
+    async def callback(self, interaction: disnake.MessageInteraction):
+        embed = EmbedFactory.ide_embed(self.ctx, "Goodbye!")
+
+
+        await self.bot_message.edit(
+            embed=embed,
+            view=None
+        )
