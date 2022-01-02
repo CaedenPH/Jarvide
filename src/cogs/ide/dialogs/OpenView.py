@@ -1,10 +1,9 @@
+import aiohttp
+import base64
 import disnake
 import re
-import base64
 
-from disnake import file
-
-from src.utils import *
+from src.utils import ExitButton, EmbedFactory, File, get_info
 from .FileView import FileView
 
 THUMBS_UP = "👍"
@@ -53,7 +52,6 @@ class OpenView(disnake.ui.View):
                 )
                 return await self.bot_message.edit(embed=embed) 
             await interaction.channel.send("Upload a file", delete_after=5)
-
 
         await message.add_reaction(THUMBS_UP)
         real_file = message.attachments[0]
@@ -179,8 +177,7 @@ class OpenView(disnake.ui.View):
         embed = EmbedFactory.ide_embed(self.ctx, description)
     
         await self.bot_message.edit(embed=embed, view=FileView(self.ctx, file_))
-        
-                
+
     @disnake.ui.button(label="Create", style=disnake.ButtonStyle.green)
     async def create_button(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction

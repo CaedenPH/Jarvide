@@ -1,6 +1,7 @@
 import disnake
+import aiohttp
 
-from src.utils import *
+from src.utils import File, add_lines, EmbedFactory, LinePaginator, TextPaginator
 from .EditView import EditView
 
 
@@ -37,7 +38,7 @@ class FileView(disnake.ui.View):
             prefix=f"```{self.extension}",
             suffix="```",
             line_limit=50,
-            timeout=None,
+            timeout=None,  # type: ignore
             embed_author_kwargs={
                 'name': f"{self.ctx.author.name}'s automated paginator for {self.file.filename}.",
                 'icon_url': self.ctx.author.avatar.url
@@ -78,11 +79,11 @@ class FileView(disnake.ui.View):
                 prefix=f"```{self.extension}",
                 suffix="```",
                 line_limit=60,
-                timeout=None,
+                timeout=None,  # type: ignore
                 embed_author_kwargs={
-                'name': f"{self.ctx.author.name}'s automated paginator for {self.file.filename}.",
-                'icon_url': self.ctx.author.avatar.url
-            }
+                    'name': f"{self.ctx.author.name}'s automated paginator for {self.file.filename}.",
+                    'icon_url': self.ctx.author.avatar.url
+                }
             ).start()
 
         await self.bot_message.edit(
