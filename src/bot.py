@@ -94,12 +94,12 @@ class Jarvide(commands.Bot):
             list_of_commands.items()
         ))
 
-        if len(commands_in_message) != 1:           
+        if len(commands_in_message) != 1:
             return  # TODO: Maybe make the user know that they supplied too many commands?
 
         cmd = commands_in_message[0][0]
         ctx = await super().get_context(original_message)
-        userAuthorized = await cmd.can_run(ctx)             
+        userAuthorized = await cmd.can_run(ctx)
 
         if userAuthorized:
             args = original_message.content.partition(

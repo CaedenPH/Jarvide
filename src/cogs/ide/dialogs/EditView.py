@@ -39,7 +39,7 @@ class EditView(disnake.ui.View):
         self.file_view = file_view
         self.undo = self.file_view.file.undo
         self.redo = self.file_view.file.redo
-        self.SUDO = self.ctx.me.guild_permissions.manage_messages   
+        self.SUDO = self.ctx.me.guild_permissions.manage_messages
 
         self.add_item(ExitButton(ctx, bot_message, row=3))
 
@@ -170,11 +170,11 @@ class EditView(disnake.ui.View):
     @disnake.ui.button(label="Clear", style=disnake.ButtonStyle.danger, row=3)
     async def clear_button(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
-    ):  
+    ):
         self.undo.append(self.file_view.file.content)
         self.file_view.file.content = ""
 
-        await self.edit(interaction)    
+        await self.edit(interaction)
 
     @disnake.ui.button(label="Back", style=disnake.ButtonStyle.danger, row=3)
     async def settings_button(
@@ -186,7 +186,7 @@ class EditView(disnake.ui.View):
             embed=embed,
             view=self.file_view
         )
-    
+
 
 def setup(bot: commands.Bot):
     pass

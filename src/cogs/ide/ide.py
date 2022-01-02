@@ -26,13 +26,13 @@ class Ide(commands.Cog):
             return
 
         embed = EmbedFactory.ide_embed(
-            ctx, 
+            ctx,
             "File open: No file currently open"
         )
 
         view = OpenView(ctx)
         view.bot_message = await ctx.send(
-            embed=embed, 
+            embed=embed,
             view=view,
         )
 

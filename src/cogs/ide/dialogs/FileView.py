@@ -19,7 +19,7 @@ class FileView(disnake.ui.View):
         self.bot = ctx.bot
         self.file = file_
         self.extension = file_.filename.split(".")[-1]
-        self.SUDO = self.ctx.me.guild_permissions.manage_messages   
+        self.SUDO = self.ctx.me.guild_permissions.manage_messages
         self.bot_message = bot_message
 
         self.add_item(ExitButton(ctx, bot_message))
@@ -66,7 +66,7 @@ class FileView(disnake.ui.View):
                 if 'message' in json and 'runtime is unknown' in json['message']:
                     await interaction.response.defer()
                     return await interaction.channel.send("This file has an invalid file extension and therefore I do not know what language to run it in! Try renaming your file", delete_after=15)
-                
+
                 output = json['output']
 
                 if not output:
