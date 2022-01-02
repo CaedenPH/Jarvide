@@ -1,7 +1,7 @@
 import disnake
 import aiohttp
 
-from src.utils import File, add_lines, EmbedFactory, LinePaginator, TextPaginator, get_info
+from src.utils import *
 from .EditView import EditView
 
 
@@ -21,6 +21,8 @@ class FileView(disnake.ui.View):
         self.extension = file_.filename.split(".")[-1]
         self.SUDO = self.ctx.me.guild_permissions.manage_messages   
         self.bot_message = bot_message
+
+        self.add_item(ExitButton(ctx, bot_message))
 
     @disnake.ui.button(label="Read", style=disnake.ButtonStyle.green)
     async def first_button(

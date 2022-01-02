@@ -41,7 +41,7 @@ class EditView(disnake.ui.View):
         self.redo = self.file_view.file.redo
         self.SUDO = self.ctx.me.guild_permissions.manage_messages   
 
-        self.add_item(ExitButton(row=3))
+        self.add_item(ExitButton(ctx, bot_message, row=3))
 
     async def edit(self, inter):
         await inter.response.defer()

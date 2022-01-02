@@ -4,6 +4,7 @@ import disnake
 import re
 
 from disnake import file
+from src import bot
 
 from src.utils import ExitButton, EmbedFactory, File, get_info
 from .FileView import FileView
@@ -12,15 +13,15 @@ THUMBS_UP = "👍"
 
 
 class OpenView(disnake.ui.View):
-    def __init__(self, ctx, bot_message: disnake.Message = None):
+    def __init__(self, ctx):
         super().__init__()
         self.ctx = ctx
         self.bot = ctx.bot
-        self.bot_message = bot_message
 
         self.clicked_num = 1
         self.SUDO = self.ctx.me.guild_permissions.manage_messages   
-        self.add_item(ExitButton())
+        #self.add_item(ExitButton(ctx, self.bot_message))
+
 
     async def interaction_check(self, interaction: disnake.MessageInteraction) -> bool:
         if self.ctx.author == interaction.author:

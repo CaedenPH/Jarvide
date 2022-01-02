@@ -7,19 +7,6 @@ from disnake.ext import commands
 from typing import TypeVar
 
 
-class ExitButton(disnake.ui.Button): 
-    def __init__(self, row=None):
-        super().__init__(
-            style=disnake.ButtonStyle.danger, 
-            label="Exit",
-            row=row
-            )
-
-    async def callback(self, interaction: disnake.MessageInteraction):
-        await interaction.response.send_message("Goodbye!", delete_after=30)
-        self.view.stop()
-
-
 def add_lines(content: str) -> list[str]:
     enumerated = list(enumerate(content.split("\n"), 1))
     lines = []
@@ -130,3 +117,23 @@ async def get_info(file_: File) -> str:
         f"\nType: {real_file.content_type}"
         f"\nSize: {real_file.size // 1000} KB ({real_file.size:,} bytes)"
     )
+
+
+class ExitButton(disnake.ui.Button): 
+    def __init__(self, ctx, bot_message, row=None):
+        super().__init__(
+            style=disnake.ButtonStyle.danger, 
+            label="Exit",
+            row=row
+            )
+        self.bot_message = bot_message
+        self.ctx = ctx
+
+    async def callback(self, interaction: disnake.MessageInteraction):
+        embed = EmbedFactory.ide_embed(self.ctx, "Goodbye!")
+
+
+        await self.bot_message.edit(
+            embed=embed,
+            view=None
+        )
