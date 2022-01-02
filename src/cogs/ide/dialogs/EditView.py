@@ -1,4 +1,5 @@
 import disnake
+from disnake import file
 
 from disnake.ext import commands
 from typing import TYPE_CHECKING
@@ -38,6 +39,7 @@ class EditView(disnake.ui.View):
         self.file_view = file_view
         self.undo = self.file_view.file.undo
         self.redo = self.file_view.file.redo
+        self.SUDO = self.ctx.me.guild_permissions.manage_messages   
 
         self.add_item(ExitButton(row=3))
 
@@ -110,6 +112,11 @@ class EditView(disnake.ui.View):
             check=lambda m: self.ctx.author == m.author
             and m.channel == self.ctx.channel,
         )
+        if len(filename.content) > 12:
+            if self.SUDO:
+                await filename.delete()
+            return await interaction.channel.send("That filename is too long! The maximum limit is 12 character")
+
         file_ = File(filename=filename, content=self.file.content, bot=self.bot)
         description = await get_info(file_)
 

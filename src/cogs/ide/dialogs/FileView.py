@@ -19,6 +19,7 @@ class FileView(disnake.ui.View):
         self.bot = ctx.bot
         self.file = file_
         self.extension = file_.filename.split(".")[-1]
+        self.SUDO = self.ctx.me.guild_permissions.manage_messages   
         self.bot_message = bot_message
 
     @disnake.ui.button(label="Read", style=disnake.ButtonStyle.green)
@@ -110,6 +111,11 @@ class FileView(disnake.ui.View):
             check=lambda m: self.ctx.author == m.author
             and m.channel == self.ctx.channel,
         )
+        if len(filename.content) > 12:
+            if self.SUDO:
+                await filename.delete()
+            return await interaction.channel.send("That filename is too long! The maximum limit is 12 character")
+
         file_ = File(filename=filename, content=self.file.content, bot=self.bot)
         description = await get_info(file_)
 

@@ -52,6 +52,7 @@ class OpenView(disnake.ui.View):
                 embed = EmbedFactory.ide_embed(
                     self.ctx, "Nice try. You cant break this bot!"
                 )
+                self.clicked_num -= 1
                 return await self.bot_message.edit(embed=embed) 
             await interaction.channel.send("Upload a file", delete_after=5)
 
@@ -63,6 +64,7 @@ class OpenView(disnake.ui.View):
                 bot=self.bot,
             )
         except UnicodeDecodeError:
+            self.clicked_num -= 1
             return await interaction.channel.send("Upload a valid text file!")
         await message.add_reaction(THUMBS_UP)
 
@@ -90,6 +92,7 @@ class OpenView(disnake.ui.View):
                 embed = EmbedFactory.ide_embed(
                     self.ctx, "Nice try. You cant break this bot!"
                 )
+                self.clicked_num -= 1
                 return await self.bot_message.edit(embed=embed)
 
             url = await self.bot.wait_for(
@@ -157,6 +160,7 @@ class OpenView(disnake.ui.View):
                 embed = EmbedFactory.ide_embed(
                     self.ctx, "Nice try. You cant break this bot!"
                 )
+                self.clicked_num -= 1
                 return await self.bot_message.edit(embed=embed)
             await interaction.response.send_message(
                 f"That url is not supported! Our supported urls are {PASTE_URLS}", delete_after=5
@@ -200,6 +204,11 @@ class OpenView(disnake.ui.View):
             check=lambda m: self.ctx.author == m.author
             and m.channel == self.ctx.channel,
         )
+        if len(filename.content) > 12:
+            if self.SUDO:
+                await filename.delete()
+            self.clicked_num -= 1
+            return await interaction.channel.send("That filename is too long! The maximum limit is 12 character")
 
         await interaction.channel.send("What is the content?")
         message = await self.bot.wait_for(
