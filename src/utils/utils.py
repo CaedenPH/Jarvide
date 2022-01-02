@@ -1,20 +1,22 @@
+import aiohttp
 import disnake
 import io
-import aiohttp
+import random
 
 from disnake.ext import commands
 from typing import TypeVar
 
 
-def add_lines(content: str) -> None:
-    enumerated = list(enumerate(content.split("\n")))
+def add_lines(content: str) -> list[str]:
+    enumerated = list(enumerate(content.split("\n"), 1))
     lines = []
     for number, line in enumerated:
         number = ("0" * (len(str(enumerated[-1][0])) - len(str(number)))) + str(number)
         line = f"\n{number} | {line}"
         lines.append(line)
 
-    return "".join(lines)
+    return lines
+
 
 Self = TypeVar("Self")
 
@@ -31,6 +33,8 @@ class File:
         self.filename = filename
         self.bot = bot
         self.content = content
+        self.undo = []  # passed in EditView
+        self.redo = []  # this too
 
         self.setup()
 
@@ -46,7 +50,8 @@ class File:
     async def get_message(self) -> disnake.Message:
         f = io.StringIO(self.content)
 
-        message = await self.bot.channel.send(file=disnake.File(fp=f, filename=self.filename))  # type: ignore
+        channel = random.choice(self.bot.send_guild.text_channels)
+        message = await channel.send(file=disnake.File(fp=f, filename=self.filename))  # type: ignore
         return message
 
     @classmethod
@@ -92,7 +97,9 @@ class EmbedFactory:
         )
 
     @staticmethod
-    def code_embed(ctx: commands.Context, code: str, path: str, format_: str = "py"):
+    def code_embed(
+        ctx: commands.Context, code: str, path: str, format_: str = "py"
+    ) -> disnake.Embed:
         return (
             disnake.Embed(
                 title="Jarvide Text Editor",
@@ -112,3 +119,23 @@ async def get_info(file_: File) -> str:
         f"\nType: {real_file.content_type}"
         f"\nSize: {real_file.size // 1000} KB ({real_file.size:,} bytes)"
     )
+
+
+class ExitButton(disnake.ui.Button):
+    def __init__(self, ctx, bot_message, row=None):
+        super().__init__(
+            style=disnake.ButtonStyle.danger,
+            label="Exit",
+            row=row
+            )
+        self.bot_message = bot_message
+        self.ctx = ctx
+
+    async def callback(self, interaction: disnake.MessageInteraction):
+        embed = EmbedFactory.ide_embed(self.ctx, "Goodbye!")
+
+
+        await self.bot_message.edit(
+            embed=embed,
+            view=None
+        )

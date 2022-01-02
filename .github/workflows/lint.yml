@@ -22,11 +22,9 @@ jobs:
         with:
           python-version: 3.8
 
-      - name: Install Python dependencies
-        run: pip install black flake8
-
-      - name: Run linters
-        uses: wearerequired/lint-action@v1
-        with:
-          black: true
-          flake8: true
+      - name: Lint Code Base
+        uses: github/super-linter@v4
+        env:
+          VALIDATE_PYTHON_BLACK: true
+          DEFAULT_BRANCH: main
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
