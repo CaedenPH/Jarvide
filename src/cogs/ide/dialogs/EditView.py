@@ -3,10 +3,10 @@ import disnake
 from disnake.ext import commands
 from typing import TYPE_CHECKING
 
-from src.utils.utils import *
+from src.utils.utils import EmbedFactory, ExitButton, add_lines, get_info
 
 if TYPE_CHECKING:
-    from ..ide import File
+    from src.utils import File
 
 
 class EditView(disnake.ui.View):
@@ -33,7 +33,6 @@ class EditView(disnake.ui.View):
         self.redo = []  
 
         self.add_item(ExitButton(row=3))
-
 
     async def edit(self, inter):
         await inter.response.defer()

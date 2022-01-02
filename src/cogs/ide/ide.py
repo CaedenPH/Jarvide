@@ -5,7 +5,6 @@ from disnake.ext import commands
 
 class Ide(commands.Cog):
     """Ide cog"""
-
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
