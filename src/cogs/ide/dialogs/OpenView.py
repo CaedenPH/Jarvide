@@ -51,7 +51,6 @@ class OpenView(disnake.ui.View):
                 embed = EmbedFactory.ide_embed(
                     self.ctx, "Nice try. You cant break this bot!"
                 )
-                self.clicked_num -= 1
                 return await self.bot_message.edit(embed=embed)
             await interaction.channel.send("Upload a file", delete_after=5)
 
@@ -63,7 +62,6 @@ class OpenView(disnake.ui.View):
                 bot=self.bot,
             )
         except UnicodeDecodeError:
-            self.clicked_num -= 1
             return await interaction.channel.send("Upload a valid text file!")
         await message.add_reaction(THUMBS_UP)
 
@@ -91,7 +89,6 @@ class OpenView(disnake.ui.View):
                 embed = EmbedFactory.ide_embed(
                     self.ctx, "Nice try. You cant break this bot!"
                 )
-                self.clicked_num -= 1
                 return await self.bot_message.edit(embed=embed)
 
             for child in self.children:
@@ -123,7 +120,16 @@ class OpenView(disnake.ui.View):
                 f"https://api.github.com/repos/{repo}/contents/{path}",
                 headers={"Accept": "application/vnd.github.v3+json"},
             )
-            content = (await a.json())["content"]
+            json = await a.json()
+            if 'content' not in json:
+                await interaction.channel.send(
+                    "Not a valid github link, please try again.", delete_after=5
+                )
+                if self.SUDO:
+                    await url.delete()
+                return
+
+            content = json["content"]
         await url.add_reaction(THUMBS_UP)
 
         content = base64.b64decode(content).decode("utf-8").replace("`", "`​")
@@ -161,16 +167,16 @@ class OpenView(disnake.ui.View):
         ).content.startswith(PASTE_URLS):
             if self.SUDO:
                 await message.delete()
-            await message.edit(suppress=True)
+            else:
+                await message.edit(suppress=True)
 
             num += 1
             if num == 3:
                 embed = EmbedFactory.ide_embed(
                     self.ctx, "Nice try. You cant break this bot!"
                 )
-                self.clicked_num -= 1
                 return await self.bot_message.edit(embed=embed)
-            await interaction.response.send_message(
+            await interaction.channel.send(
                 f"That url is not supported! Our supported urls are {PASTE_URLS}", delete_after=5
             )
 
@@ -219,7 +225,6 @@ class OpenView(disnake.ui.View):
         if len(filename.content) > 12:
             if self.SUDO:
                 await filename.delete()
-            self.clicked_num -= 1
             return await interaction.channel.send("That filename is too long! The maximum limit is 12 character")
 
         await interaction.channel.send("What is the content?")
