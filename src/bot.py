@@ -82,7 +82,7 @@ class Jarvide(commands.Bot):
 
         # Prevent the bot from running commands if its name is never mentioned
         if "jarvide" not in original_message.content.lower():
-            return super().on_message(original_message)
+            return await super().on_message(original_message)
 
         # Stripping all of the "punctuation" characters out of the message
         messageContent = "".join(
@@ -114,8 +114,8 @@ class Jarvide(commands.Bot):
         if userAuthorized:                                  # Ensure the user can actually run the command
 
             # Grabbing all of the arguments after the used alias                              
-            args = messageContent.partition(
-                [i for i in listOfCommands[cmd] if i in messageContent][0]
+            args = original_message.content.partition(
+                [i for i in listOfCommands[cmd] if i in original_message.content.lower()][0]
             )[2]
 
             
