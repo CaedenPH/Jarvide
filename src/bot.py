@@ -2,6 +2,7 @@ import disnake
 import os
 import string
 import aiosqlite
+import copy
 
 from typing import Optional
 
@@ -117,11 +118,10 @@ class Jarvide(commands.Bot):
                 [i for i in listOfCommands[cmd] if i in messageContent][0]
             )[2]
 
-            # Invoke the actual command
-            await ctx.invoke(
-                cmd,
-                *args.split()[:len(cmd.clean_params)]       # Only allowing the user to pass as many args as the function allows
-            )
+            
+            newMessage = copy.copy(original_message)
+            newMessage.content = f"jarvide {cmd.name} {args}"
+            await super().process_commands(newMessage)      # Process the actual command
 
     async def on_ready(self) -> None:
         print("Set up")
