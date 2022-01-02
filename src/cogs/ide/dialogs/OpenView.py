@@ -235,3 +235,14 @@ class OpenView(disnake.ui.View):
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         ...
+
+    @disnake.ui.button(label="Exit", style=disnake.ButtonStyle.danger)
+    async def exit_button(
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+    ):
+        embed = EmbedFactory.ide_embed(self.ctx, "Goodbye!")
+
+        await self.bot_message.edit(
+            embed=embed,
+            view=None
+        )

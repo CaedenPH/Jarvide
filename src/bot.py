@@ -94,7 +94,7 @@ class Jarvide(commands.Bot):
             list_of_commands.items()
         ))
 
-        if len(commands_in_message) != 1:
+        if len(commands_in_message) != 1:           
             return  # TODO: Maybe make the user know that they supplied too many commands?
 
         cmd = commands_in_message[0][0]
