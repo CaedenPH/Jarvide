@@ -19,7 +19,7 @@ class OpenView(disnake.ui.View):
         self.bot = ctx.bot
 
         self.clicked_num = 1
-        self.SUDO = self.ctx.me.guild_permissions.manage_messages   
+        self.SUDO = self.ctx.me.guild_permissions.manage_messages
         #self.add_item(ExitButton(ctx, self.bot_message))
 
 
@@ -54,7 +54,7 @@ class OpenView(disnake.ui.View):
                     self.ctx, "Nice try. You cant break this bot!"
                 )
                 self.clicked_num -= 1
-                return await self.bot_message.edit(embed=embed) 
+                return await self.bot_message.edit(embed=embed)
             await interaction.channel.send("Upload a file", delete_after=5)
 
         real_file = message.attachments[0]
@@ -134,7 +134,7 @@ class OpenView(disnake.ui.View):
     @disnake.ui.button(label="Link", style=disnake.ButtonStyle.green)
     async def link_button(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
-    ):  
+    ):
         PASTE_URLS = (
             "https://www.toptal.com/developers/hastebin/",
             "https://pastebin.com/",
@@ -154,7 +154,7 @@ class OpenView(disnake.ui.View):
         ).content.startswith(PASTE_URLS):
             if self.SUDO:
                 await message.delete()
-            await message.edit(suppress=True)   
+            await message.edit(suppress=True)
 
             num += 1
             if num == 3:
@@ -190,7 +190,7 @@ class OpenView(disnake.ui.View):
         )
         description = await get_info(file_)
         embed = EmbedFactory.ide_embed(self.ctx, description)
-    
+
         await self.bot_message.edit(embed=embed, view=FileView(self.ctx, file_, self.bot_message))
 
     @disnake.ui.button(label="Create", style=disnake.ButtonStyle.green)

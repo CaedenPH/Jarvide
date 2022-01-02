@@ -121,10 +121,10 @@ async def get_info(file_: File) -> str:
     )
 
 
-class ExitButton(disnake.ui.Button): 
+class ExitButton(disnake.ui.Button):
     def __init__(self, ctx, bot_message, row=None):
         super().__init__(
-            style=disnake.ButtonStyle.danger, 
+            style=disnake.ButtonStyle.danger,
             label="Exit",
             row=row
             )
