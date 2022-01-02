@@ -3,36 +3,42 @@ from disnake.ext import commands
 
 from typing import Optional
 
+
 class ConfirmationView(disnake.ui.View):
     def __init__(self, *, timeout: float, author_id: int) -> None:
         super().__init__(timeout=timeout)
         self.value: Optional[bool] = None
         self.author_id = author_id
+        self.message = None
 
     async def on_timeout(self) -> None:
         await self.message.delete()
-
 
     async def interaction_check(self, interaction: disnake.Interaction) -> bool:
         if interaction.user and interaction.user.id == self.author_id:
             return True
 
-        await interaction.response.send_message('This confirmation dialog is not for you.', ephemeral=True)
+        await interaction.response.send_message(
+            "This confirmation dialog is not for you.", ephemeral=True
+        )
         return False
 
-    @disnake.ui.button(label='Confirm', style=disnake.ButtonStyle.green)
-    async def confirm(self, button: disnake.ui.Button, interaction: disnake.Interaction):
+    @disnake.ui.button(label="Confirm", style=disnake.ButtonStyle.green)
+    async def confirm(
+        self, button: disnake.ui.Button, interaction: disnake.Interaction
+    ):
         self.value = True
         await interaction.response.defer()
         await interaction.delete_original_message()
         self.stop()
 
-    @disnake.ui.button(label='Cancel', style=disnake.ButtonStyle.red)
+    @disnake.ui.button(label="Cancel", style=disnake.ButtonStyle.red)
     async def cancel(self, button: disnake.ui.Button, interaction: disnake.Interaction):
         self.value = False
         await interaction.response.defer()
         await interaction.delete_original_message()
         self.stop()
+
 
 async def prompt(ctx: commands.Context, *, message: str, timeout: float):
     """An interactive reaction confirmation dialog

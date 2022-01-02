@@ -1,6 +1,7 @@
 import disnake
 import os
 import string
+import aiosqlite
 import copy
 
 from typing import Optional
@@ -15,9 +16,12 @@ class Jarvide(commands.Bot):
             command_prefix="jarvide",
             case_insensitive=True,
             strip_after_prefix=True,
-            help_command=None,
-            intents=disnake.Intents.all()
+            help_command=None,  # type: ignore
+            intents=disnake.Intents.all(),
         )
+        self.db = None
+        self.send_guild = None
+        self.loop.create_task(self.connect_database())
 
     def setup(self) -> None:
         for filename in os.listdir("./src/cogs"):
@@ -28,20 +32,38 @@ class Jarvide(commands.Bot):
         self.load_extension("jishaku")
 
     def load_extension(self, name: str, *, package: Optional[str] = None) -> None:
-        path = name.replace('.', '/')
+        path = name.replace(".", "/")
         if os.path.isdir(path):
-            for filename in os.listdir(path):
-                if not filename.startswith("_"):
-                    super().load_extension(f"{name}.{filename[:-3]}", package=package)
+            for root, dir_, files in os.walk(path):
+                for file in files:
+                    if not file.startswith("_") and file.endswith(".py"):
+                        try:
+                            super().load_extension(
+                                os.path.join(root, file)
+                                .replace("\\", "/")
+                                .replace("/", ".")[:-3]
+                            )
+                        except Exception as e:
+                            if not str(e).endswith("has no 'setup' function."):
+                                print(e)
             return
         super().load_extension(name, package=package)
 
     def unload_extension(self, name: str, *, package: Optional[str] = None) -> None:
-        path = name.replace('.', '/')
+        path = name.replace(".", "/")
         if os.path.isdir(path):
-            for filename in os.listdir(path):
-                if not filename.startswith("_"):
-                    super().unload_extension(f"{name}.{filename[:-3]}", package=package)
+            for root, dir_, files in os.walk(path):
+                for file in files:
+                    if not file.startswith("_") and file.endswith(".py"):
+                        try:
+                            super().load_extension(
+                                os.path.join(root, file)
+                                .replace("\\", "/")
+                                .replace("/", ".")[:-3]
+                            )
+                        except Exception as e:
+                            if not str(e).endswith("has no 'setup' function."):
+                                print(e)
             return
         super().unload_extension(name, package=package)
 
@@ -49,28 +71,57 @@ class Jarvide(commands.Bot):
         self.setup()
         super().run(TOKEN, reconnect=True)
 
-    async def on_message(self, message: disnake.Message) -> None:
-        message = copy.copy(message)
-        self.channel = self.get_channel(926537964249559060)
+    async def connect_database(self):
+        self.db = await aiosqlite.connect('./db/database.db')
 
-        if message.author.bot:
+    async def on_message(self, original_message: disnake.Message) -> None:
+
+        # Prevent bots from executing commands
+        if original_message.author.bot:
             return
 
-        if "jarvide" not in message.content.lower():
-            return
-        commands_ = [k.name for k in self.commands]
-        for command in self.commands:
-            if not command.aliases:
-                continue
-            for alias in command.aliases:
-                commands_.append(alias)
+        # Prevent the bot from running commands if its name is never mentioned
+        if "jarvide" not in original_message.content.lower():
+            return await super().on_message(original_message)
 
-        message.content = ''.join(list(filter(lambda m: m in string.ascii_letters or m.isspace(), message.content)))
-        for command_name in commands_:
-            if command_name in message.content.lower().split():
-                message.content = "jarvide " + command_name + ' '.join(message.content.split(command_name)[1:])
-                break
-        return await super().on_message(message)
+        # Stripping all of the "punctuation" characters out of the message
+        messageContent = "".join(
+            [char for char in original_message.content.lower() if char not in string.punctuation]
+        )
+
+        # IDE command interferes with the jarvide prefix
+        # NOTE: This is what you'd replace if you were making another `REMOVE_WORDS` thing.
+        messageContent = " ".join(
+            word for word in messageContent.split() if word != "jarvide"
+        )
+
+        # Create a dictionary for command lookup that also includes aliases (if any are present)
+        listOfCommands = {c : [c.name, *c.aliases] for c in self.commands}
+
+        # Get a list of all of the command keywords that the user mentioned in their message
+        commandsInMessage = list(filter(
+            lambda c: any([x in messageContent.split() for x in c[1]]), 
+            listOfCommands.items()
+        ))
+
+        if len(commandsInMessage) != 1:                     # Ensure that only one command is going to be ran.
+            return                                          # TODO: Maybe make the user know that they supplied too many commands?
+
+        cmd = commandsInMessage[0][0]                       # Get the actual command object
+        ctx = await super().get_context(original_message)   # Get the context from the message
+        userAuthorized = await cmd.can_run(ctx)             
+
+        if userAuthorized:                                  # Ensure the user can actually run the command
+
+            # Grabbing all of the arguments after the used alias                              
+            args = original_message.content.partition(
+                [i for i in listOfCommands[cmd] if i in original_message.content.lower()][0]
+            )[2]
+
+            
+            newMessage = copy.copy(original_message)
+            newMessage.content = f"jarvide {cmd.name} {args}"
+            await super().process_commands(newMessage)      # Process the actual command
 
     async def on_ready(self) -> None:
         print("Set up")
