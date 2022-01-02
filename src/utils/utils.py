@@ -97,7 +97,9 @@ class EmbedFactory:
         )
 
     @staticmethod
-    def code_embed(ctx: commands.Context, code: str, path: str, format_: str = "py"):
+    def code_embed(
+        ctx: commands.Context, code: str, path: str, format_: str = "py"
+    ) -> disnake.Embed:
         return (
             disnake.Embed(
                 title="Jarvide Text Editor",
