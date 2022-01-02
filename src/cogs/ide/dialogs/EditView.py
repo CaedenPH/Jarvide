@@ -98,6 +98,28 @@ class EditView(disnake.ui.View):
             check=lambda m: m.author == interaction.author and m.channel == interaction.channel
         )).content)
 
+    @disnake.ui.button(label="Rename", style=disnake.ButtonStyle.grey)
+    async def rename_button(
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+    ):
+        await interaction.response.send_message(
+            "What would you like the filename to be?", ephemeral=True
+        )
+        filename = await self.bot.wait_for(
+            "message",
+            check=lambda m: self.ctx.author == m.author
+            and m.channel == self.ctx.channel,
+        )
+        file_ = File(filename=filename, content=self.file.content, bot=self.bot)
+        description = await get_info(file_)
+
+        self.file = file_
+        self.extension = file_.filename.split(".")[-1]
+
+        embed = EmbedFactory.ide_embed(self.ctx, description)
+        await self.bot_message.edit(embed=embed)
+
+
     @disnake.ui.button(label="Next", style=disnake.ButtonStyle.blurple, row=2)
     async def next_button(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
