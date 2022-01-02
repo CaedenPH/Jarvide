@@ -1,13 +1,15 @@
-import disnake
 import os
 import string
-import aiosqlite
 import copy
-
 from typing import Optional
 
-from .HIDDEN import TOKEN
+import disnake
 from disnake.ext import commands
+from motor.motor_asyncio import AsyncIOMotorClient
+from odmantic import AIOEngine
+
+from .HIDDEN import TOKEN, MONGO_URI
+
 
 
 class Jarvide(commands.Bot):
@@ -19,7 +21,7 @@ class Jarvide(commands.Bot):
             help_command=None,  # type: ignore
             intents=disnake.Intents.all(),
         )
-        self.db = None
+        self.engine = AIOEngine(AsyncIOMotorClient(MONGO_URI))
         self.send_guild = None
 
     def setup(self) -> None:
