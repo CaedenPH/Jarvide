@@ -21,7 +21,6 @@ class Jarvide(commands.Bot):
         )
         self.db = None
         self.send_guild = None
-        self.loop.create_task(self.connect_database())
 
     def setup(self) -> None:
         for filename in os.listdir("./src/cogs"):
@@ -70,9 +69,6 @@ class Jarvide(commands.Bot):
     def run(self) -> None:
         self.setup()
         super().run(TOKEN, reconnect=True)
-
-    async def connect_database(self):
-        self.db = await aiosqlite.connect('./db/database.db')
 
     async def on_message(self, original_message: disnake.Message) -> None:
         # Prevent bots from executing commands
