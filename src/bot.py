@@ -1,9 +1,8 @@
 import os
 import string
 import copy
-from typing import Optional
-
 import disnake
+
 from disnake.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
 from odmantic import AIOEngine
@@ -26,47 +25,11 @@ class Jarvide(commands.Bot):
 
     def setup(self) -> None:
         for filename in os.listdir("./src/cogs"):
-            if not filename.endswith(".py") and not filename.startswith("_"):
-                self.load_extension(f"src.cogs.{filename}")
-            elif not filename.startswith("_"):
+            if not filename.startswith("_") and filename.endswith('py'):
                 self.load_extension(f"src.cogs.{filename[:-3]}")
+        
+        self.load_extension("src.cogs.ide.ide")
         self.load_extension("jishaku")
-
-    def load_extension(self, name: str, *, package: Optional[str] = None) -> None:
-        path = name.replace(".", "/")
-        if os.path.isdir(path):
-            for root, dir_, files in os.walk(path):
-                for file in files:
-                    if not file.startswith("_") and file.endswith(".py"):
-                        try:
-                            super().load_extension(
-                                os.path.join(root, file)
-                                .replace("\\", "/")
-                                .replace("/", ".")[:-3]
-                            )
-                        except Exception as e:
-                            if not str(e).endswith("has no 'setup' function."):
-                                print(e)
-            return
-        super().load_extension(name, package=package)
-
-    def unload_extension(self, name: str, *, package: Optional[str] = None) -> None:
-        path = name.replace(".", "/")
-        if os.path.isdir(path):
-            for root, dir_, files in os.walk(path):
-                for file in files:
-                    if not file.startswith("_") and file.endswith(".py"):
-                        try:
-                            super().load_extension(
-                                os.path.join(root, file)
-                                .replace("\\", "/")
-                                .replace("/", ".")[:-3]
-                            )
-                        except Exception as e:
-                            if not str(e).endswith("has no 'setup' function."):
-                                print(e)
-            return
-        super().unload_extension(name, package=package)
 
     def run(self) -> None:
         self.setup()

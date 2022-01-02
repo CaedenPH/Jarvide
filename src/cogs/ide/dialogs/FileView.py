@@ -22,7 +22,8 @@ class FileView(disnake.ui.View):
         self.SUDO = self.ctx.me.guild_permissions.manage_messages
         self.bot_message = bot_message
 
-        self.add_item(ExitButton(ctx, bot_message))
+        self.add_item(ExitButton(ctx, bot_message, row=1))
+        self.add_item(SaveButton(ctx, bot_message, file_, row=0))
 
     @disnake.ui.button(label="Read", style=disnake.ButtonStyle.green)
     async def first_button(
@@ -127,7 +128,7 @@ class FileView(disnake.ui.View):
         embed = EmbedFactory.ide_embed(self.ctx, description)
         await self.bot_message.edit(embed=embed)
 
-    @disnake.ui.button(label="Back", style=disnake.ButtonStyle.red)
+    @disnake.ui.button(label="Back", style=disnake.ButtonStyle.red, row=1)
     async def back_button(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):

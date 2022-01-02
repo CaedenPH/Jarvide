@@ -112,7 +112,10 @@ class EmbedFactory:
 
 
 async def get_info(file_: File) -> str:
-    real_file = await file_.to_real()
+    if isinstance(file_, disnake.Attachment):
+        real_file = file_
+    else:
+        real_file = await file_.to_real()
 
     return (
         f"Opened file: {real_file.filename}"
@@ -138,4 +141,25 @@ class ExitButton(disnake.ui.Button):
         await self.bot_message.edit(
             embed=embed,
             view=None
+        )
+
+class SaveButton(disnake.ui.Button): 
+    def __init__(self, ctx, bot_message, file_: File, row=None):
+        super().__init__(
+            style=disnake.ButtonStyle.green,
+            label="Save",
+            row=row
+            )
+        self.bot_message = bot_message
+        self.ctx = ctx
+        self.file = file_
+
+    async def callback(self, interaction: disnake.MessageInteraction):
+        from src.cogs.ide.dialogs import SaveFile
+        
+        embed = EmbedFactory.ide_embed(self.ctx, f"Save your file: {self.file.filename}\nCurrent directory: /users/{self.ctx.author.name}")
+        await interaction.response.defer()
+        await self.bot_message.edit(
+            embed=embed,
+            view=SaveFile(self.ctx, self.bot_message, self.file)
         )

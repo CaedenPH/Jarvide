@@ -1,10 +1,9 @@
 import disnake
-from disnake import file
 
 from disnake.ext import commands
 from typing import TYPE_CHECKING
 
-from src.utils.utils import EmbedFactory, ExitButton, add_lines, get_info
+from src.utils.utils import EmbedFactory, ExitButton, SaveButton, add_lines, get_info
 
 if TYPE_CHECKING:
     from src.utils import File
@@ -39,9 +38,11 @@ class EditView(disnake.ui.View):
         self.file_view = file_view
         self.undo = self.file_view.file.undo
         self.redo = self.file_view.file.redo
+        
         self.SUDO = self.ctx.me.guild_permissions.manage_messages
 
         self.add_item(ExitButton(ctx, bot_message, row=3))
+        self.add_item(SaveButton(ctx, bot_message, file_, row=2))
 
     async def edit(self, inter):
         await inter.response.defer()
@@ -160,12 +161,6 @@ class EditView(disnake.ui.View):
         self.undo.append(self.file_view.file.content)
         self.file_view.file.content = self.redo.pop(-1)
         await self.edit(interaction)
-
-    @disnake.ui.button(label="Save", style=disnake.ButtonStyle.green, row=3)
-    async def save_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
-    ):
-        await self.file_view.third_button.callback(interaction)
 
     @disnake.ui.button(label="Clear", style=disnake.ButtonStyle.danger, row=3)
     async def clear_button(

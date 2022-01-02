@@ -3,10 +3,9 @@ import base64
 import disnake
 import re
 
-from disnake import file
-from src import bot
 
-from src.utils import ExitButton, EmbedFactory, File, get_info
+\
+from src.utils import EmbedFactory, File, get_info
 from .FileView import FileView
 
 THUMBS_UP = "👍"
@@ -18,18 +17,12 @@ class OpenView(disnake.ui.View):
         self.ctx = ctx
         self.bot = ctx.bot
 
-        self.clicked_num = 1
         self.SUDO = self.ctx.me.guild_permissions.manage_messages
-        #self.add_item(ExitButton(ctx, self.bot_message))
-
 
     async def interaction_check(self, interaction: disnake.MessageInteraction) -> bool:
-        if self.ctx.author == interaction.author:
-            self.clicked_num += 1
         return (
             interaction.author == self.ctx.author
             and interaction.channel == self.ctx.channel
-            and self.clicked_num <= 2
         )
 
     @disnake.ui.button(label="Upload", style=disnake.ButtonStyle.green)
@@ -38,6 +31,11 @@ class OpenView(disnake.ui.View):
     ):
         num = 0
         await interaction.response.send_message("Upload a file!", ephemeral=True)
+
+        for child in self.children:
+            if child.label != "Exit":
+                child.disabled = True 
+        await self.bot_message.edit(view=self)
         while not (
             message := await self.bot.wait_for(
                 "message",
@@ -96,6 +94,10 @@ class OpenView(disnake.ui.View):
                 self.clicked_num -= 1
                 return await self.bot_message.edit(embed=embed)
 
+            for child in self.children:
+                if child.label != "Exit":
+                    child.disabled = True 
+            await self.bot_message.edit(view=self)
             url = await self.bot.wait_for(
                 "message",
                 check=lambda m: self.ctx.author == m.author
@@ -144,6 +146,11 @@ class OpenView(disnake.ui.View):
         await interaction.response.send_message(
             "Send a url with code in it", ephemeral=True
         )
+        
+        for child in self.children:
+            if child.label != "Exit":
+                child.disabled = True 
+        await self.bot_message.edit(view=self)
         num = 0
         while not (
             message := await self.bot.wait_for(
@@ -196,7 +203,11 @@ class OpenView(disnake.ui.View):
     @disnake.ui.button(label="Create", style=disnake.ButtonStyle.green)
     async def create_button(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
-    ):
+    ):  
+        for child in self.children:
+            if child.label != "Exit":
+                child.disabled = True 
+        await self.bot_message.edit(view=self)
         await interaction.response.send_message(
             "What would you like the filename to be?", ephemeral=True
         )
@@ -246,3 +257,4 @@ class OpenView(disnake.ui.View):
             embed=embed,
             view=None
         )
+        

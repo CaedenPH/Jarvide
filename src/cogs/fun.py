@@ -21,7 +21,7 @@ class Casino(disnake.ui.View):
     @disnake.ui.button(
         label="Play",
         style=disnake.ButtonStyle.green,
-        emoji: str = "▶️"
+        emoji="▶️",
         )
     async def play(
         self,
@@ -57,9 +57,8 @@ class Casino(disnake.ui.View):
         if len(set(r_ints)) == 1:
             Awinningembed = disnake.Embed(
                 title="WINNER",
-                description=(
-                    f"{interaction.author.mention} has won {random.randint(1, 1000)}$"
-                    )
+                description=f"{interaction.author.mention} has won {random.randint(1, 1000)}$"
+            )
             self.stop()
             return await interaction.send(embed=Awinningembed)
 
@@ -94,9 +93,8 @@ class Casino(disnake.ui.View):
         if len(set(r_ints)) == 1:
             Bwinningembed = disnake.Embed(
                 title="WINNER",
-                description=(
-                    f"{interaction.author.mention} has won {random.randint(1, 1000)}$"
-                    )
+                description=f"{interaction.author.mention} has won {random.randint(1, 1000)}$"
+                )
             self.stop()
             return await interaction.send(embed=Bwinningembed)
 
