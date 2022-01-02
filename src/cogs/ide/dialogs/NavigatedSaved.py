@@ -131,8 +131,8 @@ class OpenFromSaved(disnake.ui.View, DefaultButtons):
         self.bot_message = bot_message
         self.SUDO = self.ctx.me.guild_permissions.manage_messages
 
-    @disnake.ui.button(label="Choose")
-    async def choose_button(
+    @disnake.ui.button(label="Select")
+    async def select_button(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         ...
