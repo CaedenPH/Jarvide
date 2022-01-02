@@ -3,6 +3,8 @@ import base64
 import disnake
 import re
 
+from disnake import file
+
 from src.utils import ExitButton, EmbedFactory, File, get_info
 from .FileView import FileView
 
@@ -53,7 +55,6 @@ class OpenView(disnake.ui.View):
                 return await self.bot_message.edit(embed=embed) 
             await interaction.channel.send("Upload a file", delete_after=5)
 
-        await message.add_reaction(THUMBS_UP)
         real_file = message.attachments[0]
         try:
             file_ = File(
@@ -63,6 +64,7 @@ class OpenView(disnake.ui.View):
             )
         except UnicodeDecodeError:
             return await interaction.channel.send("Upload a valid text file!")
+        await message.add_reaction(THUMBS_UP)
 
         description = (
             f"Opened file: {real_file.filename}"
@@ -148,7 +150,7 @@ class OpenView(disnake.ui.View):
         ).content.startswith(PASTE_URLS):
             if self.SUDO:
                 await message.delete()
-            await message.edit(suppress=True)
+            await message.edit(suppress=True)   
 
             num += 1
             if num == 3:
@@ -160,24 +162,31 @@ class OpenView(disnake.ui.View):
                 f"That url is not supported! Our supported urls are {PASTE_URLS}", delete_after=5
             )
 
-        await message.add_reaction(THUMBS_UP)
+        await interaction.channel.send(
+            "What would you like the filename to be?"
+        )
+        filename = await self.bot.wait_for(
+            "message",
+            check=lambda m: self.ctx.author == m.author
+            and m.channel == self.ctx.channel,
+        )
 
+        await filename.add_reaction(THUMBS_UP)
         url = message.content.replace("/hastebin/", "/hastebin/raw/")
-        filename = url.split('/')[-1]
 
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as response:
                 text = await response.read()
 
         file_ = File(
-            filename=filename,
+            filename=filename.content,
             content=text,
             bot=self.bot
         )
         description = await get_info(file_)
         embed = EmbedFactory.ide_embed(self.ctx, description)
     
-        await self.bot_message.edit(embed=embed, view=FileView(self.ctx, file_))
+        await self.bot_message.edit(embed=embed, view=FileView(self.ctx, file_, self.bot_message))
 
     @disnake.ui.button(label="Create", style=disnake.ButtonStyle.green)
     async def create_button(
@@ -209,8 +218,7 @@ class OpenView(disnake.ui.View):
         description = await get_info(file_)
 
         embed = EmbedFactory.ide_embed(self.ctx, description)
-        view = FileView(self.ctx, file_, self.bot_message)
-        view.bot_message = await self.bot_message.edit(embed=embed, view=view)
+        await self.bot_message.edit(embed=embed, view=FileView(self.ctx, file_, self.bot_message))
 
     @disnake.ui.button(label="Saved", style=disnake.ButtonStyle.green)
     async def saved_button(

@@ -1,7 +1,7 @@
 import disnake
 import aiohttp
 
-from src.utils import File, add_lines, EmbedFactory, LinePaginator, TextPaginator
+from src.utils import File, add_lines, EmbedFactory, LinePaginator, TextPaginator, get_info
 from .EditView import EditView
 
 
@@ -12,7 +12,7 @@ class FileView(disnake.ui.View):
             and interaction.channel == self.ctx.channel
         )
 
-    def __init__(self, ctx, file_: File, bot_message: disnake.Message = None):
+    def __init__(self, ctx, file_: File, bot_message: disnake.Message):
         super().__init__()
 
         self.ctx = ctx
@@ -25,12 +25,13 @@ class FileView(disnake.ui.View):
     async def first_button(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
+        await interaction.response.defer()
         content = add_lines(self.file.content)
         if len("".join(content)) < 2000:
             embed = EmbedFactory.ide_embed(
                 self.ctx, "".join(content), format_=self.extension
             )
-            return await interaction.response.send_message(embed=embed)
+            return await self.bot_message.edit(embed=embed)
 
         await LinePaginator(
             interaction,
@@ -40,7 +41,7 @@ class FileView(disnake.ui.View):
             line_limit=50,
             timeout=None,  # type: ignore
             embed_author_kwargs={
-                'name': f"{self.ctx.author.name}'s automated paginator for {self.file.filename}.",
+                'name': f"{self.ctx.author.name}'s automated paginator for {self.file.filename}",
                 'icon_url': self.ctx.author.avatar.url
             }
         ).start()
@@ -59,6 +60,10 @@ class FileView(disnake.ui.View):
             ) as data:
 
                 json = await data.json()
+                if 'message' in json and 'runtime is unknown' in json['message']:
+                    await interaction.response.defer()
+                    return await interaction.channel.send("This file has an invalid file extension and therefore I do not know what language to run it in! Try renaming your file", delete_after=15)
+                
                 output = json['output']
 
                 if not output:
@@ -81,7 +86,7 @@ class FileView(disnake.ui.View):
                 line_limit=60,
                 timeout=None,  # type: ignore
                 embed_author_kwargs={
-                    'name': f"{self.ctx.author.name}'s automated paginator for {self.file.filename}.",
+                    'name': f"{self.ctx.author.name}'s automated paginator for {self.file.filename}",
                     'icon_url': self.ctx.author.avatar.url
                 }
             ).start()
@@ -91,4 +96,37 @@ class FileView(disnake.ui.View):
                 self.ctx, "".join(add_lines(content)), self.file.filename
             ),
             view=EditView(self.ctx, self.file, self.bot_message, self),
+        )
+
+    @disnake.ui.button(label="Rename", style=disnake.ButtonStyle.green)
+    async def rename_button(
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+    ):
+        await interaction.response.send_message(
+            "What would you like the filename to be?", ephemeral=True
+        )
+        filename = await self.bot.wait_for(
+            "message",
+            check=lambda m: self.ctx.author == m.author
+            and m.channel == self.ctx.channel,
+        )
+        file_ = File(filename=filename, content=self.file.content, bot=self.bot)
+        description = await get_info(file_)
+
+        self.file = file_
+        self.extension = file_.filename.split(".")[-1]
+
+        embed = EmbedFactory.ide_embed(self.ctx, description)
+        await self.bot_message.edit(embed=embed)
+
+    @disnake.ui.button(label="Back", style=disnake.ButtonStyle.red)
+    async def back_button(
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+    ):
+        from .OpenView import OpenView
+
+        await interaction.response.defer()
+        await self.bot_message.edit(
+            embed=EmbedFactory.ide_embed(self.ctx, "File open: No file currently open"),
+            view=OpenView(self.ctx, self.bot_message)
         )
