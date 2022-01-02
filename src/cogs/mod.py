@@ -27,6 +27,10 @@ class Mod(commands.Cog):
                 f"{ctx.author.mention}, please provide a member to kick."
             )
 
+        elif member == ctx.author:
+            await ctx.send(f"{ctx.author.mention}, you cannot kick yourself!")
+            return
+
         choice = await prompt(
             ctx, message="Are you sure you want to kick this user?", timeout=60
         )
@@ -48,6 +52,10 @@ class Mod(commands.Cog):
     ):
         if not member:
             await ctx.send(f"{ctx.author.mention}, please provide a member to ban.")
+            return
+
+        elif member == ctx.author:
+            await ctx.send(f"{ctx.author.mention}, you cannot ban yourself!")
             return
 
         choice = await prompt(
@@ -73,6 +81,10 @@ class Mod(commands.Cog):
             await ctx.send(
                 f"{ctx.author.mention}, please provide an ID of a user to unban."
             )
+            return
+
+        elif user == ctx.author:
+            await ctx.send(f"{ctx.author.mention}, you cannot unban yourself!")
             return
 
         choice = await prompt(
