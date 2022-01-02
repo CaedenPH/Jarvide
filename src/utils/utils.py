@@ -6,6 +6,22 @@ import random
 from disnake.ext import commands
 from typing import TypeVar
 
+class ExitButton(disnake.ui.Button): 
+    def __init__(
+        self,
+        row=None,
+    ):
+        super().__init__(
+            style=disnake.ButtonStyle.danger, 
+            label="Exit",
+            row=row
+            )
+        
+
+    async def callback(self, interaction: disnake.MessageInteraction):
+        await interaction.response.send_message("Goodbye!", delete_after=30)
+        self.view.stop()
+
 
 def add_lines(content: str) -> None:
     enumerated = list(enumerate(content.split("\n")))

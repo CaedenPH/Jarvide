@@ -21,16 +21,19 @@ class EditView(disnake.ui.View):
         ctx,
         file_: "File",
         bot_message=None,
-    ):
+    ):  
+        super().__init__()
+
         self.ctx = ctx
         self.file = file_
         self.content = file_.content
         self.bot_message = bot_message
 
         self.undo = []
-        self.redo = []
+        self.redo = []  
 
-        super().__init__()
+        self.add_item(ExitButton(row=3))
+
 
     async def edit(self, inter):
         await inter.response.defer()
@@ -94,7 +97,7 @@ class EditView(disnake.ui.View):
         self.content = self.redo[-1]    
         await self.edit(interaction)
 
-    @disnake.ui.button(label="Save", style=disnake.ButtonStyle.green, row=2)
+    @disnake.ui.button(label="Save", style=disnake.ButtonStyle.green, row=3)
     async def save_button(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
@@ -124,15 +127,6 @@ class EditView(disnake.ui.View):
             embed=embed,
             view=FileView(self.ctx, self.file, self.bot_message),
         )
-
-
-    @disnake.ui.button(label="Exit", style=disnake.ButtonStyle.danger, row=3)
-    async def exit_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
-    ):
-        await interaction.response.send_message("Goodbye!")
-        self.stop()
-
     
 
 def setup(bot: commands.Bot):

@@ -18,7 +18,8 @@ class OpenView(disnake.ui.View):
         self.bot_message = bot_message
 
         self.clicked_num = 1
-        self.SUDO = self.ctx.me.guild_permissions.manage_messages
+        self.SUDO = self.ctx.me.guild_permissions.manage_messages   
+        self.add_item(ExitButton())
 
     async def interaction_check(self, interaction: disnake.MessageInteraction) -> bool:
         if self.ctx.author == interaction.author:
@@ -149,7 +150,7 @@ class OpenView(disnake.ui.View):
         ).content.startswith(PASTE_URLS):
             if self.SUDO:
                 await message.delete()
-                
+
             num += 1
             if num == 3:
                 embed = EmbedFactory.ide_embed(
