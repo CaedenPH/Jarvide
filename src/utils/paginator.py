@@ -334,7 +334,7 @@ class LinePaginator(_AbstractPaginator):
         self.prefix = prefix
         self.suffix = suffix
 
-    def _lines_to_page(self, lines: str):
+    def _lines_to_page(self, lines: list[str]):
         page = "\n".join(lines)
         if self.prefix:
             page = self.prefix + "\n" + page

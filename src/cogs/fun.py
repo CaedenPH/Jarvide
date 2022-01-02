@@ -1,6 +1,114 @@
+import asyncio
+
 import disnake
 from disnake.ext import commands
 import random
+
+
+class Casino(disnake.ui.View):
+    """subclass for buttons in jackpot command"""
+
+    def __init__(self, author: disnake.Member) -> None:
+        self.author = author
+        super().__init__(timeout=60.0)
+        self.retry.disabled = True
+
+    async def on_timeout(self) -> None:
+        for child in self.children:
+            self.remove_item(child)
+            self.stop()
+
+    @disnake.ui.button(
+        label="Play",
+        style=disnake.ButtonStyle.green,
+        emoji: str = "▶️"
+        )
+    async def play(
+        self,
+        button: disnake.ui.button,
+        interaction: disnake.MessageInteraction
+        ) -> None:
+        self.exit.disabled = True
+        self.play.disabled = True
+        intsthink = disnake.Embed(
+            title="Casino Machine $",
+            description="```...```").set_footer(
+                text="Get Three numbers in a row for a PRIZE"
+                )
+
+        await interaction.response.edit_message(embed=intsthink, view=self)
+
+        r_ints = (random.randint(1, 9), random.randint(1, 9), random.randint(1, 9))
+        result, ints = [], None
+
+        for i in r_ints:
+            result.append(str(i))
+            ints = disnake.Embed(
+                title="Casino Machine $",
+                description=f"```{''.join(result)}```").set_footer(
+                text="Get Three numbers in a row for a PRIZE")
+            await interaction.edit_original_message(embed=ints, view=self)
+            await asyncio.sleep(1)
+
+        self.retry.disabled = False
+        self.exit.disabled = False
+        await interaction.edit_original_message(embed=ints, view=self)
+
+        if len(set(r_ints)) == 1:
+            Awinningembed = disnake.Embed(
+                title="WINNER",
+                description=(
+                    f"{interaction.author.mention} has won {random.randint(1, 1000)}$"
+                    )
+            self.stop()
+            return await interaction.send(embed=Awinningembed)
+
+    @disnake.ui.button(label="Retry", style=disnake.ButtonStyle.green, emoji="🔄")
+    async def retry(
+        self,
+        button: disnake.ui.button,
+        interaction: disnake.MessageInteraction
+        ) -> None:
+        intsthink1 = disnake.Embed(
+            title="Casino Machine $",
+            description="```...```").set_footer(text="Get Three numbers in a row for a PRIZE")
+        self.exit.disabled = True
+        await interaction.response.edit_message(embed=intsthink1, view=self)
+
+        r_ints = (random.randint(1, 9), random.randint(1, 9), random.randint(1, 9))
+
+        result, ints = [], None
+        for i in r_ints:
+            result.append(str(i))
+            ints = disnake.Embed(
+                title="Casino Machine $",
+                description=f"```{''.join(result)}```").set_footer(
+                text="Get Three numbers in a row for a PRIZE")
+            await interaction.edit_original_message(embed=ints, view=self)
+            await asyncio.sleep(1)
+
+        self.retry.disabled = False
+        self.exit.disabled = False
+        await interaction.edit_original_message(embed=ints, view=self)
+
+        if len(set(r_ints)) == 1:
+            Bwinningembed = disnake.Embed(
+                title="WINNER",
+                description=(
+                    f"{interaction.author.mention} has won {random.randint(1, 1000)}$"
+                    )
+            self.stop()
+            return await interaction.send(embed=Bwinningembed)
+
+    @disnake.ui.button(label="Exit", style=disnake.ButtonStyle.red, emoji="⏹️")
+    async def exit(
+        self,
+        button: disnake.ui.button,
+        interaction: disnake.MessageInteraction
+        ) -> None:
+        await interaction.response.defer()
+        await interaction.edit_original_message(view=None)
+        self.stop()
 
 
 class Fun(commands.Cog):
@@ -40,9 +148,9 @@ class Fun(commands.Cog):
             return await ctx.send(f"{ctx.author.mention} has kissed himself")
         embed1 = disnake.Embed(
             title=f"how cute, {ctx.author.mention} has kissed {member.name}"
-        ).set_image(
-            url="https://media.tenor.co/videos/fc567d93fe70d2e0567325df0410959b/mp4"
-        )
+            ).set_image(
+                url="https://media.tenor.co/videos/fc567d93fe70d2e0567325df0410959b/mp4"
+                )
 
         await ctx.send(embed=embed1)
 
@@ -53,9 +161,9 @@ class Fun(commands.Cog):
 
         embed2 = disnake.Embed(
             title=f"{ctx.author.mention} has slapped {member.name}"
-        ).set_image(
-            url="https://media.tenor.co/videos/318d19d23b24c54ab51cacf5ef4bfccf/mp4"
-        )
+            ).set_image(
+                url="https://media.tenor.co/videos/318d19d23b24c54ab51cacf5ef4bfccf/mp4"
+                )
 
         await ctx.send(embed=embed2)
 
@@ -72,13 +180,17 @@ class Fun(commands.Cog):
             member = ctx.author
         size = random.randint(1, 12)
         if size <= 6:
-            await ctx.send(
-                f"{member.mention} is packing {size}inches, wow such a small pp"
-            )
+            await ctx.send(f"{member.mention} is packing {size}inches, wow such a small pp")
         elif size >= 6:
-            await ctx.send(
-                f"{member.mention} is packing {size}inches, wow such a big pp"
-            )
+            await ctx.send(f"{member.mention} is packing {size}inches, wow such a big pp")
+
+    @commands.command(aliases=["casino"])
+    async def jackpot(self, ctx) -> None:
+        embed20 = disnake.Embed(
+            title="Casino Machine $",
+            description="```000```").set_footer(text="Get Three numbers in a row for a PRIZE")
+
+        await ctx.send(embed=embed20, view=Casino(ctx.author))
 
 
 def setup(bot: commands.Bot) -> None:

@@ -1,8 +1,8 @@
 import disnake
 import os
 import string
-import copy
 import aiosqlite
+import copy
 
 from typing import Optional
 
@@ -16,13 +16,12 @@ class Jarvide(commands.Bot):
             command_prefix="jarvide",
             case_insensitive=True,
             strip_after_prefix=True,
-            help_command=None,
+            help_command=None,  # type: ignore
             intents=disnake.Intents.all(),
         )
+        self.db = None
+        self.send_guild = None
 
-        self.loop.create_task(self.connect_database())
-
-    
     def setup(self) -> None:
         for filename in os.listdir("./src/cogs"):
             if not filename.endswith(".py") and not filename.startswith("_"):
@@ -71,44 +70,44 @@ class Jarvide(commands.Bot):
         self.setup()
         super().run(TOKEN, reconnect=True)
 
-    async def connect_database(self):
-        self.db = await aiosqlite.connect('./db/database.db')
-
     async def on_message(self, original_message: disnake.Message) -> None:
-        message = copy.copy(original_message)
-        self.channel = self.get_channel(926811692019626067)
-
-        if message.author.bot:
+        # Prevent bots from executing commands
+        if original_message.author.bot or "jarvide" not in original_message.content.lower():
             return
 
-        if "jarvide" not in message.content.lower():
-            return
-
-        commands_ = [k.name for k in self.commands]
-        for command in self.commands:
-            if not command.aliases:
-                continue
-            for alias in command.aliases:
-                commands_.append(alias)
-
-        message.content = "".join(
-            list(
-                filter(
-                    lambda m: m in string.ascii_letters or m.isspace(), message.content
-                )
-            )
+        message_content = "".join(
+            [char for char in original_message.content.lower() if char not in string.punctuation]
         )
-        for command_name in commands_:
-            if command_name in message.content.lower().split():
-                message.content = (
-                    "jarvide "
-                    + command_name
-                    + " ".join(original_message.content.split(command_name)[1:])
-                )
-                break
-        return await super().on_message(message)
+
+        message_content = " ".join(
+            word for word in message_content.split() if word != "jarvide"
+        )
+
+        list_of_commands = {c: [c.name, *c.aliases] for c in self.commands}
+
+        commands_in_message = list(filter(
+            lambda c: any([x in message_content.split() for x in c[1]]),
+            list_of_commands.items()
+        ))
+
+        if len(commands_in_message) != 1:
+            return  # TODO: Maybe make the user know that they supplied too many commands?
+
+        cmd = commands_in_message[0][0]
+        ctx = await super().get_context(original_message)
+        userAuthorized = await cmd.can_run(ctx)
+
+        if userAuthorized:
+            args = original_message.content.partition(
+                [i for i in list_of_commands[cmd] if i in original_message.content.lower()][0]
+            )[2]
+
+            new_message = copy.copy(original_message)
+            new_message.content = f"jarvide {cmd.name} {args}"
+            await super().process_commands(new_message)
 
     async def on_ready(self) -> None:
+        self.send_guild = self.get_guild(926811692019626064)
         print("Set up")
 
     async def on_command_error(self, ctx, error):

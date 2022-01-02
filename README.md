@@ -21,7 +21,7 @@ Learn more about Jarvide [here.](ABOUT.md)
 | Sarthak     |        |
 | Icy         |        |
 | Dekriel     |likes coding and cats|
-| Sasuke 暁   |        | 
+| Sasuke 暁   |        |
 | Snowy       |
 | okimii      |love coding and capybaras|  
 | Robin       | Aspiring software developer |
@@ -33,4 +33,3 @@ Learn more about Jarvide [here.](ABOUT.md)
 
 ## **Features**
 - to do
-

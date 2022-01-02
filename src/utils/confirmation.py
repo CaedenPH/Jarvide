@@ -9,6 +9,7 @@ class ConfirmationView(disnake.ui.View):
         super().__init__(timeout=timeout)
         self.value: Optional[bool] = None
         self.author_id = author_id
+        self.message = None
 
     async def on_timeout(self) -> None:
         await self.message.delete()
