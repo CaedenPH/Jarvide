@@ -13,11 +13,9 @@ class Ide(commands.Cog):
     async def ide(self, ctx: commands.Context) -> None:
         embed = EmbedFactory.ide_embed(ctx, "File open: No file currently open")
         view = OpenView(ctx)
-
         view.bot_message = await ctx.send(embed=embed, view=view)
 
 
 def setup(bot: commands.Bot) -> None:
     """Setup Ide cog"""
-
     bot.add_cog(Ide(bot))

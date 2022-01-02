@@ -4,7 +4,7 @@ from disnake.ext import commands
 
 
 class Misc(commands.Cog):
-    """Misc cog for randomly assorted commands that dont fall into any specific category."""
+    """Misc cog for randomly assorted commands that don't fall into any specific category."""
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 

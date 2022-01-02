@@ -1,6 +1,6 @@
+import aiohttp
 import disnake
 import io
-import aiohttp
 import random
 
 from disnake.ext import commands
@@ -8,10 +8,7 @@ from typing import TypeVar
 
 
 class ExitButton(disnake.ui.Button): 
-    def __init__(
-        self,
-        row=None,
-    ):
+    def __init__(self, row=None):
         super().__init__(
             style=disnake.ButtonStyle.danger, 
             label="Exit",
@@ -24,7 +21,7 @@ class ExitButton(disnake.ui.Button):
 
 
 def add_lines(content: str) -> list[str]:
-    enumerated = list(enumerate(content.split("\n")))
+    enumerated = list(enumerate(content.split("\n"), 1))
     lines = []
     for number, line in enumerated:
         number = ("0" * (len(str(enumerated[-1][0])) - len(str(number)))) + str(number)
@@ -49,6 +46,8 @@ class File:
         self.filename = filename
         self.bot = bot
         self.content = content
+        self.undo = []  # passed in EditView
+        self.redo = []  # this too
 
         self.setup()
 

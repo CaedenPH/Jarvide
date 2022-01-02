@@ -123,7 +123,7 @@ class OpenView(disnake.ui.View):
 
         description = await get_info(file_)
         embed = EmbedFactory.ide_embed(self.ctx, description)
-        await self.bot_message.edit(embed=embed, view=FileView(self.ctx, file_))
+        await self.bot_message.edit(embed=embed, view=FileView(self.ctx, file_, self.bot_message))
 
     @disnake.ui.button(label="Link", style=disnake.ButtonStyle.green)
     async def link_button(
@@ -148,6 +148,7 @@ class OpenView(disnake.ui.View):
         ).content.startswith(PASTE_URLS):
             if self.SUDO:
                 await message.delete()
+            await message.edit(suppress=True)
 
             num += 1
             if num == 3:

@@ -90,6 +90,5 @@ class FileView(disnake.ui.View):
             embed=EmbedFactory.code_embed(
                 self.ctx, "".join(add_lines(content)), self.file.filename
             ),
-            view=EditView(self.ctx, self.file, self.bot_message),
+            view=EditView(self.ctx, self.file, self.bot_message, self),
         )
-        
