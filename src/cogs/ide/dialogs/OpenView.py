@@ -4,7 +4,7 @@ import disnake
 import re
 
 
-\
+
 from src.utils import EmbedFactory, File, get_info
 from .FileView import FileView
 
