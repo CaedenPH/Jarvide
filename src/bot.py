@@ -20,13 +20,13 @@ class Jarvide(commands.Bot):
             command_prefix="jarvide",
             case_insensitive=True,
             strip_after_prefix=True,
-            help_command=None,
+            help_command=None,  # type: ignore
             intents=disnake.Intents.all(),
         )
-
+        self.db = None
+        self.send_guild = None
         self.loop.create_task(self.connect_database())
 
-    
     def setup(self) -> None:
         for filename in os.listdir("./src/cogs"):
             if not filename.endswith(".py") and not filename.startswith("_"):
