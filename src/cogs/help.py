@@ -48,7 +48,7 @@ class JarvideHelp(HelpCommand):
 
         # Check if it's a cog
         cog = None
-        _cog = [cog for cog in ctx.bot.cogs if cog.lower() == command]
+        _cog = [cog for cog in ctx.bot.cogs if cog.lower() == command.lower()]
         if _cog:
             cog = _cog[0]
         if cog is not None:
@@ -136,11 +136,11 @@ class JarvideHelp(HelpCommand):
         }
         command_signature = ""
         for arg in command.signature.split("] ["):
-            print(arg)
             if "=" in arg:
                 parsed_arg = "{" + arg.split("=")[0].strip("[]<>]") + "}"
             else:
                 parsed_arg = "[" + arg.strip("[]<>") + "]"
+                if parsed_arg == '[]':parsed_arg=''
             command_signature += parsed_arg + " "
         usage = f"```ini\n{await self.context.bot.get_prefix(self.context.message)} {command.name} {command_signature}\n```"
         embed = Embed(
