@@ -1,14 +1,9 @@
 import disnake
 import os
 import string
-import copy
 import aiosqlite
-import re
-import timeit
 
 from typing import Optional
-
-from disnake.ext.commands.core import command
 
 from .HIDDEN import TOKEN
 from disnake.ext import commands
@@ -108,9 +103,8 @@ class Jarvide(commands.Bot):
             listOfCommands.items()
         ))
 
-        # Ensure that only one command is going to be ran.
-        if len(commandsInMessage) != 1:                     
-            return await super().on_message(original_message)
+        if len(commandsInMessage) != 1:                     # Ensure that only one command is going to be ran.
+            return                                          # TODO: Maybe make the user know that they supplied too many commands?
 
         cmd = commandsInMessage[0][0]                       # Get the actual command object
         ctx = await super().get_context(original_message)   # Get the context from the message
