@@ -126,7 +126,7 @@ class OpenView(disnake.ui.View):
                 headers={"Accept": "application/vnd.github.v3+json"},
             )
             json = await a.json()
-            if 'content' not in json:
+            if "content" not in json:
                 await interaction.channel.send(
                     "Not a valid github link, please try again.", delete_after=5
                 )
@@ -142,7 +142,9 @@ class OpenView(disnake.ui.View):
 
         description = await get_info(file_)
         embed = EmbedFactory.ide_embed(self.ctx, description)
-        await self.bot_message.edit(embed=embed, view=FileView(self.ctx, file_, self.bot_message))
+        await self.bot_message.edit(
+            embed=embed, view=FileView(self.ctx, file_, self.bot_message)
+        )
 
     @disnake.ui.button(label="Link", style=disnake.ButtonStyle.green)
     async def link_button(
@@ -157,7 +159,7 @@ class OpenView(disnake.ui.View):
         await interaction.response.send_message(
             "Send a url with code in it", ephemeral=True
         )
-        
+
         for child in self.children:
             if isinstance(child, disnake.ui.Button):
                 if child.label != "Exit":
@@ -186,12 +188,11 @@ class OpenView(disnake.ui.View):
                 )
                 return await self.bot_message.edit(embed=embed)
             await interaction.channel.send(
-                f"That url is not supported! Our supported urls are {PASTE_URLS}", delete_after=5
+                f"That url is not supported! Our supported urls are {PASTE_URLS}",
+                delete_after=5,
             )
 
-        await interaction.channel.send(
-            "What would you like the filename to be?"
-        )
+        await interaction.channel.send("What would you like the filename to be?")
         filename = await self.bot.wait_for(
             "message",
             check=lambda m: self.ctx.author == m.author
@@ -207,20 +208,18 @@ class OpenView(disnake.ui.View):
             async with session.get(url) as response:
                 text = await response.read()
 
-        file_ = File(
-            filename=filename.content,
-            content=text,
-            bot=self.bot
-        )
+        file_ = File(filename=filename.content, content=text, bot=self.bot)
         description = await get_info(file_)
         embed = EmbedFactory.ide_embed(self.ctx, description)
 
-        await self.bot_message.edit(embed=embed, view=FileView(self.ctx, file_, self.bot_message))
+        await self.bot_message.edit(
+            embed=embed, view=FileView(self.ctx, file_, self.bot_message)
+        )
 
     @disnake.ui.button(label="Create", style=disnake.ButtonStyle.green)
     async def create_button(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
-    ):  
+    ):
         for child in self.children:
             if isinstance(child, disnake.ui.Button):
                 if child.label != "Exit":
@@ -239,7 +238,9 @@ class OpenView(disnake.ui.View):
         if len(filename.content) > 12:
             if self.SUDO:
                 await filename.delete()
-            return await interaction.channel.send("That filename is too long! The maximum limit is 12 character")
+            return await interaction.channel.send(
+                "That filename is too long! The maximum limit is 12 character"
+            )
 
         await interaction.channel.send("What is the content?")
         message = await self.bot.wait_for(
@@ -253,14 +254,18 @@ class OpenView(disnake.ui.View):
         content = message.content
 
         clean_content = content
-        if content.startswith('```') and content.endswith('```'):
-            clean_content = '\n'.join(disnake.utils.remove_markdown(content).split('\n')[1:])
+        if content.startswith("```") and content.endswith("```"):
+            clean_content = "\n".join(
+                disnake.utils.remove_markdown(content).split("\n")[1:]
+            )
 
         file_ = File(filename=filename, content=clean_content, bot=self.bot)
         description = await get_info(file_)
 
         embed = EmbedFactory.ide_embed(self.ctx, description)
-        await self.bot_message.edit(embed=embed, view=FileView(self.ctx, file_, self.bot_message))
+        await self.bot_message.edit(
+            embed=embed, view=FileView(self.ctx, file_, self.bot_message)
+        )
 
     @disnake.ui.button(label="Saved", style=disnake.ButtonStyle.green)
     async def saved_button(
@@ -275,7 +280,4 @@ class OpenView(disnake.ui.View):
         self.is_exited = True
         embed = EmbedFactory.ide_embed(self.ctx, "Goodbye!")
 
-        await self.bot_message.edit(
-            embed=embed,
-            view=None
-        )
+        await self.bot_message.edit(embed=embed, view=None)
