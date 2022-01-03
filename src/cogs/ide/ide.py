@@ -32,7 +32,7 @@ class Ide(commands.Cog):
             and ctx.author in self.active_commands[ctx.channel]
         ):
             return await ctx.send(
-                "You already have an open ide in this channel! Press the `exit` button to make a new one!", 
+                "You already have an open ide in this channel! Press the `exit` button to make a new one!",
                 delete_after=15
             )
 

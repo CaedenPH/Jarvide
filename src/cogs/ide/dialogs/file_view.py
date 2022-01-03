@@ -29,7 +29,7 @@ class FileView(disnake.ui.View):
         embed = EmbedFactory.ide_embed(
             self.ctx,
             "Ide timed out. Feel free to make a new one!"
-        )  
+        )
         await self.bot_message.edit(
             view=self,
             embed=embed
@@ -162,7 +162,7 @@ class FileView(disnake.ui.View):
             check=lambda m: self.ctx.author == m.author
             and m.channel == self.ctx.channel,
         )).channel_mentions:
-            if self.SUDO:  
+            if self.SUDO:
                 await channel.delete()
             num += 1
             if num == 3:
@@ -181,7 +181,7 @@ class FileView(disnake.ui.View):
             view=self
         )
         await ExitButton.callback()
-        
+
 
     @disnake.ui.button(label="Back", style=disnake.ButtonStyle.red, row=1)
     async def back_button(
