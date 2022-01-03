@@ -74,7 +74,6 @@ class DefaultButtons(disnake.ui.View):
             f""
         )
 
-
     @disnake.ui.button(label="View folder", style=disnake.ButtonStyle.green)
     async def view_folder(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction

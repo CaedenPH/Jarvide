@@ -15,12 +15,12 @@ class Ide(commands.Cog):
         self.active_commands = {}
         self.check_activity.start()
 
-    @tasks.loop(seconds=0.001)
+    @tasks.loop(seconds=1)
     async def check_activity(self):
         for channel in copy.copy(self.active_commands):
             for user in copy.copy(self.active_commands[channel]):
                 message = self.bot.get_message(self.active_commands[channel][user])
-                if all(child.disabled for child in message.components if isinstance(child, disnake.ui.Button)):
+                if all(all(k.disabled for k in child.children) for child in message.components if isinstance(child, disnake.ActionRow)):
                     del self.active_commands[channel][user]
 
     @commands.command()
@@ -45,7 +45,6 @@ class Ide(commands.Cog):
 
         if ctx.channel not in self.active_commands:
             self.active_commands[ctx.channel] = {}
-
         self.active_commands[ctx.channel][ctx.author] = view.bot_message.id
 
 
