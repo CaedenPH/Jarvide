@@ -133,9 +133,20 @@ class ExitButton(disnake.ui.Button):
         self.ctx = ctx
 
     async def callback(self, interaction: disnake.MessageInteraction):
-        embed = EmbedFactory.ide_embed(self.ctx, "Goodbye!")
+        await interaction.response.defer()
+        
+        for child in self.view.children:
+            if isinstance(child, disnake.ui.Button):
+                child.disabled = True
 
-        await self.bot_message.edit(embed=embed, view=None)
+        embed = EmbedFactory.ide_embed(
+            self.ctx,
+            "Goodbye!"
+        )  
+        await self.bot_message.edit(
+            view=self.view,
+            embed=embed
+        )
 
 
 class SaveButton(disnake.ui.Button):

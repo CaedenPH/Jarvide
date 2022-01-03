@@ -1,4 +1,5 @@
 from __future__ import annotations
+from time import time
 
 import disnake
 
@@ -41,6 +42,20 @@ class EditView(disnake.ui.View):
             and interaction.channel == self.ctx.channel
         )
 
+    async def on_timeout(self) -> None:
+        for child in self.children:
+            if isinstance(child, disnake.ui.Button):
+                child.disabled = True
+
+        embed = EmbedFactory.ide_embed(
+            self.ctx,
+            "Ide timed out. Feel free to make a new one!"
+        )  
+        await self.bot_message.edit(
+            view=self,
+            embed=embed
+        )
+
     def __init__(
         self,
         ctx,
@@ -49,7 +64,7 @@ class EditView(disnake.ui.View):
         file_view=None,
         lines: list[str] = None,
     ):
-        super().__init__()
+        super().__init__(timeout=15)
 
         self.ctx = ctx
         self.bot = ctx.bot
@@ -63,7 +78,7 @@ class EditView(disnake.ui.View):
         self.page = 0
         self.SUDO = self.ctx.me.guild_permissions.manage_messages
 
-        self.add_item(ExitButton(ctx, bot_message, row=3))
+        self.add_item(ExitButton( ctx, bot_message, row=3))
         self.add_item(SaveButton(ctx, bot_message, file_, row=2))
 
     async def edit(self, inter):

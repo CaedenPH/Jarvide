@@ -1,3 +1,4 @@
+from time import time
 import aiohttp
 import base64
 import disnake
@@ -8,10 +9,9 @@ from .file_view import FileView
 
 THUMBS_UP = "👍"
 
-
 class OpenView(disnake.ui.View):
     def __init__(self, ctx, bot_message=None):
-        super().__init__()
+        super().__init__(timeout=300)
         self.bot_message = bot_message
         self.ctx = ctx
         self.bot = ctx.bot
@@ -22,6 +22,20 @@ class OpenView(disnake.ui.View):
         return (
             interaction.author == self.ctx.author
             and interaction.channel == self.ctx.channel
+        )
+
+    async def on_timeout(self) -> None:
+        for child in self.children:
+            if isinstance(child, disnake.ui.Button):
+                child.disabled = True
+
+        embed = EmbedFactory.ide_embed(
+            self.ctx,
+            "Ide timed out. Feel free to make a new one!"
+        )  
+        await self.bot_message.edit(
+            view=self,
+            embed=embed
         )
 
     @disnake.ui.button(label="Upload", style=disnake.ButtonStyle.green)
@@ -287,6 +301,17 @@ class OpenView(disnake.ui.View):
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         self.is_exited = True
-        embed = EmbedFactory.ide_embed(self.ctx, "Goodbye!")
+        await interaction.response.defer()
+        
+        for child in self.children:
+            if isinstance(child, disnake.ui.Button):
+                child.disabled = True
 
-        await self.bot_message.edit(embed=embed, view=None)
+        embed = EmbedFactory.ide_embed(
+            self.ctx,
+            "Goodbye!"
+        )  
+        await self.bot_message.edit(
+            view=self,
+            embed=embed
+        )

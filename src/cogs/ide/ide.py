@@ -1,5 +1,7 @@
 import copy
 
+import disnake
+
 from .dialogs import OpenView
 from src.utils import EmbedFactory
 from disnake.ext import commands, tasks
@@ -13,12 +15,12 @@ class Ide(commands.Cog):
         self.active_commands = {}
         self.check_activity.start()
 
-    @tasks.loop(seconds=1)
+    @tasks.loop(seconds=0.001)
     async def check_activity(self):
         for channel in copy.copy(self.active_commands):
             for user in copy.copy(self.active_commands[channel]):
                 message = self.bot.get_message(self.active_commands[channel][user])
-                if not message.components:
+                if all(child.disabled for child in message.components if isinstance(child, disnake.ui.Button)):
                     del self.active_commands[channel][user]
 
     @commands.command()
@@ -29,10 +31,12 @@ class Ide(commands.Cog):
             ctx.channel in self.active_commands
             and ctx.author in self.active_commands[ctx.channel]
         ):
-            return
+            return await ctx.send(
+                "You already have an open ide in this channel! Press the `exit` button to make a new one!", 
+                delete_after=15
+            )
 
         embed = EmbedFactory.ide_embed(ctx, "File open: No file currently open")
-
         view = OpenView(ctx)
         view.bot_message = await ctx.send(
             embed=embed,

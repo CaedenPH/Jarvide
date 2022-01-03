@@ -1,3 +1,4 @@
+from time import time
 import disnake
 import aiohttp
 
@@ -21,8 +22,22 @@ class FileView(disnake.ui.View):
             and interaction.channel == self.ctx.channel
         )
 
+    async def on_timeout(self) -> None:
+        for child in self.children:
+            if isinstance(child, disnake.ui.Button):
+                child.disabled = True
+
+        embed = EmbedFactory.ide_embed(
+            self.ctx,
+            "Ide timed out. Feel free to make a new one!"
+        )  
+        await self.bot_message.edit(
+            view=self,
+            embed=embed
+        )
+
     def __init__(self, ctx, file_: File, bot_message: disnake.Message):
-        super().__init__()
+        super().__init__(timeout=300)
 
         self.ctx = ctx
         self.bot = ctx.bot
@@ -31,7 +46,7 @@ class FileView(disnake.ui.View):
         self.SUDO = self.ctx.me.guild_permissions.manage_messages
         self.bot_message = bot_message
 
-        self.add_item(ExitButton(ctx, bot_message, row=1))
+        self.add_item(ExitButton( ctx, bot_message, row=1))
         self.add_item(SaveButton(ctx, bot_message, file_, row=0))
 
     @disnake.ui.button(label="Read", style=disnake.ButtonStyle.green)
