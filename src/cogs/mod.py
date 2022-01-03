@@ -1,4 +1,5 @@
-import disnake, time_str
+import disnake
+import time_str
 import typing
 
 from disnake.ext import commands
@@ -7,7 +8,7 @@ from src.utils.confirmation import prompt
 
 
 class Mod(commands.Cog):
-    """Mod cog for moderation related commands"""
+    """Moderation related commands."""
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -108,31 +109,30 @@ class Mod(commands.Cog):
     ):
         channel = channel or ctx.channel
         if not slowmode:
-            await ctx.send(
+            return await ctx.send(
                 f"{ctx.author.mention}, please provide a number to set the slowmode to."
             )
-            return
         else:
             await channel.edit(slowmode_delay=slowmode)
             await ctx.send(
-                f"Set the slowmode for {channel.mention} to {slowmode} {'seconds' if slowmode > 1 else 'second'}!"
+                f"I've set the channel slowmode to {slowmode} {'seconds' if slowmode > 1 else 'second'}."
             )
+            return
 
-    @commands.command(aliases = ['mute', 'silence'])
+    @commands.command()
     @commands.guild_only()
-    @commands.has_permissions(moderate_members = True)
-    @commands.bot_has_permissions(moderate_members = True)
-    async def timeout(self, ctx, member: disnake.User, time, *, reason = None):
-        now =disnake.utils.utcnow()
+    @commands.has_permissions(moderate_members=True)
+    @commands.bot_has_permissions(moderate_members=True)
+    async def timeout(self, ctx, member: disnake.User, time, *, reason=None):
         change = time_str.convert(time)
-        duration = now + change
-        await member.timeout(until = duration, reason = reason)
-        embed = disnake.Embed(description = f":white_check_mark: {member.mention} was timed out",
-                              color = disnake.Color.green(), )
-        await member.send(f" you have been timed out from: {ctx.guild.name}, for {time}")
-        await ctx.send(embed = disnake.Embed(title = "Timed Out!", description = f"{member.mention} Was timed out until {duration} for reason: {reason}", color = disnake.Colour.green()))
+        duration = disnake.utils.utcnow() + change
+        await member.timeout(until=duration, reason=reason)
+        embed = disnake.Embed(
+            description=f":white_check_mark: {member.mention} was timed out.",
+            color=disnake.Color.blurple(),
+        )
+        await ctx.send(embed=embed)
 
 
 def setup(bot: commands.Bot) -> None:
-    """Setup mod cog"""
     bot.add_cog(Mod(bot))

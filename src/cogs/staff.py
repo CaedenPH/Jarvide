@@ -52,5 +52,4 @@ class Staff(commands.Cog, command_attrs={"hidden": True}):
 
 
 def setup(bot: commands.Bot) -> None:
-    """Setup staff cog"""
     bot.add_cog(Staff(bot))

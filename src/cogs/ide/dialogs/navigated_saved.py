@@ -8,12 +8,14 @@ from odmantic import Model
 
 from src.utils import ExitButton, EmbedFactory, File, get_info
 
+
 class FolderModel(Model, ABC):
     name: str
     file_urls: Optional[List[str]] = None
     folders: Optional[List[str]] = None
     create_epoch: Optional[int] = None
     last_edit_epoch: Optional[float] = None
+
 
 class FileModel(Model, ABC):
     user_id: int
@@ -22,6 +24,7 @@ class FileModel(Model, ABC):
     file_url: str
     create_epoch: Optional[int]
     last_edit_epoch: Optional[float] = None
+
 
 class DefaultButtons(disnake.ui.View):
     def __init__(self, ctx, bot_message):
@@ -49,7 +52,7 @@ class DefaultButtons(disnake.ui.View):
     @disnake.ui.button(label="View folder", style=disnake.ButtonStyle.green)
     async def view_folder(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
-    ):  
+    ):
         files = await self.bot.engine.find(
             FileModel,
             FileModel.user_id == self.ctx.author.id,
@@ -101,7 +104,7 @@ class DefaultButtons(disnake.ui.View):
     async def delete_folder(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
-        ... 
+        ...
 
     @disnake.ui.button(label="Delete file", style=disnake.ButtonStyle.danger, row=2)
     async def delete_file(
@@ -154,28 +157,26 @@ class OpenFromSaved(DefaultButtons):
         await interaction.response.send_message(
             "What file do you want to open?", ephemeral=True
         )
-        filename = (await self.bot.wait_for(
-            "message",
-            check=lambda m: self.ctx.author == m.author
-            and m.channel == self.ctx.channel,
-        )).content
-        
+        filename = (
+            await self.bot.wait_for(
+                "message",
+                check=lambda m: self.ctx.author == m.author
+                and m.channel == self.ctx.channel,
+            )
+        ).content
 
         file_model = await self.bot.engine.find(
-                    FileModel, 
-                    FileModel.user_id == self.ctx.author.id,
-                    FileModel.name == filename,
-                    FileModel.folder == self.dir
-                )
+            FileModel,
+            FileModel.user_id == self.ctx.author.id,
+            FileModel.name == filename,
+            FileModel.folder == self.dir,
+        )
 
         if not file_model:
             return await interaction.channel.send(f"{filename} doesnt exist!")
-        
+
         file_model = file_model[0]
-        file_ = await File.from_url(
-            bot=self.bot, 
-            url=file_model.file_url
-        )
+        file_ = await File.from_url(bot=self.bot, url=file_model.file_url)
         embed = EmbedFactory.ide_embed(
             self.ctx,
             f"Opened {filename}\n--------------------\n{await get_info(file_)}",
@@ -185,6 +186,7 @@ class OpenFromSaved(DefaultButtons):
         await self.bot_message.edit(
             embed=embed, view=FileView(self.ctx, file_, self.bot_message)
         )
+
 
 class SaveFile(DefaultButtons):
     async def interaction_check(self, interaction: disnake.MessageInteraction) -> bool:
@@ -216,9 +218,9 @@ class SaveFile(DefaultButtons):
         dir_files = [
             k.name
             for k in await self.bot.engine.find(
-                FileModel, 
+                FileModel,
                 FileModel.user_id == self.ctx.author.id,
-                FileModel.folder == self.dir    
+                FileModel.folder == self.dir,
             )
         ]
         if self.file.filename in dir_files:
