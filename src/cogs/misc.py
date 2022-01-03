@@ -17,7 +17,7 @@ class Misc(commands.Cog):
         self.bot = bot
         self.google = async_cse.Search(KEY)
 
-    async def overlay(ctx: commands.Context, endpoint, user=None):
+    async def overlay(ctx: commands.Context, endpoint, user:disnake.Member):
         if user == None:
             user = ctx.author
         emb = disnake.Embed(color=0x90EE90).set_image(
