@@ -1,7 +1,9 @@
 import disnake
 import aiohttp
 import random
+import async_cse
 
+from HIDDEN import KEY
 from disnake.ext import commands
 
 
@@ -13,6 +15,7 @@ class Misc(commands.Cog):
 
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
+        self.google = async_cse.Search(KEY)
 
     async def overlay(ctx: commands.Context, endpoint, user=None):
         if user == None:
@@ -22,7 +25,26 @@ class Misc(commands.Cog):
             % (endpoint, user.avatar.with_format("png").url)
         )
         await ctx.send(embed=emb)
+        
+    @commands.command(name="google", aliases=["find", "search"])
+    async def find(self, ctx, *, query):
+        safesearch = True
+        if isinstance(ctx.channel, disnake.TextChannel):
+            safesearch = not ctx.channel.is_nsfw()
+        try:
+            response = await self.google.search(query, safesearch=safesearch)
+            
+        except async_cse.search.NoResults:
+            await ctx.reply(f"Woops, no results found for `{query}`!")
+            return
 
+        if len(response) == 0:
+            await ctx.reply_embed(f"Woops, no results found for `{query}`!")
+            return
+
+        embed = disnake.Embed(color=0x00a6f2, title=res[0].title, description=response[0].description, url=res[0].url)
+        await ctx.reply(embed=embed, mention_author=False)
+        
     @commands.command(aliases=["latency"])
     async def ping(self, ctx: commands.Context):
         if round(self.bot.latency * 1000) > 150:
