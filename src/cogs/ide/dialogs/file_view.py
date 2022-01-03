@@ -80,8 +80,8 @@ class FileView(disnake.ui.View):
                         delete_after=15,
                     )
 
-                output = json["output"]
-
+                output = json["output"].strip('\n').strip()
+                print(output)
                 if not output:
                     output = "[No output]"
 

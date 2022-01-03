@@ -136,11 +136,7 @@ class _AbstractPaginator(View, ABC):
 
         self._update_labels()
         if self.message is None:
-            if isinstance(self.ctx, Context):
-                self.message = await self.ctx.send(embed=em, view=self)
-            else:
-                self.message = await self.ctx.original_message()
-                await self.message.edit(embed=em, view=self)
+            self.message = await self.ctx.channel.send(embed=em, view=self)
         else:
             await self.message.edit(embed=em, view=self)
 

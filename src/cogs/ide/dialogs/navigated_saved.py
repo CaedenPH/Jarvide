@@ -2,6 +2,7 @@ import disnake
 import time
 
 from abc import ABC
+from disnake import file
 from disnake.ext import commands
 from typing import Optional
 from odmantic import Model
@@ -148,12 +149,45 @@ class OpenFromSaved(DefaultButtons):
         self.bot_message = bot_message
         self.SUDO = self.ctx.me.guild_permissions.manage_messages
 
-    @disnake.ui.button(label="Select")
+    @disnake.ui.button(label="Select file", style=disnake.ButtonStyle.danger, row=2)
     async def select_button(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
-        ...
+        from . import FileView
 
+        await interaction.response.send_message(
+            "What file do you want to open?", ephemeral=True
+        )
+        filename = (await self.bot.wait_for(
+            "message",
+            check=lambda m: self.ctx.author == m.author
+            and m.channel == self.ctx.channel,
+        )).content
+        
+
+        file_model = await self.bot.engine.find(
+                    FileModel, 
+                    FileModel.user_id == self.ctx.author.id,
+                    FileModel.name == filename
+                )
+
+        if not file_model:
+            return await interaction.channel.send(f"{filename} doesnt exist!")
+        
+        file_model = file_model[0]
+        file_ = await File.from_url(
+            bot=self.bot, 
+            url=file_model.file_url
+        )
+        embed = EmbedFactory.ide_embed(
+            self.ctx,
+            f"Opened {filename}\n--------------------\n{await get_info(file_)}",
+        )
+
+        await self.bot.engine.save(file_model)
+        await self.bot_message.edit(
+            embed=embed, view=FileView(self.ctx, file_, self.bot_message)
+        )
 
 class SaveFile(DefaultButtons):
     async def interaction_check(self, interaction: disnake.MessageInteraction) -> bool:
@@ -175,8 +209,8 @@ class SaveFile(DefaultButtons):
 
         self.SUDO = self.ctx.me.guild_permissions.manage_messages
 
-    @disnake.ui.button(label="Select", style=disnake.ButtonStyle.danger, row=2)
-    async def select_button(
+    @disnake.ui.button(label="Save", style=disnake.ButtonStyle.danger, row=2)
+    async def save_button(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         from . import FileView

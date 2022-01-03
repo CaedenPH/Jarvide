@@ -270,8 +270,18 @@ class OpenView(disnake.ui.View):
     @disnake.ui.button(label="Saved", style=disnake.ButtonStyle.green)
     async def saved_button(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
-    ):
-        ...
+    ):  
+        from . import OpenFromSaved
+
+        embed = EmbedFactory.ide_embed(
+            self.ctx,
+            f"Open a file from saved:\nCurrent directory: /users/{self.ctx.author.name}",
+        )
+        await interaction.response.defer()
+        await self.bot_message.edit(
+            embed=embed, view=OpenFromSaved(self.ctx, self.bot_message)
+        )
+
 
     @disnake.ui.button(label="Exit", style=disnake.ButtonStyle.danger)
     async def exit_button(
