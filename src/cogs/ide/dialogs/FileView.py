@@ -46,9 +46,9 @@ class FileView(disnake.ui.View):
             )
             return await self.bot_message.edit(embed=embed)
 
-        await LinePaginator(
+        return await LinePaginator(
             interaction,
-            [line.strip("\n") for line in content],
+            content,
             prefix=f"```{self.extension}",
             suffix="```",
             line_limit=50,
@@ -89,26 +89,14 @@ class FileView(disnake.ui.View):
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.defer()
-        content: str = "".join(add_lines(self.file.content))
-        if len(content) > 4000:
-            return await LinePaginator(
-                interaction,
-                content.splitlines(),
-                prefix=f"```{self.extension}",
-                suffix="```",
-                line_limit=50,
-                timeout=None,  # type: ignore
-                embed_author_kwargs={
-                    'name': f"{self.ctx.author.name}'s automated paginator for {self.file.filename}",
-                    'icon_url': self.ctx.author.avatar.url
-                }
-            ).start()
-
+        content: list[str] = add_lines(self.file.content)
+        view = EditView(self.ctx, self.file, self.bot_message, self, content)
+        view.previous_button.disabled = True
         await self.bot_message.edit(
             embed=EmbedFactory.code_embed(
-                self.ctx, "".join(add_lines(content)), self.file.filename
+                self.ctx, "".join(content[:50]), self.file.filename
             ),
-            view=EditView(self.ctx, self.file, self.bot_message, self),
+            view=view,
         )
 
     @disnake.ui.button(label="Rename", style=disnake.ButtonStyle.green)

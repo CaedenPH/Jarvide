@@ -161,7 +161,7 @@ class _AbstractPaginator(View, ABC):
         await inter.response.defer()
         await self._show_page(0)
 
-    @button(label="Back", style=ButtonStyle.blurple)
+    @button(label="Prev", style=ButtonStyle.blurple)
     async def previous_page(self, button: Button, inter: MessageInteraction):
         """Goes to the previous page."""
         await inter.response.defer()
@@ -333,7 +333,7 @@ class LinePaginator(_AbstractPaginator):
         self.suffix = suffix
 
     def _lines_to_page(self, lines: list[str]):
-        page = "\n".join(lines)
+        page = "".join(lines)
         if self.prefix:
             page = self.prefix + "\n" + page
         if self.suffix:

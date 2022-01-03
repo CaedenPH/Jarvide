@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import disnake
 
 from disnake.ext import commands
@@ -20,6 +22,18 @@ def clear_codeblock(content: str):
     return content
 
 
+def update_buttons(cls: EditView):
+    if cls.page == 1:
+        cls.previous_button.disabled = True
+    else:
+        cls.previous_button.disabled = False
+
+    if cls.page == len(cls.pages) - 2:
+        cls.next_button.disabled = True
+    else:
+        cls.next_button.disabled = False
+
+
 class EditView(disnake.ui.View):
     async def interaction_check(self, interaction: disnake.MessageInteraction) -> bool:
         return (
@@ -27,7 +41,7 @@ class EditView(disnake.ui.View):
             and interaction.channel == self.ctx.channel
         )
 
-    def __init__(self, ctx, file_: "File", bot_message=None, file_view=None):
+    def __init__(self, ctx, file_: "File", bot_message=None, file_view=None, lines: list[str] = None):
         super().__init__()
 
         self.ctx = ctx
@@ -38,7 +52,8 @@ class EditView(disnake.ui.View):
         self.file_view = file_view
         self.undo = self.file_view.file.undo
         self.redo = self.file_view.file.redo
-        
+        self.pages = [lines[x:x+50] for x in range(0, len(lines), 50)]
+        self.page = 0
         self.SUDO = self.ctx.me.guild_permissions.manage_messages
 
         self.add_item(ExitButton(ctx, bot_message, row=3))
@@ -129,17 +144,37 @@ class EditView(disnake.ui.View):
         embed = EmbedFactory.ide_embed(self.ctx, description)
         await self.bot_message.edit(embed=embed)
 
-    @disnake.ui.button(label="Next", style=disnake.ButtonStyle.blurple, row=2)
-    async def next_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
-    ):
-        ...
-
     @disnake.ui.button(label="Prev", style=disnake.ButtonStyle.blurple, row=2)
     async def previous_button(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
-        ...
+        await interaction.response.defer()
+        update_buttons(self)
+        self.page -= 1
+        embed = disnake.Embed(
+            description=f"```py\n{''.join(self.pages[self.page])}\n```\nPage: {self.page + 1}/{len(self.pages)}",
+            timestamp=self.ctx.message.created_at
+        ).set_author(
+            name=f"{self.ctx.author.name}'s automated paginator for {self.file.filename}",
+            icon_url=self.ctx.author.avatar.url
+        ).set_footer(text="The official jarvide text editor and ide")
+        await self.bot_message.edit(embed=embed, view=self)
+
+    @disnake.ui.button(label="Next", style=disnake.ButtonStyle.blurple, row=2)
+    async def next_button(
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+    ):
+        await interaction.response.defer()
+        update_buttons(self)
+        self.page += 1
+        embed = disnake.Embed(
+            description=f"```py\n{''.join(self.pages[self.page])}\n```\nPage: {self.page + 1}/{len(self.pages)}",
+            timestamp=self.ctx.message.created_at
+        ).set_author(
+            name=f"{self.ctx.author.name}'s automated paginator for {self.file.filename}",
+            icon_url=self.ctx.author.avatar.url
+        ).set_footer(text="The official jarvide text editor and ide")
+        await self.bot_message.edit(embed=embed, view=self)
 
     @disnake.ui.button(label="Undo", style=disnake.ButtonStyle.blurple, row=2)
     async def undo_button(
