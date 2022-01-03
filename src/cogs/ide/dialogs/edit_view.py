@@ -50,7 +50,7 @@ class EditView(disnake.ui.View):
         embed = EmbedFactory.ide_embed(
             self.ctx,
             "Ide timed out. Feel free to make a new one!"
-        )  
+        )
         await self.bot_message.edit(
             view=self,
             embed=embed

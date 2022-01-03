@@ -32,7 +32,7 @@ class OpenView(disnake.ui.View):
         embed = EmbedFactory.ide_embed(
             self.ctx,
             "Ide timed out. Feel free to make a new one!"
-        )  
+        )
         await self.bot_message.edit(
             view=self,
             embed=embed
@@ -302,7 +302,7 @@ class OpenView(disnake.ui.View):
     ):
         self.is_exited = True
         await interaction.response.defer()
-        
+
         for child in self.children:
             if isinstance(child, disnake.ui.Button):
                 child.disabled = True
@@ -310,7 +310,7 @@ class OpenView(disnake.ui.View):
         embed = EmbedFactory.ide_embed(
             self.ctx,
             "Goodbye!"
-        )  
+        )
         await self.bot_message.edit(
             view=self,
             embed=embed

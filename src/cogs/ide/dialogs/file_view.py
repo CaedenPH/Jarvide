@@ -1,4 +1,3 @@
-from time import time
 import disnake
 import aiohttp
 
@@ -30,7 +29,7 @@ class FileView(disnake.ui.View):
         embed = EmbedFactory.ide_embed(
             self.ctx,
             "Ide timed out. Feel free to make a new one!"
-        )  
+        )
         await self.bot_message.edit(
             view=self,
             embed=embed
@@ -143,6 +142,46 @@ class FileView(disnake.ui.View):
 
         embed = EmbedFactory.ide_embed(self.ctx, description)
         await self.bot_message.edit(embed=embed)
+
+    @disnake.ui.button(label="Back", style=disnake.ButtonStyle.red, row=1)
+    async def back_button(
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+    ):
+        await interaction.response.send_message(
+            f"What channel would you like to move this ide to? Send the channel #. Like {interaction.channel.mention}",
+            ephemeral=True)
+        channel = await self.bot.wait_for(
+            "message",
+            check=lambda m: self.ctx.author == m.author
+            and m.channel == self.ctx.channel,
+        )
+
+        num = 0
+        while not (channel := await self.bot.wait_for(
+            "message",
+            check=lambda m: self.ctx.author == m.author
+            and m.channel == self.ctx.channel,
+        )).channel_mentions:
+            if self.SUDO:
+                await channel.delete()
+            num += 1
+            if num == 3:
+                embed = EmbedFactory.ide_embed(
+                    self.ctx, "Nice try. You cant break this bot!"
+                )
+                return await self.bot_message.edit(embed=embed)
+            await interaction.channel.send("That is not a valid channel id!", delete_after=15)
+
+        embed = EmbedFactory.ide_embed(
+            self.ctx,
+            get_info(self.file)
+        )
+        await channel.channel_mentions[0].send(
+            embed=embed,
+            view=self
+        )
+        await ExitButton.callback()
+
 
     @disnake.ui.button(label="Back", style=disnake.ButtonStyle.red, row=1)
     async def back_button(
