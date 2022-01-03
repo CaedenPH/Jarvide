@@ -83,6 +83,7 @@ class EditView(disnake.ui.View):
         else:
             from_, to = 0, len(self.file_view.file.content) - 1
             code = clear_codeblock(content)
+        self.undo.append(self.content)
         sliced = self.file_view.file.content.splitlines()
         del sliced[from_:to + 1]
         sliced.insert(from_, code)
@@ -176,7 +177,8 @@ class EditView(disnake.ui.View):
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         embed = EmbedFactory.ide_embed(self.ctx, await get_info(self.file))
-
+        self.undo = []
+        self.redo = []
         await self.bot_message.edit(
             embed=embed,
             view=self.file_view

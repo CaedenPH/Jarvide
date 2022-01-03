@@ -127,7 +127,7 @@ async def get_info(file_: typing.Union[File, disnake.Attachment]) -> str:
 
 
 class ExitButton(disnake.ui.Button):
-    def __init__(self, ctx, bot_message, row=None):
+    def __init__(self, ctx, bot_message, row=None, parent=None):
         super().__init__(
             style=disnake.ButtonStyle.danger,
             label="Exit",
@@ -135,6 +135,7 @@ class ExitButton(disnake.ui.Button):
             )
         self.bot_message = bot_message
         self.ctx = ctx
+        self.parent = parent
 
     async def callback(self, interaction: disnake.MessageInteraction):
         embed = EmbedFactory.ide_embed(self.ctx, "Goodbye!")

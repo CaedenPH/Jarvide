@@ -15,7 +15,7 @@ class OpenView(disnake.ui.View):
         self.bot_message = bot_message
         self.ctx = ctx
         self.bot = ctx.bot
-
+        self.is_exited = False
         self.SUDO = self.ctx.me.guild_permissions.manage_messages
 
     async def interaction_check(self, interaction: disnake.MessageInteraction) -> bool:
@@ -43,9 +43,10 @@ class OpenView(disnake.ui.View):
                 and m.channel == self.ctx.channel,
             )
         ).attachments:
+            if self.is_exited:
+                return
             if self.SUDO:
                 await message.delete()
-
             num += 1
             if num == 3:
                 embed = EmbedFactory.ide_embed(
@@ -101,6 +102,9 @@ class OpenView(disnake.ui.View):
                 check=lambda m: self.ctx.author == m.author
                 and m.channel == self.ctx.channel,
             )
+            if self.is_exited:
+                return
+
             await url.edit(suppress=True)
             regex = re.compile(
                 r"https://github\.com/(?P<repo>[a-zA-Z0-9-]+/[\w.-]+)"
@@ -167,6 +171,9 @@ class OpenView(disnake.ui.View):
                 and m.channel == self.ctx.channel,
             )
         ).content.startswith(PASTE_URLS):
+            if self.is_exited:
+                return
+
             if self.SUDO:
                 await message.delete()
             else:
@@ -190,6 +197,8 @@ class OpenView(disnake.ui.View):
             check=lambda m: self.ctx.author == m.author
             and m.channel == self.ctx.channel,
         )
+        if self.is_exited:
+            return
 
         await filename.add_reaction(THUMBS_UP)
         url = message.content.replace("/hastebin/", "/hastebin/raw/")
@@ -225,6 +234,8 @@ class OpenView(disnake.ui.View):
             check=lambda m: self.ctx.author == m.author
             and m.channel == self.ctx.channel,
         )
+        if self.is_exited:
+            return
         if len(filename.content) > 12:
             if self.SUDO:
                 await filename.delete()
@@ -236,6 +247,8 @@ class OpenView(disnake.ui.View):
             check=lambda m: self.ctx.author == m.author
             and m.channel == self.ctx.channel,
         )
+        if self.is_exited:
+            return
         await message.add_reaction(THUMBS_UP)
         content = message.content
 
@@ -259,10 +272,10 @@ class OpenView(disnake.ui.View):
     async def exit_button(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
+        self.is_exited = True
         embed = EmbedFactory.ide_embed(self.ctx, "Goodbye!")
 
         await self.bot_message.edit(
             embed=embed,
             view=None
         )
-        
