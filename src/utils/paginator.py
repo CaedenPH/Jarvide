@@ -6,7 +6,7 @@ from disnake import (
     ApplicationCommandInteraction,
     Embed,
     ButtonStyle,
-    Message
+    Message,
 )
 from disnake.ui import View, Button, button
 from disnake.ext.commands import Context
@@ -99,38 +99,36 @@ class _AbstractPaginator(View, ABC):
         self.current_page = page_number
         em = Embed(description=self.pages[self.current_page])
 
-        page_footer = f'Page {self.current_page + 1}/{len(self.pages)}'
-        footer_kwargs = {'text': page_footer}
+        page_footer = f"Page {self.current_page + 1}/{len(self.pages)}"
+        footer_kwargs = {"text": page_footer}
         if self.embed_footer_kwargs:
-            footer_text = self.embed_footer_kwargs.get('text')
-            icon_url = self.embed_footer_kwargs.get('icon_url')
+            footer_text = self.embed_footer_kwargs.get("text")
+            icon_url = self.embed_footer_kwargs.get("icon_url")
             if footer_text is not None:
-                page_footer = footer_text + ' • ' + page_footer
-                footer_kwargs['text'] = page_footer
+                page_footer = footer_text + " • " + page_footer
+                footer_kwargs["text"] = page_footer
             if icon_url is not None:
-                footer_kwargs['icon_url'] = icon_url
+                footer_kwargs["icon_url"] = icon_url
         em.set_footer(**footer_kwargs)
 
         if self.embed_author_kwargs:
             em.set_author(**self.embed_author_kwargs)
-
         self._update_labels()
         await self.message.edit(embed=em, view=self)
 
     async def start(self):
         self.get_pages()
         em = Embed(description=self.pages[self.current_page])
-
-        page_footer = f'Page {self.current_page + 1}/{len(self.pages)}'
-        footer_kwargs = {'text': page_footer}
+        page_footer = f"Page {self.current_page + 1}/{len(self.pages)}"
+        footer_kwargs = {"text": page_footer}
         if self.embed_footer_kwargs:
-            footer_text = self.embed_footer_kwargs.get('text')
-            icon_url = self.embed_footer_kwargs.get('icon_url')
+            footer_text = self.embed_footer_kwargs.get("text")
+            icon_url = self.embed_footer_kwargs.get("icon_url")
             if footer_text is not None:
-                page_footer = footer_text + ' • ' + page_footer
-                footer_kwargs['text'] = page_footer
+                page_footer = footer_text + " • " + page_footer
+                footer_kwargs["text"] = page_footer
             if icon_url is not None:
-                footer_kwargs['icon_url'] = icon_url
+                footer_kwargs["icon_url"] = icon_url
         em.set_footer(**footer_kwargs)
 
         if self.embed_author_kwargs:
@@ -138,11 +136,7 @@ class _AbstractPaginator(View, ABC):
 
         self._update_labels()
         if self.message is None:
-            if isinstance(self.ctx, Context):
-                self.message = await self.ctx.send(embed=em, view=self)
-            else:
-                await self.ctx.send(embed=em, view=self)
-                self.message = await self.ctx.original_message()
+            self.message = await self.ctx.channel.send(embed=em, view=self)
         else:
             await self.message.edit(embed=em, view=self)
 
@@ -157,13 +151,13 @@ class _AbstractPaginator(View, ABC):
             return False
         return True
 
-    @button(label="≪")
+    @button(label="Start")
     async def first_page(self, button: Button, inter: MessageInteraction):
         """Goes to the first page."""
         await inter.response.defer()
         await self._show_page(0)
 
-    @button(label="Back", style=ButtonStyle.blurple)
+    @button(label="Prev", style=ButtonStyle.blurple)
     async def previous_page(self, button: Button, inter: MessageInteraction):
         """Goes to the previous page."""
         await inter.response.defer()
@@ -175,7 +169,7 @@ class _AbstractPaginator(View, ABC):
         await inter.response.defer()
         await self._show_page(self.current_page + 1)
 
-    @button(label="≫")
+    @button(label="End")
     async def last_page(self, button: Button, inter: MessageInteraction):
         """Goes to the last page."""
         await inter.response.defer()
@@ -247,7 +241,7 @@ class TextPaginator(_AbstractPaginator):
             timeout=timeout,
             message=message,
             embed_footer_kwargs=embed_footer_kwargs,
-            embed_author_kwargs=embed_author_kwargs
+            embed_author_kwargs=embed_author_kwargs,
         )
         self.text = text
         self.breakpoint = breakpoint
@@ -258,12 +252,12 @@ class TextPaginator(_AbstractPaginator):
         text = self.text
         while True:
             if len(text) != 0:
-                new_text = text[0:self.breakpoint]
+                new_text = text[0 : self.breakpoint]
                 if self.prefix:
                     new_text = self.prefix + "\n" + new_text
                 if self.suffix:
                     new_text = new_text + "\n" + self.suffix
-                text = text[self.breakpoint:]
+                text = text[self.breakpoint :]
                 self.pages.append(new_text)
             else:
                 break
@@ -327,7 +321,7 @@ class LinePaginator(_AbstractPaginator):
             timeout=timeout,
             message=message,
             embed_footer_kwargs=embed_footer_kwargs,
-            embed_author_kwargs=embed_author_kwargs
+            embed_author_kwargs=embed_author_kwargs,
         )
         self.lines = lines
         self.line_limit = line_limit
@@ -335,7 +329,7 @@ class LinePaginator(_AbstractPaginator):
         self.suffix = suffix
 
     def _lines_to_page(self, lines: list[str]):
-        page = "\n".join(lines)
+        page = "".join(lines)
         if self.prefix:
             page = self.prefix + "\n" + page
         if self.suffix:

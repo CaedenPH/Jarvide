@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import aiohttp
 import disnake
 import io
@@ -111,8 +113,11 @@ class EmbedFactory:
         )
 
 
-async def get_info(file_: File) -> str:
-    real_file = await file_.to_real()
+async def get_info(file_: File | disnake.Attachment) -> str:
+    if isinstance(file_, disnake.Attachment):
+        real_file = file_
+    else:
+        real_file = await file_.to_real()
 
     return (
         f"Opened file: {real_file.filename}"
@@ -121,21 +126,44 @@ async def get_info(file_: File) -> str:
     )
 
 
-class ExitButton(disnake.ui.Button): 
+class ExitButton(disnake.ui.Button):
     def __init__(self, ctx, bot_message, row=None):
-        super().__init__(
-            style=disnake.ButtonStyle.danger, 
-            label="Exit",
-            row=row
-            )
+        super().__init__(style=disnake.ButtonStyle.danger, label="Exit", row=row)
         self.bot_message = bot_message
         self.ctx = ctx
 
     async def callback(self, interaction: disnake.MessageInteraction):
-        embed = EmbedFactory.ide_embed(self.ctx, "Goodbye!")
+        await interaction.response.defer()
+        
+        for child in self.view.children:
+            if isinstance(child, disnake.ui.Button):
+                child.disabled = True
 
-
+        embed = EmbedFactory.ide_embed(
+            self.ctx,
+            "Goodbye!"
+        )  
         await self.bot_message.edit(
-            embed=embed,
-            view=None
+            view=self.view,
+            embed=embed
+        )
+
+
+class SaveButton(disnake.ui.Button):
+    def __init__(self, ctx, bot_message, file_: File, row=None):
+        super().__init__(style=disnake.ButtonStyle.green, label="Save", row=row)
+        self.bot_message = bot_message
+        self.ctx = ctx
+        self.file = file_
+
+    async def callback(self, interaction: disnake.MessageInteraction):
+        from src.cogs.ide.dialogs import SaveFile
+
+        embed = EmbedFactory.ide_embed(
+            self.ctx,
+            f"Save your file: {self.file.filename}\nCurrent directory: /",
+        )
+        await interaction.response.defer()
+        await self.bot_message.edit(
+            embed=embed, view=SaveFile(self.ctx, self.bot_message, self.file)
         )

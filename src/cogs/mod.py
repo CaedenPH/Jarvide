@@ -1,4 +1,5 @@
 import disnake
+import time_str
 import typing
 
 from disnake.ext import commands
@@ -7,12 +8,13 @@ from src.utils.confirmation import prompt
 
 
 class Mod(commands.Cog):
-    """Mod cog for moderation related commands"""
+    """Moderation related commands."""
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @commands.command()
+    @commands.guild_only()
     @commands.has_permissions(kick_members=True)
     @commands.bot_has_permissions(kick_members=True)
     async def kick(
@@ -26,6 +28,10 @@ class Mod(commands.Cog):
                 f"{ctx.author.mention}, please provide a member to kick."
             )
 
+        elif member == ctx.author:
+            await ctx.send(f"{ctx.author.mention}, you cannot kick yourself!")
+            return
+
         choice = await prompt(
             ctx, message="Are you sure you want to kick this user?", timeout=60
         )
@@ -36,6 +42,7 @@ class Mod(commands.Cog):
             await ctx.send(f"Cancelled kick.")
 
     @commands.command()
+    @commands.guild_only()
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_permissions(ban_members=True)
     async def ban(
@@ -48,6 +55,10 @@ class Mod(commands.Cog):
             await ctx.send(f"{ctx.author.mention}, please provide a member to ban.")
             return
 
+        elif member == ctx.author:
+            await ctx.send(f"{ctx.author.mention}, you cannot ban yourself!")
+            return
+
         choice = await prompt(
             ctx, message="Are you sure you want to ban this user?", timeout=60
         )
@@ -58,6 +69,7 @@ class Mod(commands.Cog):
             await ctx.send(f"Cancelled ban.")
 
     @commands.command()
+    @commands.guild_only()
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_permissions(ban_members=True)
     async def unban(
@@ -72,6 +84,10 @@ class Mod(commands.Cog):
             )
             return
 
+        elif user == ctx.author:
+            await ctx.send(f"{ctx.author.mention}, you cannot unban yourself!")
+            return
+
         choice = await prompt(
             ctx, message="Are you sure you want to ban this user?", timeout=60
         )
@@ -84,7 +100,40 @@ class Mod(commands.Cog):
         else:
             await ctx.send("Cancelled the unban")
 
+    @commands.command()
+    @commands.guild_only()
+    @commands.has_permissions(manage_channels=True)
+    @commands.bot_has_permissions(manage_channels=True)
+    async def slowmode(
+        self, ctx, channel: disnake.TextChannel = None, slowmode: int = None
+    ):
+        channel = channel or ctx.channel
+        if not slowmode:
+            return await ctx.send(
+                f"{ctx.author.mention}, please provide a number to set the slowmode to."
+            )
+        else:
+            await channel.edit(slowmode_delay=slowmode)
+            await ctx.send(
+                f"I've set the channel slowmode to {slowmode} {'seconds' if slowmode > 1 else 'second'}."
+            )
+            return
+
+    @commands.command()
+    @commands.guild_only()
+    @commands.has_permissions(moderate_members=True)
+    @commands.bot_has_permissions(moderate_members=True)
+    async def timeout(self, ctx, member: disnake.Member, time, *, reason=None):
+        change = time_str.convert(time)
+        duration = disnake.utils.utcnow() + change
+        endduration = disnake.utils.format_dt(duration,style='f')
+        await member.timeout(until=duration, reason=reason)
+        embed = disnake.Embed(
+            description=f":white_check_mark: {member.mention} was timed out until {endduration}.",
+            color=disnake.Color.blurple(),
+        )
+        await ctx.send(embed=embed)
+
 
 def setup(bot: commands.Bot) -> None:
-    """Setup mod cog"""
     bot.add_cog(Mod(bot))
