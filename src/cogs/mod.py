@@ -129,7 +129,7 @@ class Mod(commands.Cog):
         endduration = disnake.utils.format_dt(duration,style='f')
         await member.timeout(until=duration, reason=reason)
         embed = disnake.Embed(
-            description=f":white_check_mark: {member.mention} was timed out until {endduration}.",
+            description=f":white_check_mark: {member.mention} has been timed out until {endduration}.",
             color=disnake.Color.blurple(),
         )
         await ctx.send(embed=embed)

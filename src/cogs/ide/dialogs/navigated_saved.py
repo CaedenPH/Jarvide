@@ -30,7 +30,7 @@ class DefaultButtons(disnake.ui.View):
         embed = EmbedFactory.ide_embed(
             self.ctx,
             "Ide timed out. Feel free to make a new one!"
-        )  
+        )
         await self.bot_message.edit(
             view=self,
             embed=embed
@@ -40,7 +40,7 @@ class DefaultButtons(disnake.ui.View):
         self.ctx = ctx
         self.bot_message = bot_message
         self.bot = ctx.bot
-        self.path = "/" 
+        self.path = "/"
 
         self.SUDO = self.ctx.me.guild_permissions.manage_messages
         super().__init__(timeout=300)
@@ -59,10 +59,10 @@ class DefaultButtons(disnake.ui.View):
             and m.channel == self.ctx.channel,
         )
         path = self.bot.engine.find(
-            FileModel, 
+            FileModel,
             FileModel.user_id == self.ctx.author.id,
             FileModel.folder == directory
-                )  
+                )
 
         if not path:
             if self.SUDO:
@@ -77,12 +77,12 @@ class DefaultButtons(disnake.ui.View):
     @disnake.ui.button(label="View folder", style=disnake.ButtonStyle.green)
     async def view_folder(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
-    ):  
+    ):
         files = "\n    - ".join(
             [
                 f"{k.name}"
                 for k in await self.bot.engine.find(
-                    FileModel, 
+                    FileModel,
                     FileModel.user_id == self.ctx.author.id,
                     FileModel.folder == self.path
                 )
@@ -135,7 +135,7 @@ class DefaultButtons(disnake.ui.View):
     async def delete_folder(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
-        ... 
+        ...
 
     @disnake.ui.button(label="Delete file", style=disnake.ButtonStyle.danger, row=2)
     async def delete_file(
@@ -188,10 +188,10 @@ class OpenFromSaved(DefaultButtons):
             check=lambda m: self.ctx.author == m.author
             and m.channel == self.ctx.channel,
         )).content
-        
+
 
         file_model = await self.bot.engine.find(
-                    FileModel, 
+                    FileModel,
                     FileModel.user_id == self.ctx.author.id,
                     FileModel.name == filename,
                     FileModel.folder == self.path
@@ -199,10 +199,10 @@ class OpenFromSaved(DefaultButtons):
 
         if not file_model:
             return await interaction.channel.send(f"{filename} doesnt exist!")
-        
+
         file_model = file_model[0]
         file_ = await File.from_url(
-            bot=self.bot, 
+            bot=self.bot,
             url=file_model.file_url
         )
         embed = EmbedFactory.ide_embed(
@@ -236,9 +236,9 @@ class SaveFile(DefaultButtons):
         dir_files = [
             k.name
             for k in await self.bot.engine.find(
-                FileModel, 
+                FileModel,
                 FileModel.user_id == self.ctx.author.id,
-                FileModel.folder == self.path    
+                FileModel.folder == self.path
             )
         ]
         if self.file.filename in dir_files:
@@ -259,7 +259,7 @@ class SaveFile(DefaultButtons):
             f"Saved {self.file.filename}\n{''.join(['-' for i in range(len(self.file.filename)+len('Saved '))])}\n{await get_info(attachment)}",
         )
 
-        
+
 
         await interaction.response.defer()
         await self.bot.engine.save(file_)

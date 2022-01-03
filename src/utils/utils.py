@@ -133,10 +133,14 @@ class ExitButton(disnake.ui.Button):
         self.ctx = ctx
 
     async def callback(self, interaction: disnake.MessageInteraction):
+<<<<<<< HEAD
         try:
             await interaction.response.defer()
         except disnake.errors.InteractionResponded:
             pass
+=======
+        await interaction.response.defer()
+>>>>>>> 8e47fac51a50c3b9bee9a366f61d6204eccb9fd7
 
         for child in self.view.children:
             if isinstance(child, disnake.ui.Button):
@@ -145,7 +149,7 @@ class ExitButton(disnake.ui.Button):
         embed = EmbedFactory.ide_embed(
             self.ctx,
             "Goodbye!"
-        )  
+        )
         await self.bot_message.edit(
             view=self.view,
             embed=embed
