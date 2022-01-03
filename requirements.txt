@@ -3,3 +3,4 @@ aiohttp>=3.7.0,<3.9.0
 odmantic>=0.3.4
 disnake-jishaku>=2.6.5
 motor>=2.3.1
+async-cse>=0.3.0
