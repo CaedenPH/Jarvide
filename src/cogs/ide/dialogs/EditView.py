@@ -32,6 +32,7 @@ class EditView(disnake.ui.View):
         super().__init__()
 
         self.ctx = ctx
+        self.bot = ctx.bot
         self.file = file_
         self.content = file_.content
         self.bot_message = bot_message
@@ -126,7 +127,6 @@ class EditView(disnake.ui.View):
 
         embed = EmbedFactory.ide_embed(self.ctx, description)
         await self.bot_message.edit(embed=embed)
-
 
     @disnake.ui.button(label="Next", style=disnake.ButtonStyle.blurple, row=2)
     async def next_button(

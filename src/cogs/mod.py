@@ -99,19 +99,18 @@ class Mod(commands.Cog):
         else:
             await ctx.send("Cancelled the unban")
 
-
-@commands.command()
-@commands.guild_only()
-@commands.has_permissions(manage_channels=True)
-@commands.bot_has_permissions(manage_channels=True)
-async def slowmode(self, ctx, channel: disnake.TextChannel=None, slowmode: int=None):
-    channel = channel or ctx.channel
-    if not slowmode:
-        await ctx.send(f"{ctx.author.mention}, please provide a number to set the slowmode to.")
-        return
-    else:
-        await channel.edit(slowmode_delay=slowmode)
-        await ctx.send(f"Set the slowmode for {channel.mention} to {slowmode} {'seconds' if slowmode > 1 else 'second'}!")
+    @commands.command()
+    @commands.guild_only()
+    @commands.has_permissions(manage_channels=True)
+    @commands.bot_has_permissions(manage_channels=True)
+    async def slowmode(self, ctx, channel: disnake.TextChannel = None, slowmode: int = None):
+        channel = channel or ctx.channel
+        if not slowmode:
+            await ctx.send(f"{ctx.author.mention}, please provide a number to set the slowmode to.")
+            return
+        else:
+            await channel.edit(slowmode_delay=slowmode)
+            await ctx.send(f"Set the slowmode for {channel.mention} to {slowmode} {'seconds' if slowmode > 1 else 'second'}!")
 
 
 def setup(bot: commands.Bot) -> None:

@@ -27,7 +27,7 @@ class Casino(disnake.ui.View):
         self,
         button: disnake.ui.button,
         interaction: disnake.MessageInteraction
-        ) -> None:
+    ) -> None:
         self.exit.disabled = True
         self.play.disabled = True
         intsthink = disnake.Embed(
@@ -67,7 +67,7 @@ class Casino(disnake.ui.View):
         self,
         button: disnake.ui.button,
         interaction: disnake.MessageInteraction
-        ) -> None:
+    ) -> None:
         intsthink1 = disnake.Embed(
             title="Casino Machine $",
             description="```...```").set_footer(text="Get Three numbers in a row for a PRIZE")
@@ -103,7 +103,7 @@ class Casino(disnake.ui.View):
         self,
         button: disnake.ui.button,
         interaction: disnake.MessageInteraction
-        ) -> None:
+    ) -> None:
         await interaction.response.defer()
         await interaction.edit_original_message(view=None)
         self.stop()

@@ -41,6 +41,7 @@ class Ide(commands.Cog):
 
         self.active_commands[ctx.channel][ctx.author] = view.bot_message.id
 
+
 def setup(bot: commands.Bot) -> None:
     """Setup Ide cog"""
     bot.add_cog(Ide(bot))

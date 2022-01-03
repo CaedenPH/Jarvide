@@ -1,10 +1,13 @@
 import disnake
 import time
 
-from src.utils import *
 from abc import ABC
+from disnake.ext import commands
 from typing import Optional
 from odmantic import Model
+
+from src.utils import ExitButton, EmbedFactory, File, get_info
+
 
 class FileModel(Model, ABC):
     user_id: int
@@ -14,8 +17,14 @@ class FileModel(Model, ABC):
     create_epoch: int
     last_edit_epoch: Optional[float] = None
 
-class DefaultButtons:
-    def __init__(self):
+
+class DefaultButtons(disnake.ui.View):
+    def __init__(self, ctx, bot_message):
+        self.ctx = ctx
+        self.bot_message = bot_message
+        self.bot = ctx.bot
+
+        super().__init__()
         self.add_item(ExitButton(self.ctx, self.bot_message))
 
     @disnake.ui.button(label="CD", style=disnake.ButtonStyle.green)
@@ -55,7 +64,6 @@ class DefaultButtons:
         await self.bot_message.edit(
             embed=embed,
         )
-
 
     @disnake.ui.button(label="Create folder", style=disnake.ButtonStyle.green)
     async def create_folder(
@@ -100,7 +108,6 @@ class DefaultButtons:
             and m.channel == self.ctx.channel,
         )
 
-
         filename = directory.content.split('/')[-1]
         file_ = await self.bot.engine.find_one(
             FileModel,
@@ -115,8 +122,7 @@ class DefaultButtons:
         await interaction.channel.send(f"Successfully deleted {file_.name}")
 
 
-
-class OpenFromSaved(disnake.ui.View, DefaultButtons):
+class OpenFromSaved(DefaultButtons):
     async def interaction_check(self, interaction: disnake.MessageInteraction) -> bool:
         return (
             interaction.author == self.ctx.author
@@ -124,7 +130,7 @@ class OpenFromSaved(disnake.ui.View, DefaultButtons):
         )
 
     def __init__(self, ctx, bot_message):
-        super().__init__()
+        super().__init__(ctx, bot_message)
 
         self.ctx = ctx
         self.bot = ctx.bot
@@ -138,7 +144,7 @@ class OpenFromSaved(disnake.ui.View, DefaultButtons):
         ...
 
 
-class SaveFile(disnake.ui.View, DefaultButtons):
+class SaveFile(DefaultButtons):
     async def interaction_check(self, interaction: disnake.MessageInteraction) -> bool:
         return (
             interaction.author == self.ctx.author
@@ -146,7 +152,7 @@ class SaveFile(disnake.ui.View, DefaultButtons):
         )
 
     def __init__(self, ctx: commands.Context, bot_message: disnake.Message, file_: File):
-        super().__init__()
+        super().__init__(ctx, bot_message)
 
         self.ctx = ctx
         self.bot = ctx.bot
