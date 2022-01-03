@@ -57,10 +57,13 @@ class Casino(disnake.ui.View):
             self.stop()
             return await interaction.send(embed=Awinningembed)
 
-    @disnake.ui.button(label="Retry", style=disnake.ButtonStyle.green, emoji="🔄")
+    @disnake.ui.button(
+        label: str = "Retry",
+        style: disnake.ButtonStyle = disnake.ButtonStyle.green,
+        emoji: str = "🔄")
     async def retry(
         self, button: disnake.ui.button, interaction: disnake.MessageInteraction
-    ) -> None:
+        ) -> None:
         intsthink1 = disnake.Embed(
             title="Casino Machine $", description="```...```"
         ).set_footer(text="Get Three numbers in a row for a PRIZE")
@@ -166,14 +169,12 @@ class Fun(commands.Cog):
     async def ppmeter(self, ctx, member: disnake.Member = None) -> None:
         if not member:
             member = ctx.author
-        size = random.randint(1, 12)
-        if size <= 6:
-            await ctx.send(
-                f"{member.mention} is packing {size}inches, wow such a small pp"
-            )
-        elif size >= 6:
-            await ctx.send(
-                f"{member.mention} is packing {size}inches, wow such a big pp"
+
+        inches = random.randint(1, 12)
+        size = "small" if inches <= 6 else "big"
+
+        await ctx.send(
+            f"{member.mention} is packing {inches}inches, wow such a {size} pp"
             )
 
     @commands.command(aliases=["casino"])
