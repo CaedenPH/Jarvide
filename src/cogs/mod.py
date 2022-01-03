@@ -123,7 +123,7 @@ class Mod(commands.Cog):
     @commands.guild_only()
     @commands.has_permissions(moderate_members=True)
     @commands.bot_has_permissions(moderate_members=True)
-    async def timeout(self, ctx, member: disnake.User, time, *, reason=None):
+    async def timeout(self, ctx, member: disnake.Member, time, *, reason=None):
         change = time_str.convert(time)
         duration = disnake.utils.utcnow() + change
         endduration = disnake.utils.format_dt(duration,style='f')
