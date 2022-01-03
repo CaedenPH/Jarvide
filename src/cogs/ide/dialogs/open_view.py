@@ -275,7 +275,7 @@ class OpenView(disnake.ui.View):
 
         embed = EmbedFactory.ide_embed(
             self.ctx,
-            f"Open a file from saved:\nCurrent directory: /users/{self.ctx.author.name}",
+            f"Open a file from saved:\nCurrent directory: /",
         )
         await interaction.response.defer()
         await self.bot_message.edit(

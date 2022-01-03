@@ -81,7 +81,6 @@ class FileView(disnake.ui.View):
                     )
 
                 output = json["output"].strip('\n').strip()
-                print(output)
                 if not output:
                     output = "[No output]"
 

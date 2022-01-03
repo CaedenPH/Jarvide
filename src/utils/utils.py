@@ -150,7 +150,7 @@ class SaveButton(disnake.ui.Button):
 
         embed = EmbedFactory.ide_embed(
             self.ctx,
-            f"Save your file: {self.file.filename}\nCurrent directory: /users/{self.ctx.author.name}",
+            f"Save your file: {self.file.filename}\nCurrent directory: /",
         )
         await interaction.response.defer()
         await self.bot_message.edit(
