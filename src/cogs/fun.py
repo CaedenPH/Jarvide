@@ -186,5 +186,4 @@ class Fun(commands.Cog):
 
 
 def setup(bot: commands.Bot) -> None:
-    """Setup fun cog"""
     bot.add_cog(Fun(bot))
