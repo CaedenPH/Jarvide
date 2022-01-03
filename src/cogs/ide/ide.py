@@ -7,6 +7,7 @@ from disnake.ext import commands, tasks
 
 class Ide(commands.Cog):
     """Ide cog"""
+
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.active_commands = {}
@@ -21,14 +22,16 @@ class Ide(commands.Cog):
                     del self.active_commands[channel][user]
 
     @commands.command()
-    async def ide(self, ctx: commands.Context, query: str = None, link: str = None) -> None:
-        if ctx.channel in self.active_commands and ctx.author in self.active_commands[ctx.channel]:
+    async def ide(
+        self, ctx: commands.Context, query: str = None, link: str = None
+    ) -> None:
+        if (
+            ctx.channel in self.active_commands
+            and ctx.author in self.active_commands[ctx.channel]
+        ):
             return
 
-        embed = EmbedFactory.ide_embed(
-            ctx,
-            "File open: No file currently open"
-        )
+        embed = EmbedFactory.ide_embed(ctx, "File open: No file currently open")
 
         view = OpenView(ctx)
         view.bot_message = await ctx.send(

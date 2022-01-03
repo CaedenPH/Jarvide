@@ -17,9 +17,8 @@ class Staff(commands.Cog, command_attrs={"hidden": True}):
         embed = disnake.Embed(color=disnake.Color.dark_gold())
         self.bot.load_extension(f"src.cogs.{extension}")
         embed.add_field(
-            name="Load Extension",
-            value=f"Loaded cog: ``{extension}`` successfully"
-            )
+            name="Load Extension", value=f"Loaded cog: ``{extension}`` successfully"
+        )
         await ctx.send(embed=embed)
 
     @commands.command()
@@ -27,9 +26,8 @@ class Staff(commands.Cog, command_attrs={"hidden": True}):
         self.bot.unload_extension(f"src.cogs.{extension}")
         embed = disnake.Embed(color=disnake.Color.dark_gold())
         embed.add_field(
-            name="Unload Extension",
-            value=f"Unloaded cog: ``{extension}`` successfully"
-            )
+            name="Unload Extension", value=f"Unloaded cog: ``{extension}`` successfully"
+        )
         await ctx.send(embed=embed)
 
     @commands.command(aliases=["re"])
@@ -40,7 +38,7 @@ class Staff(commands.Cog, command_attrs={"hidden": True}):
             embed = disnake.Embed(color=disnake.Color.dark_gold())
             embed.add_field(
                 name="Reload Extension", value=f"Reloaded cogs successfully"
-                )
+            )
             print("----------------------------------------")
             return await ctx.send(embed=embed)
 
@@ -48,9 +46,8 @@ class Staff(commands.Cog, command_attrs={"hidden": True}):
         self.bot.reload_extension(f"cogs.{extension}")
         embed = disnake.Embed(color=disnake.Color.dark_gold())
         embed.add_field(
-            name="Reload Extension",
-            value=f"Reloaded cog: ``{extension}`` successfully"
-            )
+            name="Reload Extension", value=f"Reloaded cog: ``{extension}`` successfully"
+        )
         await ctx.send(embed=embed)
 
 

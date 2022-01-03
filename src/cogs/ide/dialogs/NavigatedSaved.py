@@ -53,12 +53,16 @@ class DefaultButtons(disnake.ui.View):
             and m.channel == self.ctx.channel,
         )
 
-        files = await self.bot.engine.find(FileModel, FileModel.user_id == self.ctx.author.id, FileModel.folder == directory)
+        files = await self.bot.engine.find(
+            FileModel,
+            FileModel.user_id == self.ctx.author.id,
+            FileModel.folder == directory,
+        )
 
         embed = EmbedFactory.ide_embed(
-            self.ctx, 
+            self.ctx,
             f"""All files:
-            {files}""", 
+            {files}""",
         )
 
         await self.bot_message.edit(
@@ -76,13 +80,20 @@ class DefaultButtons(disnake.ui.View):
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
 
-        files = '\n    - '.join([f"{k.name}" for k in await self.bot.engine.find(FileModel, FileModel.user_id == self.ctx.author.id)])
+        files = "\n    - ".join(
+            [
+                f"{k.name}"
+                for k in await self.bot.engine.find(
+                    FileModel, FileModel.user_id == self.ctx.author.id
+                )
+            ]
+        )
 
         embed = EmbedFactory.ide_embed(
-            self.ctx, 
+            self.ctx,
             f"""All {self.ctx.author.name}'s files:
-    - {files}""", 
-        )   
+    - {files}""",
+        )
 
         await interaction.response.defer()
         await self.bot_message.edit(
@@ -94,7 +105,7 @@ class DefaultButtons(disnake.ui.View):
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         ...
-    
+
     @disnake.ui.button(label="Delete file", style=disnake.ButtonStyle.danger, row=2)
     async def delete_file(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
@@ -108,12 +119,12 @@ class DefaultButtons(disnake.ui.View):
             and m.channel == self.ctx.channel,
         )
 
-        filename = directory.content.split('/')[-1]
+        filename = directory.content.split("/")[-1]
         file_ = await self.bot.engine.find_one(
             FileModel,
             FileModel.user_id == self.ctx.author.id,
             FileModel.name == filename,
-        )  
+        )
 
         if not file_:
             await interaction.channel.send(f"File {file_} does not exist!")
@@ -151,7 +162,9 @@ class SaveFile(DefaultButtons):
             and interaction.channel == self.ctx.channel
         )
 
-    def __init__(self, ctx: commands.Context, bot_message: disnake.Message, file_: File):
+    def __init__(
+        self, ctx: commands.Context, bot_message: disnake.Message, file_: File
+    ):
         super().__init__(ctx, bot_message)
 
         self.ctx = ctx
@@ -161,7 +174,7 @@ class SaveFile(DefaultButtons):
         self.dir = f"/users/{ctx.author.name}"
 
         self.SUDO = self.ctx.me.guild_permissions.manage_messages
-        
+
     @disnake.ui.button(label="Select", style=disnake.ButtonStyle.danger, row=2)
     async def select_button(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
@@ -170,7 +183,12 @@ class SaveFile(DefaultButtons):
 
         attachment = await self.file.to_real()
 
-        all_files = [k.name for k in await self.bot.engine.find(FileModel, FileModel.user_id == self.ctx.author.id)]
+        all_files = [
+            k.name
+            for k in await self.bot.engine.find(
+                FileModel, FileModel.user_id == self.ctx.author.id
+            )
+        ]
         if self.file.filename in all_files:
             return await interaction.response.send_message(
                 "You cant have a file with the same name!"
@@ -179,20 +197,18 @@ class SaveFile(DefaultButtons):
         file_ = FileModel(
             file_url=attachment.url,
             name=self.file.filename,
-            user_id = self.ctx.author.id,
-            create_epoch = int(time.time()),
+            user_id=self.ctx.author.id,
+            create_epoch=int(time.time()),
             folder=self.dir,
-        )   
-        
+        )
+
         embed = EmbedFactory.ide_embed(
             self.ctx,
-            f"Saved {self.file.filename}\n--------------------\n{await get_info(attachment)}"
+            f"Saved {self.file.filename}\n--------------------\n{await get_info(attachment)}",
         )
 
         await interaction.response.defer()
         await self.bot.engine.save(file_)
         await self.bot_message.edit(
-            embed=embed,
-            view=FileView(self.ctx, self.file, self.bot_message)
+            embed=embed, view=FileView(self.ctx, self.file, self.bot_message)
         )
-        

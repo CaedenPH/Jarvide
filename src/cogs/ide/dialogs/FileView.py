@@ -9,7 +9,7 @@ from src.utils import (
     EmbedFactory,
     LinePaginator,
     TextPaginator,
-    get_info
+    get_info,
 )
 from .EditView import EditView
 
@@ -54,9 +54,9 @@ class FileView(disnake.ui.View):
             line_limit=50,
             timeout=None,  # type: ignore
             embed_author_kwargs={
-                'name': f"{self.ctx.author.name}'s automated paginator for {self.file.filename}",
-                'icon_url': self.ctx.author.avatar.url
-            }
+                "name": f"{self.ctx.author.name}'s automated paginator for {self.file.filename}",
+                "icon_url": self.ctx.author.avatar.url,
+            },
         ).start()
 
     @disnake.ui.button(label="Run", style=disnake.ButtonStyle.green)
@@ -73,11 +73,14 @@ class FileView(disnake.ui.View):
             ) as data:
 
                 json = await data.json()
-                if 'message' in json and 'runtime is unknown' in json['message']:
+                if "message" in json and "runtime is unknown" in json["message"]:
                     await interaction.response.defer()
-                    return await interaction.channel.send("This file has an invalid file extension and therefore I do not know what language to run it in! Try renaming your file", delete_after=15)
+                    return await interaction.channel.send(
+                        "This file has an invalid file extension and therefore I do not know what language to run it in! Try renaming your file",
+                        delete_after=15,
+                    )
 
-                output = json['output']
+                output = json["output"]
 
                 if not output:
                     output = "[No output]"
@@ -114,7 +117,9 @@ class FileView(disnake.ui.View):
         if len(filename.content) > 12:
             if self.SUDO:
                 await filename.delete()
-            return await interaction.channel.send("That filename is too long! The maximum limit is 12 character")
+            return await interaction.channel.send(
+                "That filename is too long! The maximum limit is 12 character"
+            )
 
         file_ = File(filename=filename, content=self.file.content, bot=self.bot)
         description = await get_info(file_)
@@ -134,5 +139,5 @@ class FileView(disnake.ui.View):
         await interaction.response.defer()
         await self.bot_message.edit(
             embed=EmbedFactory.ide_embed(self.ctx, "File open: No file currently open"),
-            view=OpenView(self.ctx, self.bot_message)
+            view=OpenView(self.ctx, self.bot_message),
         )

@@ -128,40 +128,31 @@ async def get_info(file_: File | disnake.Attachment) -> str:
 
 class ExitButton(disnake.ui.Button):
     def __init__(self, ctx, bot_message, row=None):
-        super().__init__(
-            style=disnake.ButtonStyle.danger,
-            label="Exit",
-            row=row
-            )
+        super().__init__(style=disnake.ButtonStyle.danger, label="Exit", row=row)
         self.bot_message = bot_message
         self.ctx = ctx
 
     async def callback(self, interaction: disnake.MessageInteraction):
         embed = EmbedFactory.ide_embed(self.ctx, "Goodbye!")
 
-        await self.bot_message.edit(
-            embed=embed,
-            view=None
-        )
+        await self.bot_message.edit(embed=embed, view=None)
 
 
-class SaveButton(disnake.ui.Button): 
+class SaveButton(disnake.ui.Button):
     def __init__(self, ctx, bot_message, file_: File, row=None):
-        super().__init__(
-            style=disnake.ButtonStyle.green,
-            label="Save",
-            row=row
-            )
+        super().__init__(style=disnake.ButtonStyle.green, label="Save", row=row)
         self.bot_message = bot_message
         self.ctx = ctx
         self.file = file_
 
     async def callback(self, interaction: disnake.MessageInteraction):
         from src.cogs.ide.dialogs import SaveFile
-        
-        embed = EmbedFactory.ide_embed(self.ctx, f"Save your file: {self.file.filename}\nCurrent directory: /users/{self.ctx.author.name}")
+
+        embed = EmbedFactory.ide_embed(
+            self.ctx,
+            f"Save your file: {self.file.filename}\nCurrent directory: /users/{self.ctx.author.name}",
+        )
         await interaction.response.defer()
         await self.bot_message.edit(
-            embed=embed,
-            view=SaveFile(self.ctx, self.bot_message, self.file)
+            embed=embed, view=SaveFile(self.ctx, self.bot_message, self.file)
         )
