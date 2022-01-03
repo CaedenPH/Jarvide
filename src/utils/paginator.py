@@ -113,14 +113,12 @@ class _AbstractPaginator(View, ABC):
 
         if self.embed_author_kwargs:
             em.set_author(**self.embed_author_kwargs)
-
         self._update_labels()
         await self.message.edit(embed=em, view=self)
 
     async def start(self):
         self.get_pages()
         em = Embed(description=self.pages[self.current_page])
-
         page_footer = f'Page {self.current_page + 1}/{len(self.pages)}'
         footer_kwargs = {'text': page_footer}
         if self.embed_footer_kwargs:
@@ -141,8 +139,8 @@ class _AbstractPaginator(View, ABC):
             if isinstance(self.ctx, Context):
                 self.message = await self.ctx.send(embed=em, view=self)
             else:
-                await self.ctx.send(embed=em, view=self)
                 self.message = await self.ctx.original_message()
+                await self.message.edit(embed=em, view=self)
         else:
             await self.message.edit(embed=em, view=self)
 
@@ -157,7 +155,7 @@ class _AbstractPaginator(View, ABC):
             return False
         return True
 
-    @button(label="≪")
+    @button(label="Start")
     async def first_page(self, button: Button, inter: MessageInteraction):
         """Goes to the first page."""
         await inter.response.defer()
@@ -175,7 +173,7 @@ class _AbstractPaginator(View, ABC):
         await inter.response.defer()
         await self._show_page(self.current_page + 1)
 
-    @button(label="≫")
+    @button(label="End")
     async def last_page(self, button: Button, inter: MessageInteraction):
         """Goes to the last page."""
         await inter.response.defer()

@@ -10,12 +10,11 @@ if TYPE_CHECKING:
 
 
 def clear_codeblock(content: str):
+    content.strip("\n")
     if content.startswith("```"):
         content = "\n".join(content.splitlines()[1:])
     if content.endswith("```"):
         content = content[:-3]
-    if content.endswith("\n"):
-        content = content[:-1]
     if "`" in content:
         content.replace("`", "\u200b")
     return content
@@ -66,7 +65,8 @@ class EditView(disnake.ui.View):
     ):
         await interaction.response.send_message(
             "**Format:**\n[line number]\n```py\n<code>\n```**Example:**"
-            "\n12-25\n```py\nfor i in range(10):\n\tprint('foo')\n```",
+            "\n12-25\n```py\nfor i in range(10):\n\tprint('foo')\n```"
+            "\n`[Click save to see the result]`",
             ephemeral=True
         )
         content: str = (await self.ctx.bot.wait_for(

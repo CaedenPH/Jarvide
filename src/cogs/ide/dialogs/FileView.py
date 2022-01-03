@@ -89,14 +89,14 @@ class FileView(disnake.ui.View):
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.defer()
-        content = self.file.content
+        content: str = "".join(add_lines(self.file.content))
         if len(content) > 4000:
             return await LinePaginator(
                 interaction,
-                [line.strip("\n") for line in content],
+                content.splitlines(),
                 prefix=f"```{self.extension}",
                 suffix="```",
-                line_limit=60,
+                line_limit=50,
                 timeout=None,  # type: ignore
                 embed_author_kwargs={
                     'name': f"{self.ctx.author.name}'s automated paginator for {self.file.filename}",

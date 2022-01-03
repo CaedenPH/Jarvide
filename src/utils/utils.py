@@ -1,4 +1,4 @@
-import typing
+from __future__ import annotations
 
 import aiohttp
 import disnake
@@ -113,7 +113,7 @@ class EmbedFactory:
         )
 
 
-async def get_info(file_: typing.Union[File, disnake.Attachment]) -> str:
+async def get_info(file_: File | disnake.Attachment) -> str:
     if isinstance(file_, disnake.Attachment):
         real_file = file_
     else:
@@ -127,7 +127,7 @@ async def get_info(file_: typing.Union[File, disnake.Attachment]) -> str:
 
 
 class ExitButton(disnake.ui.Button):
-    def __init__(self, ctx, bot_message, row=None, parent=None):
+    def __init__(self, ctx, bot_message, row=None):
         super().__init__(
             style=disnake.ButtonStyle.danger,
             label="Exit",
@@ -135,7 +135,6 @@ class ExitButton(disnake.ui.Button):
             )
         self.bot_message = bot_message
         self.ctx = ctx
-        self.parent = parent
 
     async def callback(self, interaction: disnake.MessageInteraction):
         embed = EmbedFactory.ide_embed(self.ctx, "Goodbye!")
