@@ -1,4 +1,4 @@
-from .OpenView import OpenView
-from .FileView import FileView
-from .EditView import EditView
-from .NavigatedSaved import OpenFromSaved, SaveFile
+from .open_view import OpenView
+from .file_view import FileView
+from .edit_view import EditView
+from .navigated_saved import OpenFromSaved, SaveFile

@@ -11,7 +11,7 @@ from src.utils import (
     TextPaginator,
     get_info,
 )
-from .EditView import EditView
+from .edit_view import EditView
 
 
 class FileView(disnake.ui.View):
@@ -134,7 +134,7 @@ class FileView(disnake.ui.View):
     async def back_button(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
-        from .OpenView import OpenView
+        from .open_view import OpenView
 
         await interaction.response.defer()
         await self.bot_message.edit(
