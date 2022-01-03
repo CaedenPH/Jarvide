@@ -2,12 +2,27 @@ import os
 import string
 import copy
 import disnake
+from disnake import message
 
 from disnake.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
 from odmantic import AIOEngine
 
 from .HIDDEN import TOKEN, MONGO_URI
+
+REMOVE_WORDS = [
+    "what",
+    "pls",
+    "tell",
+    "me",
+    "the",
+    "tf",
+    "give",
+    "your",
+    "you",
+    "is",
+    "can",
+    ]
 
 
 class Jarvide(commands.Bot):
@@ -17,7 +32,6 @@ class Jarvide(commands.Bot):
             case_insensitive=True,
             strip_after_prefix=True,
             help_command=None,  # type: ignore
-            intents=disnake.Intents.all(),
         )
         self.engine = AIOEngine(AsyncIOMotorClient(MONGO_URI))
         self.send_guild = None
@@ -35,17 +49,19 @@ class Jarvide(commands.Bot):
         super().run(TOKEN, reconnect=True)
 
     async def on_message(self, original_message: disnake.Message) -> None:
-        # Prevent bots from executing commands
         if (
             original_message.author.bot
             or "jarvide" not in original_message.content.lower()
         ):
             return
 
+        original_message.content = " ".join([
+            word for word in original_message.content.lower().split() if not any(word.startswith(censored_word) for censored_word in REMOVE_WORDS)  
+        ])
         message_content = "".join(
             [
                 char
-                for char in original_message.content.lower()
+                for char in original_message.content
                 if char not in string.punctuation
             ]
         )
@@ -55,16 +71,19 @@ class Jarvide(commands.Bot):
         )
 
         list_of_commands = {c: [c.name, *c.aliases] for c in self.commands}
-
         commands_in_message = list(
             filter(
                 lambda c: any([x in message_content.split() for x in c[1]]),
                 list_of_commands.items(),
             )
         )
-
-        if len(commands_in_message) != 1:
-            return  # TODO: Maybe make the user know that they supplied too many commands?
+        if len(commands_in_message) <= 0:
+            return
+        
+        if "help" in [k[0].name for k in commands_in_message]:
+            if commands_in_message[0][0].name != "help":
+                commands_in_message = commands_in_message[::-1]
+                
 
         cmd = commands_in_message[0][0]
         ctx = await super().get_context(original_message)
@@ -80,7 +99,8 @@ class Jarvide(commands.Bot):
             )[2]
 
             new_message = copy.copy(original_message)
-            new_message.content = f"jarvide {cmd.name} {args}"
+            new_message.content = f"jarvide {cmd.name}{args}"
+            print(new_message.content)
             await super().process_commands(new_message)
 
     async def on_ready(self) -> None:

@@ -133,8 +133,11 @@ class ExitButton(disnake.ui.Button):
         self.ctx = ctx
 
     async def callback(self, interaction: disnake.MessageInteraction):
-        await interaction.response.defer()
-        
+        try:
+            await interaction.response.defer()
+        except disnake.errors.InteractionResponded:
+            pass
+
         for child in self.view.children:
             if isinstance(child, disnake.ui.Button):
                 child.disabled = True

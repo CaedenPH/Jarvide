@@ -8,9 +8,34 @@ from disnake.embeds import Embed
 from disnake.colour import Color
 from disnake import utils
 from disnake.interactions.message import MessageInteraction
-from disnake.ui.button import Button
 from disnake.ui.view import View
 from disnake.ui.select import Select
+
+
+_desc = f"""```yaml
+        How to use Ide command:
+
+        To start: run the command; [jarvide ide]
+
+Note:
+    - all phases have an exit button; to open a new IDE, you have to exit your open ide. (one ide open per channel)
+
+Creating a file (OpenFile phase):
+    - press the create button 
+       ➥ enter a filename; 
+            [must be shorter than 12 characters long.]
+            [if you want to run the file, you must put the file extension. eg if you want it to be ran in python, you put .py in the filename]
+       ➥ enter the content;
+            [you can use discord codeblocks if you want]
+            [this can be edited and changed]
+
+    + you have just created a file. You have now moved onto the FileView phase!
+    + you can also open files via    links, uploading, github and saved files 
+        ➥ [ supported links are (toptal, pastebin, ghostbin)]
+
+
+```"""  
+ide_embed = Embed(description=_desc)
 
 
 class HelpCog(Cog):
@@ -96,8 +121,10 @@ class JarvideHelp(HelpCommand):
         TO-DO : Invite Button and URL , Change Help Command interface with SHort help text
         """
         _bot: Bot = self.context.bot
-        _desc = f"```fix\nPrefix : {await _bot.get_prefix(self.context.message)}\n```"
-        embed = Embed(color=Color.og_blurple(), description=_bot.description + _desc)
+        
+        await self.context.send(embed=ide_embed)
+        embed = Embed(color=Color.og_blurple(), description=_bot.description + f"```fix\nPrefix : {await _bot.get_prefix(self.context.message)}```")
+        embed.set_image(url="https://media.discordapp.net/attachments/926135748451774464/927683552609439804/jarvideposter.png?width=1440&height=368")
         for cog_name in _bot.cogs:
             if cog_name.lower() in ("jishaku", "helpcog"):
                 continue
@@ -106,7 +133,7 @@ class JarvideHelp(HelpCommand):
             cog: Cog = _bot.get_cog(cog_name)
             embed.add_field(
                 name=f"{cog.qualified_name.upper()} COMMANDS [{len(cog.get_commands())}]",
-                value=f"**╰** {cog.description}",
+                value=f"➥ {cog.description}",
                 inline=False,
             )
         embed.set_author(
@@ -183,7 +210,7 @@ class JarvideHelp(HelpCommand):
 
 class HelpView(View):
     def __init__(self):
-        super().__init__(timeout=15)
+        super().__init__(timeout=180)
 
     async def on_timeout(self) -> None:
         self.children[0].disabled = True
@@ -217,11 +244,6 @@ class NavigatorMenu(Select):
         ]
         embed = await embed_for_cog(cog_s[0], self.context)
         await interaction.message.edit(embed=embed)
-        await interaction.response.send_message(
-            f"Showing help for {cog_s[0].qualified_name.upper()} COMMANDS",
-            ephemeral=True,
-        )
-
 
 async def embed_for_cog(cog: Cog, ctx: Context):
     desc = "\n".join(

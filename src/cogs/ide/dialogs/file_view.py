@@ -35,7 +35,7 @@ class FileView(disnake.ui.View):
             embed=embed
         )
 
-    def __init__(self, ctx, file_: File, bot_message: disnake.Message):
+    def __init__(self, ctx, file_: File, bot_message: disnake.Message = None):
         super().__init__(timeout=300)
 
         self.ctx = ctx
@@ -65,7 +65,7 @@ class FileView(disnake.ui.View):
             content,
             prefix=f"```{self.extension}",
             suffix="```",
-            line_limit=50,
+            line_limit=30,
             timeout=None,  # type: ignore
             embed_author_kwargs={
                 "name": f"{self.ctx.author.name}'s automated paginator for {self.file.filename}",
@@ -94,10 +94,17 @@ class FileView(disnake.ui.View):
                         delete_after=15,
                     )
 
+                if not 'output' in json:
+                    await interaction.response.defer()
+                    return await interaction.channel.send(
+                        "Something went wrong! Maybe the file is too long!",
+                        delete_after=15,
+                    )
                 output = json["output"].strip("\n").strip()
                 if not output:
                     output = "[No output]"
 
+            await interaction.response.defer()
             await TextPaginator(interaction, f"```yaml\n{output}```").start()
 
     @disnake.ui.button(label="Edit", style=disnake.ButtonStyle.green)
@@ -143,19 +150,13 @@ class FileView(disnake.ui.View):
         embed = EmbedFactory.ide_embed(self.ctx, description)
         await self.bot_message.edit(embed=embed)
 
-    @disnake.ui.button(label="Back", style=disnake.ButtonStyle.red, row=1)
-    async def back_button(
+    @disnake.ui.button(label="Move", style=disnake.ButtonStyle.red, row=1)
+    async def move_button(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.send_message(
             f"What channel would you like to move this ide to? Send the channel #. Like {interaction.channel.mention}",
             ephemeral=True)
-        channel = await self.bot.wait_for(
-            "message",
-            check=lambda m: self.ctx.author == m.author
-            and m.channel == self.ctx.channel,
-        )
-
         num = 0
         while not (channel := await self.bot.wait_for(
             "message",
@@ -174,13 +175,29 @@ class FileView(disnake.ui.View):
 
         embed = EmbedFactory.ide_embed(
             self.ctx,
-            get_info(self.file)
+            await get_info(self.file)
         )
-        await channel.channel_mentions[0].send(
+        view = FileView(self.ctx, self.file)
+        view.bot_message = await channel.channel_mentions[0].send(
             embed=embed,
-            view=self
+            view=view
         )
-        await ExitButton.callback()
+
+        # for child in self.children:
+        #     if isinstance(child, disnake.ui.Button):
+        #         child.disabled = True
+
+        # embed = EmbedFactory.ide_embed(
+        #     self.ctx,
+        #     "Goodbye!"
+        # )  
+        # await self.bot_message.edit(
+        #     view=self,
+        #     embed=embed
+        # )
+
+        # TODO: fix
+        
         
 
     @disnake.ui.button(label="Back", style=disnake.ButtonStyle.red, row=1)
