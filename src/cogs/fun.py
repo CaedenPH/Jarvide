@@ -58,9 +58,10 @@ class Casino(disnake.ui.View):
             return await interaction.send(embed=Awinningembed)
 
     @disnake.ui.button(
-        label: str = "Retry",
-        style: disnake.ButtonStyle = disnake.ButtonStyle.green,
-        emoji: str = "🔄")
+        label = "Retry",
+        style = disnake.ButtonStyle.green,
+        emoji = "🔄"
+    )
     async def retry(
         self, button: disnake.ui.button, interaction: disnake.MessageInteraction
         ) -> None:
