@@ -164,3 +164,22 @@ class SaveButton(disnake.ui.Button):
         await self.bot_message.edit(
             embed=embed, view=SaveFile(self.ctx, self.bot_message, self.file)
         )
+
+def main_embed(bot):
+    return disnake.Embed(description=f"""
+    **Hello, my name is Jarvide.** 
+
+    │ I am half AI, half discord text editor. │
+    │ To understand more about me, read [this](https://github.com/CaedenPH/Jarvide/blob/main/ABOUT.md). │
+    │ To understand more about how to use me, read [this](https://github.com/CaedenPH/Jarvide/blob/main/USAGE.md). │   
+
+    │ If you are still confused, join my [support server](https://discord.gg/mtue4UnWaA). │ 
+    │ My devs are always around to assist you! │  
+            """
+            ).set_image(
+                url="https://media.discordapp.net/attachments/926115595307614252/927951464725377034/big.png?width=1440&height=453"
+            ).set_author(
+                name="Jarvide",
+                icon_url=bot.user.avatar.url
+            )
+
