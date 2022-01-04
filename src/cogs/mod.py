@@ -128,12 +128,11 @@ class Mod(commands.Cog):
         change = time_str.convert(time)
         duration = now + change
         await member.timeout(until=duration, reason=reason)
-        await member.send(f"You have been timed out from: {ctx.guild.name}, for {time}")
         await ctx.send(
             embed=disnake.Embed(
                 title="Timed Out!",
-                description=f"{member.mention} was timed out until {duration} for reason: {reason}",
-                color=disnake.Colour.green()
+                description=f":white_check_mark: {member.mention} was timed out until <t:{duration.timestamp()}:R>",
+                color=disnake.Colour.blurple()
             )
         )
 
