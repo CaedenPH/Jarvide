@@ -2,32 +2,6 @@ from disnake import utils, Embed, Color, MessageInteraction, SelectOption
 from disnake.ui import View, Select
 from disnake.ext.commands import Bot, Command, Cog, command, HelpCommand, Context, Group
 
-_desc = f"""```yaml
-        How to use Ide command:
-
-        To start: run the command; [jarvide ide]
-
-Note:
-    - all phases have an exit button; to open a new IDE, you have to exit your open ide. (one ide open per channel)
-
-Creating a file (OpenFile phase):
-    - press the create button 
-       ➥ enter a filename; 
-            [must be shorter than 12 characters long.]
-            [if you want to run the file, you must put the file extension. eg if you want it to be ran in python, you put .py in the filename]
-       ➥ enter the content;
-            [you can use discord codeblocks if you want]
-            [this can be edited and changed]
-
-    + you have just created a file. You have now moved onto the FileView phase!
-    + you can also open files via    links, uploading, github and saved files 
-        ➥ [ supported links are (toptal, pastebin, ghostbin)]
-
-
-```"""
-ide_embed = Embed(description=_desc)
-
-
 class HelpCog(Cog):
     def __init__(self, bot):
         self._original_help_command = bot.help_command
@@ -112,7 +86,6 @@ class JarvideHelp(HelpCommand):
         """
         _bot: Bot = self.context.bot
 
-        await self.context.send(embed=ide_embed)
         embed = Embed(
             color=Color.og_blurple(),
             description=_bot.description
@@ -122,9 +95,7 @@ class JarvideHelp(HelpCommand):
             url="https://media.discordapp.net/attachments/926115595307614252/927951464725377034/big.png"
         )
         for cog_name in _bot.cogs:
-            if cog_name.lower() in ("jishaku", "helpcog"):
-                continue
-            if cog_name.lower() == "staff" and self.context.author not in _bot.owners:
+            if cog_name.lower() in ("jishaku", "helpcog", "staff", "ide"):
                 continue
             cog: Cog = _bot.get_cog(cog_name)
             embed.add_field(
@@ -219,9 +190,7 @@ class NavigatorMenu(Select):
         self.context: Context = ctx
         options = []
         for cog_name in ctx.bot.cogs:
-            if cog_name.lower() in ("jishaku", "helpcog"):
-                continue
-            if cog_name.lower() == "staff" and ctx.author not in ctx.bot.owners:
+            if cog_name.lower() in ("jishaku", "helpcog", "staff", "ide"):
                 continue
             cog: Cog = ctx.bot.get_cog(cog_name)
             options.append(
@@ -241,6 +210,7 @@ class NavigatorMenu(Select):
             == self.context.bot.get_cog(cog).qualified_name.lower()
         ]
         embed = await embed_for_cog(cog_s[0], self.context)
+        await interaction.response.defer()
         await interaction.message.edit(embed=embed)
 
 
