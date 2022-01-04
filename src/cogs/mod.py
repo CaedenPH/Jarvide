@@ -124,10 +124,10 @@ class Mod(commands.Cog):
     @commands.guild_only()
     @commands.has_permissions(moderate_members=True)
     @commands.bot_has_permissions(moderate_members=True)
-    async def timeout(self, ctx, member: disnake.Member, time: typing.Union[datetime.datetime, int], *, reason=None):
+    async def timeout(self, ctx, member: disnake.Member, time: typing.Union[int, datetime.datetime], *, reason=None):
         kwargs = {"duration": time, "reason": reason}
         if isinstance(time, datetime.datetime):
-            kwargs = {"time": time, "reason": reason}
+            kwargs = {"until": time, "reason": reason}
         await member.timeout(**kwargs)
         embed = disnake.Embed(
             description=f":white_check_mark: {member.mention} has been timed out until {time}.",

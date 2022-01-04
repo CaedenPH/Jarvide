@@ -1,7 +1,6 @@
-from disnake import utils, Embed, Color, MessageInteraction, SelectOption, SelectMenu
+from disnake import utils, Embed, Color, MessageInteraction, SelectOption
 from disnake.ui import View, Select
-from disnake.ext.commands import Bot, Cog, HelpCommand, Context, Group, Command, command
-
+from disnake.ext.commands import Bot, Command, Cog, command, HelpCommand, Context, Group
 
 _desc = f"""```yaml
         How to use Ide command:
@@ -25,7 +24,7 @@ Creating a file (OpenFile phase):
         ➥ [ supported links are (toptal, pastebin, ghostbin)]
 
 
-```"""  
+```"""
 ide_embed = Embed(description=_desc)
 
 
@@ -51,20 +50,20 @@ class JarvideHelp(HelpCommand):
     def __init__(self):
         super().__init__()
 
-    async def command_callback(self, ctx, *, command_=None):
+    async def command_callback(self, ctx, *, cmd=None):
         """
-        Overrided to make the help for Cog case insensitive
+        Overrided to make the help for Cog case-insensitive
         """
-        await self.prepare_help_command(ctx, command_)
+        await self.prepare_help_command(ctx, cmd)
         bot = ctx.bot
 
-        if command_ is None:
+        if cmd is None:
             mapping = self.get_bot_mapping()
             return await self.send_bot_help(mapping)
 
         # Check if it's a cog
         cog = None
-        _cog = [cog for cog in ctx.bot.cogs if cog.lower() == command_.lower()]
+        _cog = [cog for cog in ctx.bot.cogs if cog.lower() == cmd.lower()]
         if _cog:
             cog = _cog[0]
         if cog is not None:
@@ -76,7 +75,7 @@ class JarvideHelp(HelpCommand):
         # Since we want to have detailed errors when someone
         # passes an invalid subcommand, we need to walk through
         # the command group chain ourselves.
-        keys = command_.split(" ")
+        keys = cmd.split(" ")
         cmd = bot.all_commands.get(keys[0])
         if cmd is None:
             string = await maybe_coro(
@@ -112,10 +111,12 @@ class JarvideHelp(HelpCommand):
         TO-DO : Invite Button and URL , Change Help Command interface with SHort help text
         """
         _bot: Bot = self.context.bot
-        
+
         await self.context.send(embed=ide_embed)
-        embed = Embed(color=Color.og_blurple(), description=_bot.description + f"```fix\nPrefix : {await _bot.get_prefix(self.context.message)}```")
-        embed.set_image(url="https://media.discordapp.net/attachments/926135748451774464/927683552609439804/jarvideposter.png?width=1440&height=368")
+        embed = Embed(color=Color.og_blurple(),
+                      description=_bot.description + f"```fix\nPrefix : {await _bot.get_prefix(self.context.message)}```")
+        embed.set_image(
+            url="https://media.discordapp.net/attachments/926135748451774464/927683552609439804/jarvideposter.png?width=1440&height=368")
         for cog_name in _bot.cogs:
             if cog_name.lower() in ("jishaku", "helpcog"):
                 continue
@@ -184,8 +185,7 @@ class JarvideHelp(HelpCommand):
             for cmd in group.commands
         )
         embed = Embed(
-            description=group.description
-            or f"{group.qualified_name.title()} Group" + desc,
+            description=group.description or f"{group.qualified_name.title()} Group" + desc,
             color=Color.og_blurple(),
         )
         await self.context.reply(embed=embed, mention_author=False)
@@ -200,13 +200,12 @@ class JarvideHelp(HelpCommand):
 
 class HelpView(View):
     def __init__(self):
+        super().__init__(timeout=180)
         self.message = None
-        super().__init__(timeout=3)
 
     async def on_timeout(self) -> None:
         item = self.children[0]
-        if isinstance(item, SelectMenu):
-            item.disabled = True
+        item.disabled = True
         await self.message.edit(view=self)
 
 
@@ -232,8 +231,8 @@ class NavigatorMenu(Select):
         cog_s = [
             self.context.bot.get_cog(cog)
             for cog in self.context.bot.cogs
-            if interaction.values[0].lower().replace(" commands", "")
-            == self.context.bot.get_cog(cog).qualified_name.lower()
+            if interaction.values[0].lower(
+            ).replace(" commands", "") == self.context.bot.get_cog(cog).qualified_name.lower()
         ]
         embed = await embed_for_cog(cog_s[0], self.context)
         await interaction.message.edit(embed=embed)
@@ -248,13 +247,11 @@ async def embed_for_cog(cog: Cog, ctx: Context):
         Embed(
             color=Color.og_blurple(),
             description="Use `jarvide help <command>` for more info about commands\n\n"
-            + desc,
-        )
-        .set_author(
+                        + desc,
+        ).set_author(
             name=f"{cog.qualified_name.upper()} CATEGORY",
             icon_url=ctx.bot.user.display_avatar.url,
-        )
-        .set_footer(
+        ).set_footer(
             text=f"Requested by {ctx.author}", icon_url=ctx.author.display_avatar.url
         )
     )

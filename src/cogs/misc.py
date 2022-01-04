@@ -17,15 +17,14 @@ class Misc(commands.Cog):
         self.bot = bot
         self.google = async_cse.Search(KEY)
 
-    async def overlay(ctx: commands.Context, endpoint, user:disnake.Member):
-        if user == None:
-            user = ctx.author
+    async def overlay(self, ctx: commands.Context, endpoint, user: disnake.Member = None):
+        user = user or ctx.author
         emb = disnake.Embed(color=0x90EE90).set_image(
             url=f"https://some-random-api.ml/canvas/%s?avatar=%s"
             % (endpoint, user.avatar.with_format("png").url)
         )
         await ctx.send(embed=emb)
-        
+
     @commands.command(name="google", aliases=["find", "search"])
     async def find(self, ctx, *, query):
         safesearch = True
@@ -33,7 +32,7 @@ class Misc(commands.Cog):
             safesearch = not ctx.channel.is_nsfw()
         try:
             response = await self.google.search(query, safesearch=safesearch)
-            
+
         except async_cse.search.NoResults:
             await ctx.reply(f"Woops, no results found for `{query}`!")
             return
@@ -42,9 +41,11 @@ class Misc(commands.Cog):
             await ctx.reply_embed(f"Woops, no results found for `{query}`!")
             return
 
-        embed = disnake.Embed(color=0x00a6f2, title=res[0].title, description=response[0].description, url=res[0].url)
+        embed = disnake.Embed(
+            color=0x00a6f2, title=response[0].title, description=response[0].description, url=response[0].url
+        )
         await ctx.reply(embed=embed, mention_author=False)
-        
+
     @commands.command(aliases=["latency"])
     async def ping(self, ctx: commands.Context):
         if round(self.bot.latency * 1000) > 150:
@@ -116,45 +117,30 @@ class Misc(commands.Cog):
 
     @commands.command()
     async def gay(self, ctx, *, user: disnake.Member = None):
-        if user == None:
-            await self.overlay(ctx, "gay")
-        else:
-            await self.overlay(ctx, "gay", user)
+        await self.overlay(ctx, "gay", user)
 
     @commands.command()
     async def wasted(self, ctx, *, user: disnake.Member = None):
-        if user == None:
-            await self.overlay(ctx, "wasted")
-        else:
-            await self.overlay(ctx, "wasted", user)
+        await self.overlay(ctx, "wasted", user)
 
     @commands.command()
     async def passed(self, ctx, *, user: disnake.Member = None):
-        if user == None:
-            await self.overlay(ctx, "passed")
-        else:
-            await self.overlay(ctx, "passed", user)
+        await self.overlay(ctx, "passed", user)
 
     @commands.command()
     async def jail(self, ctx, *, user: disnake.Member = None):
-        if user == None:
-            await self.overlay(ctx, "jail")
-        else:
-            await self.overlay(ctx, "jail", user)
+        await self.overlay(ctx, "jail", user)
 
     @commands.command()
     async def comrade(self, ctx, *, user: disnake.Member = None):
-        if user == None:
+        if user is None:
             await self.overlay(ctx, "comrade")
         else:
             await self.overlay(ctx, "comrade", user)
 
     @commands.command()
     async def triggered(self, ctx, *, user: disnake.Member = None):
-        if user == None:
-            await self.overlay(ctx, "triggered")
-        else:
-            await self.overlay(ctx, "triggered", user)
+        await self.overlay(ctx, "triggered", user)
 
 
 def setup(bot: commands.Bot) -> None:

@@ -24,7 +24,7 @@ class Casino(disnake.ui.View):
         emoji="▶️",
     )
     async def play(
-        self, button: disnake.ui.button, interaction: disnake.MessageInteraction
+            self, button: disnake.ui.button, interaction: disnake.MessageInteraction
     ) -> None:
         self.exit.disabled = True
         self.play.disabled = True
@@ -63,8 +63,8 @@ class Casino(disnake.ui.View):
         emoji="🔄"
     )
     async def retry(
-        self, button: disnake.ui.button, interaction: disnake.MessageInteraction
-        ) -> None:
+            self, button: disnake.ui.button, interaction: disnake.MessageInteraction
+    ) -> None:
         intsthink1 = disnake.Embed(
             title="Casino Machine $", description="```...```"
         ).set_footer(text="Get Three numbers in a row for a PRIZE")
@@ -96,7 +96,7 @@ class Casino(disnake.ui.View):
 
     @disnake.ui.button(label="Exit", style=disnake.ButtonStyle.red, emoji="⏹️")
     async def exit(
-        self, button: disnake.ui.button, interaction: disnake.MessageInteraction
+            self, button: disnake.ui.button, interaction: disnake.MessageInteraction
     ) -> None:
         await interaction.response.defer()
         await interaction.edit_original_message(view=None)
@@ -176,7 +176,7 @@ class Fun(commands.Cog):
 
         await ctx.send(
             f"{member.mention} is packing {inches}inches, wow such a {size} pp"
-            )
+        )
 
     @commands.command(aliases=["casino"])
     async def jackpot(self, ctx) -> None:

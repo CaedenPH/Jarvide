@@ -64,7 +64,7 @@ class OpenView(disnake.ui.View):
             num += 1
             if num == 3:
                 embed = EmbedFactory.ide_embed(
-                    self.ctx, "Nice try. You cant break this bot!"
+                    self.ctx, "Nice try. You can't break this bot!"
                 )
                 return await self.bot_message.edit(embed=embed)
             await interaction.channel.send("Upload a file", delete_after=5)
@@ -102,7 +102,7 @@ class OpenView(disnake.ui.View):
             num += 1
             if num == 3:
                 embed = EmbedFactory.ide_embed(
-                    self.ctx, "Nice try. You cant break this bot!"
+                    self.ctx, "Nice try. You can't break this bot!"
                 )
                 return await self.bot_message.edit(embed=embed)
 
@@ -198,7 +198,7 @@ class OpenView(disnake.ui.View):
             num += 1
             if num == 3:
                 embed = EmbedFactory.ide_embed(
-                    self.ctx, "Nice try. You cant break this bot!"
+                    self.ctx, "Nice try. You can't break this bot!"
                 )
                 return await self.bot_message.edit(embed=embed)
             await interaction.channel.send(

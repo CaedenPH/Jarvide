@@ -166,7 +166,7 @@ class FileView(disnake.ui.View):
             num += 1
             if num == 3:
                 embed = EmbedFactory.ide_embed(
-                    self.ctx, "Nice try. You cant break this bot!"
+                    self.ctx, "Nice try. You can't break this bot!"
                 )
                 return await self.bot_message.edit(embed=embed)
             await interaction.channel.send("That is not a valid channel id!", delete_after=15)

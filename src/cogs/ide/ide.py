@@ -6,8 +6,6 @@ from .dialogs import OpenView
 from src.utils import EmbedFactory
 from disnake.ext import commands, tasks
 
-from typing import Optional
-
 
 class Ide(commands.Cog):
     """Ide cog"""
@@ -25,8 +23,7 @@ class Ide(commands.Cog):
                 if not message:
                     del self.active_commands[channel][user]
                     return
-                if all(all(k.disabled for k in child.children if isinstance(k, disnake.ui.Button))
-                       for child in message.components if isinstance(child, disnake.ActionRow)):
+                if all(all(k.disabled for k in child.children) for child in message.components if isinstance(child, disnake.ActionRow)):
                     del self.active_commands[channel][user]
 
     @commands.command(
@@ -34,7 +31,7 @@ class Ide(commands.Cog):
     )
     async def ide(
         self, ctx: commands.Context, query: str = None, link: str = None
-    ) -> Optional[disnake.Message]:
+    ) -> disnake.Message:
         if (
             ctx.channel in self.active_commands
             and ctx.author in self.active_commands[ctx.channel]

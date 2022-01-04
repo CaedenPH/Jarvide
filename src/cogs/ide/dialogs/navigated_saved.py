@@ -245,7 +245,7 @@ class SaveFile(DefaultButtons):
         ]
         if self.file.filename in dir_files:
             return await interaction.response.send_message(
-                "You cant have a file with the same name!"
+                "You can't have a file with the same name!"
             )
 
         file_ = FileModel(
