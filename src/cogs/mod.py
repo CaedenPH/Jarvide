@@ -124,13 +124,16 @@ class Mod(commands.Cog):
     @commands.guild_only()
     @commands.has_permissions(moderate_members=True)
     @commands.bot_has_permissions(moderate_members=True)
-    async def timeout(self, ctx, member: disnake.Member, time: typing.Union[int, datetime.datetime], *, reason=None):
-        kwargs = {"duration": time, "reason": reason}
-        if isinstance(time, datetime.datetime):
-            kwargs = {"until": time, "reason": reason}
-        await member.timeout(**kwargs)
+    async def timeout(self, ctx, member: disnake.Member, time: str, *, reason=None):
+        if len(str) > 2:
+            return await ctx.reply("Invalid time input, expected: [1s/1h/1m/1d]") 
+        durations = { "days": time[0] if time[1] == "d" else 0, "hours": time[0] if time[1] == "h" else 0, "minutes": time[0] if time[1] == "s" else 0 }
+        now = datetime.datetime.utcnow()
+        change = datetime.timedelta(**durations)
+        duration = now + change
+        await member.timeout(until = duration, reason = reason)
         embed = disnake.Embed(
-            description=f":white_check_mark: {member.mention} has been timed out until {time}.",
+            description=f":white_check_mark: {member.mention} has been timed out until {duration}.",
             color=disnake.Color.blurple(),
         )
         await ctx.send(embed=embed)
