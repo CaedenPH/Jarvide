@@ -12,7 +12,7 @@ class Misc(
     commands.Cog,
     command_attrs={
         "cooldown": commands.CooldownMapping.from_cooldown(
-            1, 3.5, commands.BucketType.user5
+            1, 3.5, commands.BucketType.user
         )
     },
 ):
