@@ -1,53 +1,24 @@
-import datetime
 import os
 import string
 import copy
-import typing
+import disnake
 
-from disnake import Message
-
-from disnake.ext.commands import (
-    Bot,
-    BotMissingPermissions,
-    MissingPermissions,
-    MissingRole,
-    DisabledCommand,
-    NotOwner,
-    ChannelNotFound,
-    MemberNotFound,
-    UserNotFound,
-    TooManyArguments,
-    CommandOnCooldown,
-    MissingRequiredArgument,
-    Context
-)
+from disnake.ext import commands
+import aiosqlite
 from motor.motor_asyncio import AsyncIOMotorClient
 from odmantic import AIOEngine
 
 from .HIDDEN import TOKEN, MONGO_URI
 
-REMOVE_WORDS = [
-    "what",
-    "pls",
-    "tell",
-    "me",
-    "the",
-    "tf",
-    "give",
-    "your",
-    "you",
-    "is",
-    "can",
-]
 
-
-class Jarvide(Bot):
+class Jarvide(commands.Bot):
     def __init__(self):
         super().__init__(
             command_prefix="jarvide",
             case_insensitive=True,
             strip_after_prefix=True,
             help_command=None,  # type: ignore
+            intents=disnake.Intents.all(),
         )
         self.engine = AIOEngine(AsyncIOMotorClient(MONGO_URI))
         self.send_guild = None
@@ -64,28 +35,18 @@ class Jarvide(Bot):
         self.setup()
         super().run(TOKEN, reconnect=True)
 
-    async def on_message(self, original_message: Message) -> typing.Optional[Message]:
-        if self.user.mentioned_in(original_message):
-            return await original_message.channel.send("My prefix is jarvide")
+    async def on_message(self, original_message: disnake.Message) -> None:
+        # Prevent bots from executing commands
         if (
             original_message.author.bot
             or "jarvide" not in original_message.content.lower()
         ):
             return
 
-        original_message.content = " ".join(
-            [
-                word
-                for word in original_message.content.lower().split()
-                if not any(
-                    word.startswith(censored_word) for censored_word in REMOVE_WORDS
-                )
-            ]
-        )
         message_content = "".join(
             [
                 char
-                for char in original_message.content
+                for char in original_message.content.lower()
                 if char not in string.punctuation
             ]
         )
@@ -95,18 +56,16 @@ class Jarvide(Bot):
         )
 
         list_of_commands = {c: [c.name, *c.aliases] for c in self.commands}
+
         commands_in_message = list(
             filter(
                 lambda c: any([x in message_content.split() for x in c[1]]),
                 list_of_commands.items(),
             )
         )
-        if len(commands_in_message) <= 0:
-            return
 
-        if "help" in [k[0].name for k in commands_in_message]:
-            if commands_in_message[0][0].name != "help":
-                commands_in_message = commands_in_message[::-1]
+        if len(commands_in_message) != 1:
+            return  # TODO: Maybe make the user know that they supplied too many commands?
 
         cmd = commands_in_message[0][0]
         ctx = await super().get_context(original_message)
@@ -122,54 +81,42 @@ class Jarvide(Bot):
             )[2]
 
             new_message = copy.copy(original_message)
-            new_message.content = f"jarvide {cmd.name}{args}"
+            new_message.content = f"jarvide {cmd.name} {args}"
             await super().process_commands(new_message)
 
     async def on_ready(self) -> None:
         self.send_guild = self.get_guild(926811692019626064)
         print("Set up")
+    
+    async def on_guild_join(guild)
+        await guild.system_channel.send(embed = disnake.Embed(title = f"Thank you for adding my bot!", description = f"""
+        Hello, i am jarvide Bot And IDE ```yaml\nHow to use Ide command:
 
-    def underline(self, text, at, for_):
-        underline = (" " * at) + ("^" * for_)
-        return text + "\n" + underline
+        To start: run the command; [jarvide ide]
 
-    async def on_command_error(self, ctx: Context, error: Exception):
-        
-        if isinstance(error, MissingRequiredArgument):
-            desc = f"{ctx.prefix} {ctx.command.name} {ctx.command.signature}"
-            inside = self.underline(desc, desc.index(f'<{error.param.name}>'), len(f'<{error.param.name}>'))
-            desc = f"You missed an argument: \n```\n{inside}\n```"
-            return await ctx.send(desc)
+Note:
+    - all phases have an exit button; to open a new IDE, you have to exit your open ide. (one ide open per channel)
 
-        elif isinstance(error, DisabledCommand):
-            return await ctx.send('This command is disabled.')
+Creating a file (OpenFile phase):
+    - press the create button 
+       ➥ enter a filename; 
+            [must be shorter than 12 characters long.]
+            [if you want to run the file, you must put the file extension. eg if you want it to be ran in python, you put .py in the filename]
+       ➥ enter the content;
+            [you can use discord codeblocks if you want]
+            [this can be edited and changed]
 
-        elif isinstance(error, TooManyArguments):
-            return await ctx.send(f'Too many arguments passed.\n```yaml\nusage: {ctx.prefix}{ctx.command.aliases.append(ctx.command.name)} {ctx.command.signature}')
+    + you have just created a file. You have now moved onto the FileView phase!
+    + you can also open files via    links, uploading, github and saved files 
+        ➥ [ supported links are (toptal, pastebin, ghostbin)]'n```"""))
+        async with aiosqlite.connect("databases/config.sqlite") as db:
+            async with db.cursor() as cur:
+                guilds = (i[0] for i in cur.execute("SELECT * FROM guilds"))
+                if guild.id not in guilds:
+                    cur.execute("INSERT INTO guilds (id, allowedChannels) VALUES (%s, %s)" % (guild.id, (ctx.guild.system_channel)
+                else:
+                    cur.execute(f"UPDATE guilds SET allowedChannels = (allowedChannels, {channel.id}) WHERE guildid = {.guild.id}")
+                cur.commit()  
 
-        elif isinstance(error, CommandOnCooldown):
-            return await ctx.send(f'Command is on cooldown. Try again after {datetime.timedelta(seconds = error.retry_after)}')
-
-        elif isinstance(error, NotOwner):
-            return await ctx.send('Only my owner can use this command.')
-
-        elif isinstance(error, MemberNotFound):
-            return await ctx.send('No such member found.')
-
-        elif isinstance(error, UserNotFound):
-            return await ctx.send('No such user found.')   
-
-        elif isinstance(error, ChannelNotFound):
-            return await ctx.send('No such channel found.')
-
-        elif isinstance(error, MissingPermissions):
-            return await ctx.send(f'You need the {"".join(error.missing_permissions)} permissions to be able to do this.')
-
-        elif isinstance(error, BotMissingPermissions):
-            return await ctx.send(f'I need the {"".join(error.missing_permissions)} permissions to be able to do this.')
-
-        elif isinstance(error, MissingRole):
-            return await ctx.send('You are missing a certain role to perform this command.')
-        else:
-            await ctx.send(error)
-            raise error
+    async def on_command_error(self, ctx, error):
+        await ctx.send(error)
