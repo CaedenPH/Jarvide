@@ -119,7 +119,7 @@ class Mod(commands.Cog):
             )
             return
 
-    @commands.command()
+    @commands.command(aliases=['mute', 'to', 'silence', 'shush'])
     @commands.guild_only()
     @commands.has_permissions(moderate_members=True)
     @commands.bot_has_permissions(moderate_members=True)
@@ -128,11 +128,11 @@ class Mod(commands.Cog):
         change = time_str.convert(time)
         duration = now + change
         await member.timeout(until=duration, reason=reason)
-        await member.send(f"You have been timed out from: {ctx.guild.name}, for {time}")
+        await member.send(f"You have been timed out from: {ctx.guild.name}, until <t:{int(duration.timestamp())}:f>")
         await ctx.send(
             embed=disnake.Embed(
                 title="Timed Out!",
-                description=f"{member.mention} was timed out until {duration} for reason: {reason}",
+                description=f"{member.mention} was timed out until <t:{int(duration.timestamp())}:f> for reason: {reason}",
                 color=disnake.Colour.green()
             )
         )

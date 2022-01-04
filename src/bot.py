@@ -2,6 +2,8 @@ import datetime
 import os
 import string
 import copy
+import typing
+
 from disnake import Message
 
 from disnake.ext.commands import (
@@ -62,7 +64,9 @@ class Jarvide(Bot):
         self.setup()
         super().run(TOKEN, reconnect=True)
 
-    async def on_message(self, original_message: Message) -> None:
+    async def on_message(self, original_message: Message) -> typing.Optional[Message]:
+        if self.user.mentioned_in(original_message):
+            return await original_message.channel.send("My prefix is jarvide")
         if (
             original_message.author.bot
             or "jarvide" not in original_message.content.lower()
@@ -124,16 +128,18 @@ class Jarvide(Bot):
     async def on_ready(self) -> None:
         self.send_guild = self.get_guild(926811692019626064)
         print("Set up")
-    
+
     def underline(self, text, at, for_):
-        import itertools
-        underline = "".join(itertools.repeat(" ", at)) + "".join(itertools.repeat("^", for_))
+        underline = (" " * at) + ("^" * for_)
         return text + "\n" + underline
-    
+
     async def on_command_error(self, ctx: Context, error: Exception):
         
         if isinstance(error, MissingRequiredArgument):
-            return
+            desc = f"{ctx.prefix} {ctx.command.name} {ctx.command.signature}"
+            inside = self.underline(desc, desc.index(f'<{error.param.name}>'), len(f'<{error.param.name}>'))
+            desc = f"You missed an argument: \n```\n{inside}\n```"
+            return await ctx.send(desc)
 
         elif isinstance(error, DisabledCommand):
             return await ctx.send('This command is disabled.')
