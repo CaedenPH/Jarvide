@@ -30,13 +30,9 @@ class DefaultButtons(disnake.ui.View):
                 child.disabled = True
 
         embed = EmbedFactory.ide_embed(
-            self.ctx,
-            "Ide timed out. Feel free to make a new one!"
+            self.ctx, "Ide timed out. Feel free to make a new one!"
         )
-        await self.bot_message.edit(
-            view=self,
-            embed=embed
-        )
+        await self.bot_message.edit(view=self, embed=embed)
 
     def __init__(self, ctx, bot_message):
         self.ctx = ctx
@@ -52,9 +48,7 @@ class DefaultButtons(disnake.ui.View):
     async def current_directory(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
-        await interaction.response.send_message(
-            "What folder ", ephemeral=True
-        )
+        await interaction.response.send_message("What folder ", ephemeral=True)
         directory = await self.bot.wait_for(
             "message",
             check=lambda m: self.ctx.author == m.author
@@ -63,18 +57,17 @@ class DefaultButtons(disnake.ui.View):
         path = self.bot.engine.find(
             FileModel,
             FileModel.user_id == self.ctx.author.id,
-            FileModel.folder == directory
-                )
+            FileModel.folder == directory,
+        )
 
         if not path:
             if self.SUDO:
                 await directory.delete()
-            return await interaction.channel.send(f"{directory} doesn't exist!", delete_after=15)
+            return await interaction.channel.send(
+                f"{directory} doesn't exist!", delete_after=15
+            )
 
-        embed = EmbedFactory.ide_embed(
-            self.ctx,
-            f""
-        )
+        embed = EmbedFactory.ide_embed(self.ctx, f"")
 
     @disnake.ui.button(label="View folder", style=disnake.ButtonStyle.green)
     async def view_folder(
@@ -86,7 +79,7 @@ class DefaultButtons(disnake.ui.View):
                 for k in await self.bot.engine.find(
                     FileModel,
                     FileModel.user_id == self.ctx.author.id,
-                    FileModel.folder == self.path
+                    FileModel.folder == self.path,
                 )
             ]
         )
@@ -185,27 +178,26 @@ class OpenFromSaved(DefaultButtons):
         await interaction.response.send_message(
             "What file do you want to open?", ephemeral=True
         )
-        filename = (await self.bot.wait_for(
-            "message",
-            check=lambda m: self.ctx.author == m.author
-            and m.channel == self.ctx.channel,
-        )).content
+        filename = (
+            await self.bot.wait_for(
+                "message",
+                check=lambda m: self.ctx.author == m.author
+                and m.channel == self.ctx.channel,
+            )
+        ).content
 
         file_model = await self.bot.engine.find(
-                    FileModel,
-                    FileModel.user_id == self.ctx.author.id,
-                    FileModel.name == filename,
-                    FileModel.folder == self.path
-                )
+            FileModel,
+            FileModel.user_id == self.ctx.author.id,
+            FileModel.name == filename,
+            FileModel.folder == self.path,
+        )
 
         if not file_model:
             return await interaction.channel.send(f"{filename} doesnt exist!")
 
         file_model = file_model[0]
-        file_ = await File.from_url(
-            bot=self.bot,
-            url=file_model.file_url
-        )
+        file_ = await File.from_url(bot=self.bot, url=file_model.file_url)
         embed = EmbedFactory.ide_embed(
             self.ctx,
             f"Opened {filename}\n{''.join(['-' for _ in range(len(filename)+len('Opened '))])}\n{await get_info(file_)}",
@@ -240,7 +232,7 @@ class SaveFile(DefaultButtons):
             for k in await self.bot.engine.find(
                 FileModel,
                 FileModel.user_id == self.ctx.author.id,
-                FileModel.folder == self.path
+                FileModel.folder == self.path,
             )
         ]
         if self.file.filename in dir_files:
