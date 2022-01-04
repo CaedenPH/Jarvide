@@ -3,7 +3,7 @@ import aiohttp
 import random
 import async_cse
 
-from HIDDEN import KEY
+from ..HIDDEN import KEY
 from disnake.ext import commands
 
 

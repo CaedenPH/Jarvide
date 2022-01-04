@@ -1,4 +1,3 @@
-from time import time
 import aiohttp
 import base64
 import disnake
@@ -8,6 +7,7 @@ from src.utils import EmbedFactory, File, get_info
 from .file_view import FileView
 
 THUMBS_UP = "👍"
+
 
 class OpenView(disnake.ui.View):
     def __init__(self, ctx, bot_message=None):
