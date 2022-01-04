@@ -133,6 +133,8 @@ class Jarvide(Bot):
     async def on_command_error(self, ctx: Context, error: Exception):
         
         if isinstance(error, MissingRequiredArgument):
+            desc = f"```\n{ctx.prefix}[{'/'.join(ctx.command.aliases.append(ctx.command.name))}] {ctx.command.signature}\n```"
+            desc = underline(desc, desc.index(f"<{errororiginal.param}>", len(f"<{errororiginal.param}")))
             return
 
         elif isinstance(error, DisabledCommand):
