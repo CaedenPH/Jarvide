@@ -24,6 +24,7 @@ class Misc(commands.Cog):
         emb = disnake.Embed(color=0x90EE90).set_image(
             url=f"https://some-random-api.ml/canvas/{endpoint}?avatar={member.avatar.with_format('png').url}"
             )
+        emb.set_author(name=ctx.author, icon_url=str(ctx.author.avatar))
         await ctx.send(embed=emb)
 
     @commands.command(name="google", aliases=["find", "search"])
