@@ -18,12 +18,12 @@ class Config(commands.Cog):
     async def allowchannel(self, ctx, channel: discord.TextChannel):
         async with aiosqlite.connect("databases/config.sqlite") as db:
             async with db.cursor() as cur:
-                guilds = (i[0] for i in cur.execute("SELECT * FROM guilds"))
+                guilds = (i[0] for i in await cur.execute("SELECT * FROM guilds"))
                 if ctx.guild.id not in guilds:
-                    cur.execute("INSERT INTO guilds (id, allowedChannels) VALUES (%s, %s)" % (ctx.guild.id, (ctx.guild.system_channel, channel.id))
+                    await cur.execute("INSERT INTO guilds (id, allowedChannels) VALUES (%s, %s)" % (ctx.guild.id, (ctx.guild.system_channel, channel.id))
                 else:
-                    cur.execute(f"UPDATE guilds SET allowedChannels = (allowedChannels, {channel.id}) WHERE guildid = {ctx.guild.id}")
-                cur.commit()
+                    await cur.execute(f"UPDATE guilds SET allowedChannels = (allowedChannels, {channel.id}) WHERE guildid = {ctx.guild.id}")
+                await cur.commit()
                 await ctx.reply(embed = discord.Embed(title = f"Added.", description = f"The channel {channel} Was successfully added to the allowed list"))
                 return       
 
