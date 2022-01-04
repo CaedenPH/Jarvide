@@ -111,12 +111,11 @@ Creating a file (OpenFile phase):
         ➥ [ supported links are (toptal, pastebin, ghostbin)]'n```"""))
         async with aiosqlite.connect("databases/config.sqlite") as db:
             async with db.cursor() as cur:
-                guilds = (i[0] for i in cur.execute("SELECT * FROM guilds"))
+                guilds = (i[0] for i in await cur.execute("SELECT * FROM guilds"))
                 if guild.id not in guilds:
-                    cur.execute("INSERT INTO guilds (id, allowedChannels) VALUES (%s, %s)" % (guild.id, (ctx.guild.system_channel)
-                else:
-                    cur.execute(f"UPDATE guilds SET allowedChannels = (allowedChannels, {channel.id}) WHERE guildid = {.guild.id}")
-                cur.commit()  
+                    await cur.execute("INSERT INTO guilds (id, allowedChannels) VALUES (%s, %s)" % (guild.id, (ctx.guild.system_channel)
+                else: return
+                await cur.commit()  
 
     async def on_command_error(self, ctx, error):
         await ctx.send(error)
