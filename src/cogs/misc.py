@@ -21,7 +21,7 @@ class Misc(commands.Cog):
         user = user or ctx.author
         emb = disnake.Embed(color=0x90EE90).set_image(
             url=f"https://some-random-api.ml/canvas/%s?avatar=%s"
-            % (endpoint, user.avatar.with_format("png").url)
+            % (endpoint, user.avatar.with_format("png"))
         )
         await ctx.send(embed=emb)
 
