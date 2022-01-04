@@ -16,7 +16,7 @@ from disnake.ext.commands import (
     UserNotFound,
     TooManyArguments,
     CommandOnCooldown,
-    MissingRequiredArgument
+    MissingRequiredArgument,
     Context
 )
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -122,7 +122,7 @@ class Jarvide(Bot):
             await super().process_commands(new_message)
 
     async def on_ready(self) -> None:
-        self.send_guild = self.get_guild(926997883381772309)
+        self.send_guild = self.get_guild(926811692019626064)
         print("Set up")
 
     async def on_command_error(self, ctx: Context, error: Exception):

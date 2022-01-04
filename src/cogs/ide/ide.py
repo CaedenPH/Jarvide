@@ -24,7 +24,7 @@ class Ide(commands.Cog):
                     del self.active_commands[channel][user]
                     return
                 if all(
-                    all(k.disabled for k in child.children)
+                    all(k.disabled for k in child.children if isinstance(k, disnake.Button))
                     for child in message.components
                     if isinstance(child, disnake.ActionRow)
                 ):

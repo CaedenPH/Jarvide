@@ -22,7 +22,7 @@ class Misc(commands.Cog):
     ):
         member = member or ctx.author
         emb = disnake.Embed(color=0x90EE90).set_image(
-            url=f"https://some-random-api.ml/canvas/{endpoint}?avatar={member.avatar.with_format(png').url}"
+            url=f"https://some-random-api.ml/canvas/{endpoint}?avatar={member.avatar.with_format('png').url}"
             )
         await ctx.send(embed=emb)
 

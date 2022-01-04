@@ -128,16 +128,16 @@ class Mod(commands.Cog):
         if len(time) > 2:
             return await ctx.reply("Invalid time input, expected: [1s/1h/1m/1d]")
         durations = {
-            "days": int(time[0 : len(time) - 2]) if time[-1] == "d" else 0,
-            "hours": int(time[0 : len(time) - 2]) if time[-1] == "h" else 0,
-            "minutes": int(time[0 : len(time) - 2]) if time[-1] == "s" else 0,
+            "days": int(time[0: len(time) - 2]) if time[-1] == "d" else 0,
+            "hours": int(time[0: len(time) - 2]) if time[-1] == "h" else 0,
+            "minutes": int(time[0: len(time) - 2]) if time[-1] == "s" else 0,
         }
         now = datetime.datetime.utcnow()
         change = datetime.timedelta(**durations)
         duration = now + change
         await member.timeout(until=duration, reason=reason)
         embed = disnake.Embed(
-            description=f":white_check_mark: {member.mention} has been timed out until {duration}.",
+            description=f":white_check_mark: {member.mention} has been timed out until {time}.",
             color=disnake.Color.blurple(),
         )
         await ctx.send(embed=embed)
