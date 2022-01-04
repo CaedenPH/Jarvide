@@ -22,11 +22,13 @@ Learn more about Jarvide [here.](ABOUT.md)
 | Stealthninja|fucking sucks at coding|
 | Sarthak     |        |
 | Icy         |        |
+| DTS         |developer|
 | Dekriel     |likes coding and cats|
 | Sasuke 暁   |        |
 | Snowy       |
 | okimii      |love coding and capybaras|  
 | Robin       | Aspiring software developer |
+| Osama       | Thinks he is good at coding (he is trash) |
 
 
 
