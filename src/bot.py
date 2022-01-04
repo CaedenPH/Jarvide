@@ -1,3 +1,4 @@
+import datetime
 import os
 import string
 import copy
@@ -8,7 +9,6 @@ from disnake.ext.commands import (
     BotMissingPermissions,
     MissingPermissions,
     MissingRole,
-    CommandNotFound,
     DisabledCommand,
     NotOwner,
     ChannelNotFound,
@@ -125,10 +125,10 @@ class Jarvide(Bot):
         self.send_guild = self.get_guild(926811692019626064)
         print("Set up")
     
-    def underline(text, at, for_):
-            import itertools
-            underline = "".join(itertools.repeat(" ", at)) + "".join(itertools.repeat("^", for_))
-            return text + "\n" + underline
+    def underline(self, text, at, for_):
+        import itertools
+        underline = "".join(itertools.repeat(" ", at)) + "".join(itertools.repeat("^", for_))
+        return text + "\n" + underline
     
     async def on_command_error(self, ctx: Context, error: Exception):
         
@@ -142,7 +142,7 @@ class Jarvide(Bot):
             return await ctx.send(f'Too many arguments passed.\n```yaml\nusage: {ctx.prefix}{ctx.command.aliases.append(ctx.command.name)} {ctx.command.signature}')
 
         elif isinstance(error, CommandOnCooldown):
-            return await ctx.send(f'Command is on cooldown. Try again after {datetime.timedelta(seconds = error.retry_after)}}')
+            return await ctx.send(f'Command is on cooldown. Try again after {datetime.timedelta(seconds = error.retry_after)}')
 
         elif isinstance(error, NotOwner):
             return await ctx.send('Only my owner can use this command.')
@@ -160,7 +160,10 @@ class Jarvide(Bot):
             return await ctx.send(f'You need the {"".join(error.missing_permissions)} permissions to be able to do this.')
 
         elif isinstance(error, BotMissingPermissions):
-            return await ctx.send(f'I need the {"",join(error.missing_permissions)} permissions to be able to do this.')
+            return await ctx.send(f'I need the {"".join(error.missing_permissions)} permissions to be able to do this.')
 
         elif isinstance(error, MissingRole):
             return await ctx.send('You are missing a certain role to perform this command.')
+        else:
+            await ctx.send(error)
+            raise error

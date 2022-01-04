@@ -1,8 +1,7 @@
-import datetime
-
 import disnake
 import typing
 
+import time_str
 from disnake.ext import commands
 
 from src.utils.confirmation import prompt
@@ -19,10 +18,10 @@ class Mod(commands.Cog):
     @commands.has_permissions(kick_members=True)
     @commands.bot_has_permissions(kick_members=True)
     async def kick(
-        self,
-        ctx: commands.Context,
-        member: disnake.Member = None,
-        reason: str = "No Reason Provided.",
+            self,
+            ctx: commands.Context,
+            member: disnake.Member = None,
+            reason: str = "No Reason Provided.",
     ):
         if not member:
             return await ctx.send(
@@ -47,10 +46,10 @@ class Mod(commands.Cog):
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_permissions(ban_members=True)
     async def ban(
-        self,
-        ctx: commands.Context,
-        member: disnake.Member = None,
-        reason="No Reason Provided.",
+            self,
+            ctx: commands.Context,
+            member: disnake.Member = None,
+            reason="No Reason Provided.",
     ):
         if not member:
             await ctx.send(f"{ctx.author.mention}, please provide a member to ban.")
@@ -74,10 +73,10 @@ class Mod(commands.Cog):
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_permissions(ban_members=True)
     async def unban(
-        self,
-        ctx: commands.Context,
-        user: typing.Union[disnake.User, int] = None,
-        reason="No Reason Provided.",
+            self,
+            ctx: commands.Context,
+            user: typing.Union[disnake.User, int] = None,
+            reason="No Reason Provided.",
     ):
         if not user:
             await ctx.send(
@@ -106,7 +105,7 @@ class Mod(commands.Cog):
     @commands.has_permissions(manage_channels=True)
     @commands.bot_has_permissions(manage_channels=True)
     async def slowmode(
-        self, ctx, channel: disnake.TextChannel = None, slowmode: int = None
+            self, ctx, channel: disnake.TextChannel = None, slowmode: int = None
     ):
         channel = channel or ctx.channel
         if not slowmode:
@@ -125,23 +124,18 @@ class Mod(commands.Cog):
     @commands.has_permissions(moderate_members=True)
     @commands.bot_has_permissions(moderate_members=True)
     async def timeout(self, ctx, member: disnake.Member, time: str, *, reason=None):
-        if len(time) > 3:
-            return await ctx.reply("Invalid time input, expected: [1s/1h/1m/1d]")
-        
-        durations = {
-            "days": int(time[0: len(time) - 2]) if time[-1] == "d" else 0,
-            "hours": int(time[0: len(time) - 2]) if time[-1] == "h" else 0,
-            "minutes": int(time[0: len(time) - 2]) if time[-1] == "s" else 0,
-        }
-        now = datetime.datetime.utcnow()
-        change = datetime.timedelta(**durations)
+        now = disnake.utils.utcnow()
+        change = time_str.convert(time)
         duration = now + change
         await member.timeout(until=duration, reason=reason)
-        embed = disnake.Embed(
-            description=f":white_check_mark: {member.mention} has been timed out until {duration}.",
-            color=disnake.Color.blurple(),
+        await member.send(f"You have been timed out from: {ctx.guild.name}, for {time}")
+        await ctx.send(
+            embed=disnake.Embed(
+                title="Timed Out!",
+                description=f"{member.mention} was timed out until {duration} for reason: {reason}",
+                color=disnake.Colour.green()
+            )
         )
-        await ctx.send(embed=embed)
 
 
 def setup(bot: commands.Bot) -> None:

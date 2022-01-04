@@ -4,3 +4,4 @@ odmantic>=0.3.4
 disnake-jishaku>=2.6.5
 motor>=2.3.1
 async-cse>=0.3.0
+time-str>=0.1.0
