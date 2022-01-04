@@ -42,32 +42,36 @@ class DefaultButtons(disnake.ui.View):
 
         self.SUDO = self.ctx.me.guild_permissions.manage_messages
         super().__init__(timeout=300)
-        self.add_item(ExitButton(self.ctx, self.bot_message, row=2))
 
     @disnake.ui.button(label="Move dir", style=disnake.ButtonStyle.green)
     async def current_directory(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
-        await interaction.response.send_message("What folder ", ephemeral=True)
+        await interaction.response.send_message("What folder would you like to move into?", ephemeral=True)
         directory = await self.bot.wait_for(
             "message",
             check=lambda m: self.ctx.author == m.author
             and m.channel == self.ctx.channel,
         )
-        path = self.bot.engine.find(
+        path = await self.bot.engine.find_one(
             FileModel,
             FileModel.user_id == self.ctx.author.id,
-            FileModel.folder == directory,
+            FileModel.folder == self.path,
+            FileModel.name == "folder: " + directory.content
         )
 
         if not path:
             if self.SUDO:
                 await directory.delete()
             return await interaction.channel.send(
-                f"{directory} doesn't exist!", delete_after=15
+                f"{directory.content} doesn't exist!", delete_after=15
             )
+        self.path = f"{self.path}{path.name[8:]}/"
+        embed = EmbedFactory.ide_embed(self.ctx, f"Moved into dir: {self.path}\n{''.join(['-' for i in range(len(self.path) + len('Moved into dir: '))])}")
 
-        embed = EmbedFactory.ide_embed(self.ctx, f"")
+        await self.bot_message.edit(
+            embed=embed
+        )
 
     @disnake.ui.button(label="View folder", style=disnake.ButtonStyle.green)
     async def view_folder(
@@ -86,7 +90,7 @@ class DefaultButtons(disnake.ui.View):
 
         embed = EmbedFactory.ide_embed(
             self.ctx,
-            f"""All {self.ctx.author.name}'s files in current directory ({self.path}):
+            f"""{self.path}:
     - {files}""",
         )
 
@@ -155,7 +159,7 @@ class DefaultButtons(disnake.ui.View):
 
         embed = EmbedFactory.ide_embed(
             self.ctx,
-            f"""All {self.ctx.author.name}'s files:
+            f"""/:
     - {files}""",
         )
 
@@ -184,15 +188,27 @@ class DefaultButtons(disnake.ui.View):
             FileModel.name == filename,
             FileModel.folder == self.path,
         )
-        print(file_)
 
         if file_:
             await self.bot.engine.delete(file_)
             return await interaction.channel.send(f"Successfully deleted {file_.name}")
-        
 
-        
+        folder = directory.content
+        if directory.content.endswith("/"):
+            folder = directory.content.split("/")[-2]
 
+        folder_ = await self.bot.engine.find_one(
+            FileModel,
+            FileModel.user_id == self.ctx.author.id,
+            FileModel.name == "folder: " + folder,
+            FileModel.folder == self.path,
+        )
+         
+        if folder_:
+            await self.bot.engine.delete(folder_)
+            await interaction.channel.send(f"Successfully deleted {file_.name}") 
+        
+        await interaction.channel.send(f"I could not find a folder or file called {directory.content} in {self.path}") 
 
 class OpenFromSaved(DefaultButtons):
     def __init__(self, ctx, bot_message):
@@ -201,6 +217,7 @@ class OpenFromSaved(DefaultButtons):
         self.ctx = ctx
         self.bot = ctx.bot
         self.bot_message = bot_message
+        self.add_item(ExitButton(self.ctx, self.bot_message, row=2))
 
     @disnake.ui.button(label="Select file", style=disnake.ButtonStyle.danger, row=2)
     async def select_button(
@@ -218,7 +235,7 @@ class OpenFromSaved(DefaultButtons):
         )
         
 
-        file_model = await self.bot.engine.find(
+        file_model = await self.bot.engine.find_one(
             FileModel,
             FileModel.user_id == self.ctx.author.id,
             FileModel.name == filename.content,
@@ -230,7 +247,6 @@ class OpenFromSaved(DefaultButtons):
                 await filename.delete()
             return await interaction.channel.send(f"{filename.content} doesnt exist!", delete_after=15)
 
-        file_model = file_model[0]
         file_ = await File.from_url(bot=self.bot, url=file_model.file_url)
         embed = EmbedFactory.ide_embed(
             self.ctx,
@@ -252,6 +268,8 @@ class SaveFile(DefaultButtons):
         self.bot = ctx.bot
         self.bot_message = bot_message
         self.file = file_
+        self.add_item(ExitButton(self.ctx, self.bot_message, row=2))
+
 
     @disnake.ui.button(label="Save", style=disnake.ButtonStyle.danger, row=2)
     async def save_button(
@@ -269,11 +287,6 @@ class SaveFile(DefaultButtons):
                 FileModel.folder == self.path,
             )
         ]
-        # if self.file.filename in dir_files:
-        #     return await interaction.response.send_message(
-        #         "Overriding !"
-        #     )
-
         file_ = FileModel(
             file_url=attachment.url,
             name=self.file.filename,
@@ -285,7 +298,7 @@ class SaveFile(DefaultButtons):
         n = '\n'
         embed = EmbedFactory.ide_embed(
             self.ctx,
-            f"Saved {self.file.filename}\n{''.join(['-' for _ in range(len(self.file.filename)+len('Saved '))])}{overwrote if overwrote else n}{await get_info(attachment)}",
+            f"Saved {self.file.filename}\n{''.join(['-' for _ in range(len(self.file.filename)+len('Saved '))])}{overwrote if self.file.filename in dir_files else n}{await get_info(attachment)}",
         )
 
         await interaction.response.defer()
