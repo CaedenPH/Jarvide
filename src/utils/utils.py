@@ -6,7 +6,7 @@ import io
 import random
 
 from disnake.ext import commands
-from typing import TypeVar
+from typing import TypeVar, Type
 
 
 def add_lines(content: str) -> list[str]:
@@ -58,7 +58,7 @@ class File:
 
     @classmethod
     async def from_url(
-        cls: Self,
+        cls: Type[Self],
         *,
         bot: commands.Bot,
         url,
@@ -133,14 +133,11 @@ class ExitButton(disnake.ui.Button):
         self.ctx = ctx
 
     async def callback(self, interaction: disnake.MessageInteraction):
-<<<<<<< HEAD
         try:
             await interaction.response.defer()
         except disnake.errors.InteractionResponded:
             pass
-=======
         await interaction.response.defer()
->>>>>>> 8e47fac51a50c3b9bee9a366f61d6204eccb9fd7
 
         for child in self.view.children:
             if isinstance(child, disnake.ui.Button):

@@ -6,6 +6,8 @@ from .dialogs import OpenView
 from src.utils import EmbedFactory
 from disnake.ext import commands, tasks
 
+from typing import Optional
+
 
 class Ide(commands.Cog):
     """Ide cog"""
@@ -23,15 +25,16 @@ class Ide(commands.Cog):
                 if not message:
                     del self.active_commands[channel][user]
                     return
-                if all(all(k.disabled for k in child.children) for child in message.components if isinstance(child, disnake.ActionRow)):
+                if all(all(k.disabled for k in child.children if isinstance(k, disnake.ui.Button))
+                       for child in message.components if isinstance(child, disnake.ActionRow)):
                     del self.active_commands[channel][user]
 
     @commands.command(
-        help="""Have you used the linux commandline editor, nano? This disccord text editor is like nano , and implements safe, reliable and fast file storing with editing and compiling technology. The database is secure and cannot be accessed or broken into by anyone, not even the core developers. You can upload or create files and these files would be saved into a filesystem which you can open at any time. If you have an open file you can compile it and run it (depending on the filetype). You can also edit the content and replace text. You can also pull and push to github depending on the file/folder you uploaded."""
+        help="""Have you used the linux commandline editor, nano? This discord text editor is like nano , and implements safe, reliable and fast file storing with editing and compiling technology. The database is secure and cannot be accessed or broken into by anyone, not even the core developers. You can upload or create files and these files would be saved into a filesystem which you can open at any time. If you have an open file you can compile it and run it (depending on the filetype). You can also edit the content and replace text. You can also pull and push to github depending on the file/folder you uploaded."""
     )
     async def ide(
         self, ctx: commands.Context, query: str = None, link: str = None
-    ) -> None:
+    ) -> Optional[disnake.Message]:
         if (
             ctx.channel in self.active_commands
             and ctx.author in self.active_commands[ctx.channel]

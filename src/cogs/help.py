@@ -1,15 +1,6 @@
-from disnake.components import SelectOption
-from disnake.ext.commands.bot import Bot
-from disnake.ext.commands.cog import Cog
-from disnake.ext.commands.help import HelpCommand
-from disnake.ext.commands.context import Context
-from disnake.ext.commands.core import Group, Command, command
-from disnake.embeds import Embed
-from disnake.colour import Color
-from disnake import utils
-from disnake.interactions.message import MessageInteraction
-from disnake.ui.view import View
-from disnake.ui.select import Select
+from disnake import utils, Embed, Color, MessageInteraction, SelectOption, SelectMenu
+from disnake.ui import View, Select
+from disnake.ext.commands import Bot, Cog, HelpCommand, Context, Group, Command, command
 
 
 _desc = f"""```yaml
@@ -60,20 +51,20 @@ class JarvideHelp(HelpCommand):
     def __init__(self):
         super().__init__()
 
-    async def command_callback(self, ctx, *, command=None):
+    async def command_callback(self, ctx, *, command_=None):
         """
         Overrided to make the help for Cog case insensitive
         """
-        await self.prepare_help_command(ctx, command)
+        await self.prepare_help_command(ctx, command_)
         bot = ctx.bot
 
-        if command is None:
+        if command_ is None:
             mapping = self.get_bot_mapping()
             return await self.send_bot_help(mapping)
 
         # Check if it's a cog
         cog = None
-        _cog = [cog for cog in ctx.bot.cogs if cog.lower() == command.lower()]
+        _cog = [cog for cog in ctx.bot.cogs if cog.lower() == command_.lower()]
         if _cog:
             cog = _cog[0]
         if cog is not None:
@@ -85,7 +76,7 @@ class JarvideHelp(HelpCommand):
         # Since we want to have detailed errors when someone
         # passes an invalid subcommand, we need to walk through
         # the command group chain ourselves.
-        keys = command.split(" ")
+        keys = command_.split(" ")
         cmd = bot.all_commands.get(keys[0])
         if cmd is None:
             string = await maybe_coro(
@@ -137,39 +128,38 @@ class JarvideHelp(HelpCommand):
                 inline=False,
             )
         embed.set_author(
-            name=f"{_bot.user.name.upper()} HELP", icon_url=_bot.user.display_avatar
+            name=f"{_bot.user.name.upper()} HELP", icon_url=_bot.user.display_avatar.url
         )
         embed.set_footer(
             text=f"Requested by {self.context.author}",
-            icon_url=self.context.author.display_avatar,
+            icon_url=self.context.author.display_avatar.url,
         )
-        embed.set_thumbnail(url=_bot.user.display_avatar)
+        embed.set_thumbnail(url=_bot.user.display_avatar.url)
         view = HelpView()
         view.add_item(NavigatorMenu(self.context))
         view.message = await self.context.reply(
             embed=embed, mention_author=False, view=view
         )
 
-    async def send_command_help(self, command: Command):
+    async def send_command_help(self, cmd: Command):
         """
         Called upon a command arg being supplied ;
         Read , needs to be polished
         """
         command_help_dict = {
-            "aliases": " , ".join(command.aliases) or "No aliases",
-            "description": command.description
-            or command.brief
-            or "No description Provided",
+            "aliases": " , ".join(cmd.aliases) or "No aliases",
+            "description": cmd.description or cmd.brief or "No description Provided",
         }
         command_signature = ""
-        for arg in command.signature.split("] ["):
+        for arg in cmd.signature.split("] ["):
             if "=" in arg:
                 parsed_arg = "{" + arg.split("=")[0].strip("[]<>]") + "}"
             else:
                 parsed_arg = "[" + arg.strip("[]<>") + "]"
-                if parsed_arg == '[]':parsed_arg=''
+                if parsed_arg == '[]':
+                    parsed_arg = ''
             command_signature += parsed_arg + " "
-        usage = f"```ini\n{await self.context.bot.get_prefix(self.context.message)} {command.name} {command_signature}\n```"
+        usage = f"```ini\n{await self.context.bot.get_prefix(self.context.message)} {cmd.name} {command_signature}\n```"
         embed = Embed(
             color=Color.og_blurple(),
             description="\n".join(
@@ -178,8 +168,8 @@ class JarvideHelp(HelpCommand):
             ),
         )
         embed.set_author(
-            name=f"{command.name.upper()} COMMAND",
-            icon_url=self.context.bot.user.display_avatar,
+            name=f"{cmd.name.upper()} COMMAND",
+            icon_url=self.context.bot.user.display_avatar.url,
         )
         embed.add_field(name="USAGE", value=usage)
         embed.set_footer(text="[] : Required | {} : Optional")
@@ -190,8 +180,8 @@ class JarvideHelp(HelpCommand):
         Group Commands , would rarely be used
         """
         desc = "\n".join(
-            f"`{command.name}` **:** {command.short_doc or 'No help text'}"
-            for command in group.commands
+            f"`{cmd.name}` **:** {cmd.short_doc or 'No help text'}"
+            for cmd in group.commands
         )
         embed = Embed(
             description=group.description
@@ -210,10 +200,13 @@ class JarvideHelp(HelpCommand):
 
 class HelpView(View):
     def __init__(self):
-        super().__init__(timeout=180)
+        self.message = None
+        super().__init__(timeout=3)
 
     async def on_timeout(self) -> None:
-        self.children[0].disabled = True
+        item = self.children[0]
+        if isinstance(item, SelectMenu):
+            item.disabled = True
         await self.message.edit(view=self)
 
 
@@ -245,10 +238,11 @@ class NavigatorMenu(Select):
         embed = await embed_for_cog(cog_s[0], self.context)
         await interaction.message.edit(embed=embed)
 
+
 async def embed_for_cog(cog: Cog, ctx: Context):
     desc = "\n".join(
-        f"`{command.name}` **:** {command.short_doc or 'No help text'}"
-        for command in cog.get_commands()
+        f"`{cmd.name}` **:** {cmd.short_doc or 'No help text'}"
+        for cmd in cog.get_commands()
     )
     embed = (
         Embed(
@@ -258,10 +252,10 @@ async def embed_for_cog(cog: Cog, ctx: Context):
         )
         .set_author(
             name=f"{cog.qualified_name.upper()} CATEGORY",
-            icon_url=ctx.bot.user.display_avatar,
+            icon_url=ctx.bot.user.display_avatar.url,
         )
         .set_footer(
-            text=f"Requested by {ctx.author}", icon_url=ctx.author.display_avatar
+            text=f"Requested by {ctx.author}", icon_url=ctx.author.display_avatar.url
         )
     )
     return embed

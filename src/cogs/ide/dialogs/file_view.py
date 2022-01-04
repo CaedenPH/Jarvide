@@ -45,7 +45,7 @@ class FileView(disnake.ui.View):
         self.SUDO = self.ctx.me.guild_permissions.manage_messages
         self.bot_message = bot_message
 
-        self.add_item(ExitButton( ctx, bot_message, row=1))
+        self.add_item(ExitButton(ctx, bot_message, row=1))
         self.add_item(SaveButton(ctx, bot_message, file_, row=0))
 
     @disnake.ui.button(label="Read", style=disnake.ButtonStyle.green)
@@ -94,7 +94,7 @@ class FileView(disnake.ui.View):
                         delete_after=15,
                     )
 
-                if not 'output' in json:
+                if 'output' not in json:
                     await interaction.response.defer()
                     return await interaction.channel.send(
                         "Something went wrong! Maybe the file is too long!",
@@ -182,7 +182,6 @@ class FileView(disnake.ui.View):
             embed=embed,
             view=view
         )
-<<<<<<< HEAD
 
         # for child in self.children:
         #     if isinstance(child, disnake.ui.Button):
@@ -199,11 +198,7 @@ class FileView(disnake.ui.View):
 
         # TODO: fix
         
-        
-=======
-        await ExitButton.callback()
-
->>>>>>> 8e47fac51a50c3b9bee9a366f61d6204eccb9fd7
+        await ExitButton.callback(ExitButton(self.ctx, self.bot_message), interaction)
 
     @disnake.ui.button(label="Back", style=disnake.ButtonStyle.red, row=1)
     async def back_button(

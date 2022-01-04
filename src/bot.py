@@ -2,7 +2,6 @@ import os
 import string
 import copy
 import disnake
-from disnake import message
 
 from disnake.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -83,7 +82,6 @@ class Jarvide(commands.Bot):
         if "help" in [k[0].name for k in commands_in_message]:
             if commands_in_message[0][0].name != "help":
                 commands_in_message = commands_in_message[::-1]
-                
 
         cmd = commands_in_message[0][0]
         ctx = await super().get_context(original_message)
