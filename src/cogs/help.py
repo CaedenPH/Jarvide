@@ -119,7 +119,7 @@ class JarvideHelp(HelpCommand):
             + f"```fix\nPrefix : {await _bot.get_prefix(self.context.message)}```",
         )
         embed.set_image(
-            url="https://media.discordapp.net/attachments/926135748451774464/927683552609439804/jarvideposter.png?width=1440&height=368"
+            url="https://media.discordapp.net/attachments/926115595307614252/927951464725377034/big.png"
         )
         for cog_name in _bot.cogs:
             if cog_name.lower() in ("jishaku", "helpcog"):
@@ -128,8 +128,8 @@ class JarvideHelp(HelpCommand):
                 continue
             cog: Cog = _bot.get_cog(cog_name)
             embed.add_field(
-                name=f"{cog.qualified_name.upper()} COMMANDS [{len(cog.get_commands())}]",
-                value=f"➥ {cog.description}",
+                name=f"{cog.emoji} {cog.qualified_name.upper()} COMMANDS [{len(cog.get_commands())}]",
+                value=f"➥ {cog.short_help_doc}",
                 inline=False,
             )
         embed.set_author(
@@ -228,6 +228,7 @@ class NavigatorMenu(Select):
                 SelectOption(
                     label=f"{cog.qualified_name.upper()} COMMANDS",
                     description=cog.description.replace("cog", "module"),
+                    emoji= cog.emoji
                 )
             )
         super().__init__(placeholder="Navigate to Category", options=options)
