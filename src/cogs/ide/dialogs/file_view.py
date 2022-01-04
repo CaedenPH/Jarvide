@@ -101,7 +101,14 @@ class FileView(disnake.ui.View):
                     output = "[No output]"
 
             await interaction.response.defer()
-            await TextPaginator(interaction, f"```yaml\n{output}```").start()
+            await TextPaginator(
+                interaction, 
+                f"```yaml\n{output}```",
+                embed_author_kwargs={
+                    "name": f"{self.ctx.author.name} evaluator for {self.file.filename}",
+                    "icon_url": self.ctx.author.avatar.url, 
+                }
+            ).start()
 
     @disnake.ui.button(label="Edit", style=disnake.ButtonStyle.green)
     async def third_button(

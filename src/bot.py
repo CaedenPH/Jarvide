@@ -138,12 +138,12 @@ class Jarvide(Bot):
         print("Set up")
 
     async def on_guild_join(self, guild) -> None:
-        await self.server_message.edit(content=f"I am now in `{len(self.guilds)}` servers")
+        await self.server_message.edit(content=f"I am now in `{len(self.guilds)}` servers and can see `{len(self.users)}` users")
 
         embed = main_embed(self)
         names = ['general', 'genchat', 'generalchat', 'general-chat', 'general-talk', 'gen', 'talk', 'general-1', '🗣general-chat','🗣', '🗣general']
         for k in guild.text_channels:
-            if k.name in names:
+            if k.name in names: 
                 return await k.send(embed=embed)
         try:
             await guild.system_channel.send(embed=embed)
