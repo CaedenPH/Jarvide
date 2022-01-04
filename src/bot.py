@@ -109,7 +109,7 @@ Creating a file (OpenFile phase):
     + you have just created a file. You have now moved onto the FileView phase!
     + you can also open files via    links, uploading, github and saved files 
         ➥ [ supported links are (toptal, pastebin, ghostbin)]'n```"""))
-        async with aiosqlite.connect("databases/config.sqlite") as db:
+        async with aiosqlite.connect("databases/config.db") as db:
             async with db.cursor() as cur:
                 guilds = (i[0] for i in await cur.execute("SELECT * FROM guilds"))
                 if guild.id not in guilds:
