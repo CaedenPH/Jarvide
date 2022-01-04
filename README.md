@@ -24,7 +24,7 @@ Learn more about Jarvide [here.](ABOUT.md)
 | Icy         |        |
 | DTS         |developer|
 | Dekriel     |likes coding and cats|
-| Sasuke 暁   |        |
+| Sasuke 暁   |    🗿    |
 | Snowy       |
 | okimii      |love coding and capybaras|  
 | Robin       | Aspiring software developer |
