@@ -126,10 +126,12 @@ class Mod(commands.Cog):
     @commands.bot_has_permissions(moderate_members=True)
     async def timeout(self, ctx, member: disnake.Member, time: str, *, reason=None):
         if len(time) > 2:
-            return await ctx.reply("Invalid time input, expected: [1s/1h/1m/1d]") 
-        durations = {"days": int(time[0:len(time) - 2]) if time[-1] == "d" else 0,
-                     "hours": int(time[0:len(time) - 2]) if time[-1] == "h" else 0,
-                     "minutes": int(time[0:len(time) - 2]) if time[-1] == "s" else 0}
+            return await ctx.reply("Invalid time input, expected: [1s/1h/1m/1d]")
+        durations = {
+            "days": int(time[0 : len(time) - 2]) if time[-1] == "d" else 0,
+            "hours": int(time[0 : len(time) - 2]) if time[-1] == "h" else 0,
+            "minutes": int(time[0 : len(time) - 2]) if time[-1] == "s" else 0,
+        }
         now = datetime.datetime.utcnow()
         change = datetime.timedelta(**durations)
         duration = now + change

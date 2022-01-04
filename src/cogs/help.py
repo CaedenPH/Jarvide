@@ -113,10 +113,14 @@ class JarvideHelp(HelpCommand):
         _bot: Bot = self.context.bot
 
         await self.context.send(embed=ide_embed)
-        embed = Embed(color=Color.og_blurple(),
-                      description=_bot.description + f"```fix\nPrefix : {await _bot.get_prefix(self.context.message)}```")
+        embed = Embed(
+            color=Color.og_blurple(),
+            description=_bot.description
+            + f"```fix\nPrefix : {await _bot.get_prefix(self.context.message)}```",
+        )
         embed.set_image(
-            url="https://media.discordapp.net/attachments/926135748451774464/927683552609439804/jarvideposter.png?width=1440&height=368")
+            url="https://media.discordapp.net/attachments/926135748451774464/927683552609439804/jarvideposter.png?width=1440&height=368"
+        )
         for cog_name in _bot.cogs:
             if cog_name.lower() in ("jishaku", "helpcog"):
                 continue
@@ -157,8 +161,8 @@ class JarvideHelp(HelpCommand):
                 parsed_arg = "{" + arg.split("=")[0].strip("[]<>]") + "}"
             else:
                 parsed_arg = "[" + arg.strip("[]<>") + "]"
-                if parsed_arg == '[]':
-                    parsed_arg = ''
+                if parsed_arg == "[]":
+                    parsed_arg = ""
             command_signature += parsed_arg + " "
         usage = f"```ini\n{await self.context.bot.get_prefix(self.context.message)} {cmd.name} {command_signature}\n```"
         embed = Embed(
@@ -185,7 +189,8 @@ class JarvideHelp(HelpCommand):
             for cmd in group.commands
         )
         embed = Embed(
-            description=group.description or f"{group.qualified_name.title()} Group" + desc,
+            description=group.description
+            or f"{group.qualified_name.title()} Group" + desc,
             color=Color.og_blurple(),
         )
         await self.context.reply(embed=embed, mention_author=False)
@@ -231,8 +236,8 @@ class NavigatorMenu(Select):
         cog_s = [
             self.context.bot.get_cog(cog)
             for cog in self.context.bot.cogs
-            if interaction.values[0].lower(
-            ).replace(" commands", "") == self.context.bot.get_cog(cog).qualified_name.lower()
+            if interaction.values[0].lower().replace(" commands", "")
+            == self.context.bot.get_cog(cog).qualified_name.lower()
         ]
         embed = await embed_for_cog(cog_s[0], self.context)
         await interaction.message.edit(embed=embed)
@@ -247,11 +252,13 @@ async def embed_for_cog(cog: Cog, ctx: Context):
         Embed(
             color=Color.og_blurple(),
             description="Use `jarvide help <command>` for more info about commands\n\n"
-                        + desc,
-        ).set_author(
+            + desc,
+        )
+        .set_author(
             name=f"{cog.qualified_name.upper()} CATEGORY",
             icon_url=ctx.bot.user.display_avatar.url,
-        ).set_footer(
+        )
+        .set_footer(
             text=f"Requested by {ctx.author}", icon_url=ctx.author.display_avatar.url
         )
     )

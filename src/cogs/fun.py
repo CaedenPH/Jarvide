@@ -24,7 +24,7 @@ class Casino(disnake.ui.View):
         emoji="▶️",
     )
     async def play(
-            self, button: disnake.ui.button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.button, interaction: disnake.MessageInteraction
     ) -> None:
         self.exit.disabled = True
         self.play.disabled = True
@@ -57,13 +57,9 @@ class Casino(disnake.ui.View):
             self.stop()
             return await interaction.send(embed=Awinningembed)
 
-    @disnake.ui.button(
-        label="Retry",
-        style=disnake.ButtonStyle.green,
-        emoji="🔄"
-    )
+    @disnake.ui.button(label="Retry", style=disnake.ButtonStyle.green, emoji="🔄")
     async def retry(
-            self, button: disnake.ui.button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.button, interaction: disnake.MessageInteraction
     ) -> None:
         intsthink1 = disnake.Embed(
             title="Casino Machine $", description="```...```"
@@ -96,7 +92,7 @@ class Casino(disnake.ui.View):
 
     @disnake.ui.button(label="Exit", style=disnake.ButtonStyle.red, emoji="⏹️")
     async def exit(
-            self, button: disnake.ui.button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.button, interaction: disnake.MessageInteraction
     ) -> None:
         await interaction.response.defer()
         await interaction.edit_original_message(view=None)

@@ -9,24 +9,24 @@ from disnake.ext import commands
 
 class Misc(commands.Cog):
     """
-    Misc cog for randomly assorted commands that don't fall into
-    any specific category.
+    Misc cog for randomly assorted commands that don't fall into any specific category.
     """
 
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
         self.google = async_cse.Search(KEY)
 
-    async def overlay(self, ctx: commands.Context, endpoint, user: disnake.Member = None):
-        user = user or ctx.author
+    async def overlay(
+        self, ctx: commands.Context, endpoint: str, member: disnake.Member = None
+    ):
+        member = member or ctx.author
         emb = disnake.Embed(color=0x90EE90).set_image(
-            url=f"https://some-random-api.ml/canvas/%s?avatar=%s"
-            % (endpoint, user.avatar.with_format("png"))
-        )
+            url=f"https://some-random-api.ml/canvas/{endpoint}?avatar={member.avatar.with_format(png').url}"
+            )
         await ctx.send(embed=emb)
 
     @commands.command(name="google", aliases=["find", "search"])
-    async def find(self, ctx, *, query):
+    async def google(self, ctx, *, query):
         safesearch = True
         if isinstance(ctx.channel, disnake.TextChannel):
             safesearch = not ctx.channel.is_nsfw()
@@ -42,11 +42,14 @@ class Misc(commands.Cog):
             return
 
         embed = disnake.Embed(
-            color=0x00a6f2, title=response[0].title, description=response[0].description, url=response[0].url
+            color=0x00A6F2,
+            title=response[0].title,
+            description=response[0].description,
+            url=response[0].url,
         )
         await ctx.reply(embed=embed, mention_author=False)
 
-    @commands.command(aliases=["latency"])
+    @commands.command()
     async def ping(self, ctx: commands.Context):
         if round(self.bot.latency * 1000) > 150:
             health, color = "Unhealthy", disnake.Color.red()
@@ -67,8 +70,8 @@ class Misc(commands.Cog):
         )
         await ctx.send(content="🏓**Pong**", embed=embed)
 
-    @commands.command(aliases=["insult"])
-    async def roast(self, ctx: commands.Context, *, user: disnake.Member):
+    @commands.command()
+    async def roast(self, ctx: commands.Context, *, member: disnake.Member):
         async with aiohttp.ClientSession() as cs:
             async with cs.get(
                 "https://evilinsult.com/generate_insult.php?lang=en&type=json"
@@ -77,7 +80,7 @@ class Misc(commands.Cog):
                 insult = resp["insult"]
                 color = 0x90EE90
                 embed = disnake.Embed(color=color, description=insult)
-                await ctx.send(f"{user.mention}", embed=embed)
+                await ctx.send(f"{member.mention}", embed=embed)
 
     @commands.command()
     async def meme(self, ctx: commands.Context):
@@ -92,7 +95,7 @@ class Misc(commands.Cog):
                 await ctx.send(embed=embed)
 
     @commands.command()
-    async def reddit(self, ctx: commands.Context, subreddit):
+    async def reddit(self, ctx: commands.Context, subreddit: str):
         async with aiohttp.ClientSession() as cs:
             async with cs.get(
                 f"https://reddit.com/r/{subreddit}.json?sort=hot"
@@ -116,31 +119,31 @@ class Misc(commands.Cog):
                 await ctx.send(embed=embed)
 
     @commands.command()
-    async def gay(self, ctx, *, user: disnake.Member = None):
-        await self.overlay(ctx, "gay", user)
+    async def gay(self, ctx, *, member: disnake.Member = None):
+        await self.overlay(ctx, "gay", member)
 
     @commands.command()
-    async def wasted(self, ctx, *, user: disnake.Member = None):
-        await self.overlay(ctx, "wasted", user)
+    async def wasted(self, ctx, *, member: disnake.Member = None):
+        await self.overlay(ctx, "wasted", member)
 
     @commands.command()
-    async def passed(self, ctx, *, user: disnake.Member = None):
-        await self.overlay(ctx, "passed", user)
+    async def passed(self, ctx, *, member: disnake.Member = None):
+        await self.overlay(ctx, "passed", member)
 
     @commands.command()
-    async def jail(self, ctx, *, user: disnake.Member = None):
-        await self.overlay(ctx, "jail", user)
+    async def jail(self, ctx, *, member: disnake.Member = None):
+        await self.overlay(ctx, "jail", member)
 
     @commands.command()
-    async def comrade(self, ctx, *, user: disnake.Member = None):
-        if user is None:
+    async def comrade(self, ctx, *, member: disnake.Member = None):
+        if member is None:
             await self.overlay(ctx, "comrade")
         else:
-            await self.overlay(ctx, "comrade", user)
+            await self.overlay(ctx, "comrade", member)
 
     @commands.command()
-    async def triggered(self, ctx, *, user: disnake.Member = None):
-        await self.overlay(ctx, "triggered", user)
+    async def triggered(self, ctx, *, member: disnake.Member = None):
+        await self.overlay(ctx, "triggered", member)
 
 
 def setup(bot: commands.Bot) -> None:

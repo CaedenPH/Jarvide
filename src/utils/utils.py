@@ -142,14 +142,8 @@ class ExitButton(disnake.ui.Button):
             if isinstance(child, disnake.ui.Button):
                 child.disabled = True
 
-        embed = EmbedFactory.ide_embed(
-            self.ctx,
-            "Goodbye!"
-        )
-        await self.bot_message.edit(
-            view=self.view,
-            embed=embed
-        )
+        embed = EmbedFactory.ide_embed(self.ctx, "Goodbye!")
+        await self.bot_message.edit(view=self.view, embed=embed)
 
 
 class SaveButton(disnake.ui.Button):

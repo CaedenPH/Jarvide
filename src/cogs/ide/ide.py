@@ -23,7 +23,11 @@ class Ide(commands.Cog):
                 if not message:
                     del self.active_commands[channel][user]
                     return
-                if all(all(k.disabled for k in child.children) for child in message.components if isinstance(child, disnake.ActionRow)):
+                if all(
+                    all(k.disabled for k in child.children)
+                    for child in message.components
+                    if isinstance(child, disnake.ActionRow)
+                ):
                     del self.active_commands[channel][user]
 
     @commands.command(
@@ -38,7 +42,7 @@ class Ide(commands.Cog):
         ):
             return await ctx.send(
                 "You already have an open ide in this channel! Press the `exit` button to make a new one!",
-                delete_after=15
+                delete_after=15,
             )
 
         embed = EmbedFactory.ide_embed(ctx, "File open: No file currently open")

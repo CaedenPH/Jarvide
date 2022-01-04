@@ -30,13 +30,9 @@ class OpenView(disnake.ui.View):
                 child.disabled = True
 
         embed = EmbedFactory.ide_embed(
-            self.ctx,
-            "Ide timed out. Feel free to make a new one!"
+            self.ctx, "Ide timed out. Feel free to make a new one!"
         )
-        await self.bot_message.edit(
-            view=self,
-            embed=embed
-        )
+        await self.bot_message.edit(view=self, embed=embed)
 
     @disnake.ui.button(label="Upload", style=disnake.ButtonStyle.green)
     async def upload_button(
@@ -307,11 +303,5 @@ class OpenView(disnake.ui.View):
             if isinstance(child, disnake.ui.Button):
                 child.disabled = True
 
-        embed = EmbedFactory.ide_embed(
-            self.ctx,
-            "Goodbye!"
-        )
-        await self.bot_message.edit(
-            view=self,
-            embed=embed
-        )
+        embed = EmbedFactory.ide_embed(self.ctx, "Goodbye!")
+        await self.bot_message.edit(view=self, embed=embed)
