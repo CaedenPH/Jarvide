@@ -95,9 +95,7 @@ class JarvideHelp(HelpCommand):
             url="https://media.discordapp.net/attachments/926115595307614252/927951464725377034/big.png"
         )
         for cog_name in _bot.cogs:
-            if cog_name.lower() in ("jishaku", "helpcog"):
-                continue
-            if cog_name.lower() == "staff" and self.context.author not in _bot.owners:
+            if cog_name.lower() in ("jishaku", "helpcog", "staff", "ide"):
                 continue
             cog: Cog = _bot.get_cog(cog_name)
             embed.add_field(
@@ -192,9 +190,7 @@ class NavigatorMenu(Select):
         self.context: Context = ctx
         options = []
         for cog_name in ctx.bot.cogs:
-            if cog_name.lower() in ("jishaku", "helpcog"):
-                continue
-            if cog_name.lower() == "staff" and ctx.author not in ctx.bot.owners:
+            if cog_name.lower() in ("jishaku", "helpcog", "staff", "ide"):
                 continue
             cog: Cog = ctx.bot.get_cog(cog_name)
             options.append(
@@ -214,6 +210,7 @@ class NavigatorMenu(Select):
             == self.context.bot.get_cog(cog).qualified_name.lower()
         ]
         embed = await embed_for_cog(cog_s[0], self.context)
+        await interaction.response.defer()
         await interaction.message.edit(embed=embed)
 
 
