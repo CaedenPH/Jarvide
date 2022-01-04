@@ -22,7 +22,7 @@ Learn more about Jarvide [here.](ABOUT.md)
 | Stealthninja|fucking sucks at coding|
 | Sarthak     |        |
 | Icy         |        |
-| DTS         |        |
+| DTS         |developer|
 | Dekriel     |likes coding and cats|
 | Sasuke 暁   |        |
 | Snowy       |
