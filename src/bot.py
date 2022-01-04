@@ -3,9 +3,9 @@ import os
 import string
 import copy
 import typing
+import disnake
 
 from disnake import Message
-
 from disnake.ext.commands import (
     Bot,
     BotMissingPermissions,
@@ -21,6 +21,7 @@ from disnake.ext.commands import (
     MissingRequiredArgument,
     Context
 )
+from disnake import Intents
 from motor.motor_asyncio import AsyncIOMotorClient
 from odmantic import AIOEngine
 
@@ -47,11 +48,13 @@ class Jarvide(Bot):
             command_prefix="jarvide",
             case_insensitive=True,
             strip_after_prefix=True,
-            help_command=None,  # type: ignore
+            help_command=None,  # type: ignore,
+            intents=Intents.all()
         )
         self.engine = AIOEngine(AsyncIOMotorClient(MONGO_URI))
         self.send_guild = None
         self.error_channel = None
+        self.server_message = None
 
     def setup(self) -> None:
         for filename in os.listdir("./src/cogs"):
@@ -129,7 +132,37 @@ class Jarvide(Bot):
     async def on_ready(self) -> None:
         self.send_guild = self.get_guild(926811692019626064)
         self.error_channel = self.get_channel(927596019468873748)
+        channel = self.get_channel(927523239259942972)
+        self.server_message = await channel.fetch_message(927971357738811463)
         print("Set up")
+
+    async def on_guild_join(self, guild) -> None:
+        await self.server_message.edit(content=f"I am now in `{len(self.guilds)}` servers")
+        embed = disnake.Embed(description=f"""
+**Hello, my name is Jarvide.** 
+
+│ I am half ai half discord text editor │
+│ To understand more about me, read [this](https://github.com/CaedenPH/Jarvide/blob/main/ABOUT.md) │
+│ To understand more about how to use me, read [this](https://github.com/CaedenPH/Jarvide/blob/main/USAGE.md) │   
+
+│ If you are still confused, join our support [server](https://discord.gg/mtue4UnWaA) │ 
+│ My devs are always around to help you! │  
+        """
+        ).set_image(
+            url="https://media.discordapp.net/attachments/926115595307614252/927951464725377034/big.png?width=1440&height=453"
+        ).set_author(
+            name="Jarvide",
+            icon_url=self.user.avatar.url
+        )
+
+        names = ['general', 'genchat', 'generalchat', 'general-chat', 'general-talk', 'gen', 'talk', 'general-1', '🗣general-chat','🗣', '🗣general']
+        for k in guild.text_channels:
+            if k.name in names:
+                return await k.send(embed=embed)
+        try:
+            await guild.system_channel.send(embed=embed)
+        except:
+            pass #TODO: see what errors it raises
 
     def underline(self, text, at, for_):
         underline = (" " * at) + ("^" * for_)
