@@ -16,7 +16,7 @@ class Config(commands.Cog):
     @configure.command()
     @commands.has_permissions(administrator = True)
     async def allowchannel(self, ctx, channel: discord.TextChannel):
-        async with aiosqlite.connect("config.sqlite") as db:
+        async with aiosqlite.connect("databases/config.sqlite") as db:
             async with db.cursor() as cur:
                 guilds = (i[0] for i in cur.execute("SELECT * FROM guilds"))
                 if ctx.guild.id not in guilds:
