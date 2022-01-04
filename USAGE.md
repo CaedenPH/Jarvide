@@ -54,9 +54,10 @@
 
 **FileView phase**
 
-
     Buttons:
         (Read, Run, Edit, Rename, Save)
+
+    
 
 
 **FileSave phase**
@@ -85,6 +86,7 @@
 **Images:**
 
 ![](https://media.discordapp.net/attachments/926115595307614252/927995618264252447/unknown.png?width=465&height=274)
-![](https://media.discordapp.net/attachments/926115595307614252/927995618264252447/unknown.png?width=465&height=274)
 ![](https://cdn.discordapp.com/attachments/926115595307614252/928009967439577108/unknown.png)
 ![](https://media.discordapp.net/attachments/926115595307614252/928010283744649216/unknown.png?width=470&height=303)
+![](https://media.discordapp.net/attachments/926115595307614252/928016476059869264/unknown.png?width=421&height=238)
+![](https://media.discordapp.net/attachments/926941864173645825/928017244158558228/unknown.png?width=582&height=678)

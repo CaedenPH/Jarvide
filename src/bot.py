@@ -3,7 +3,7 @@ import os
 import string
 import copy
 import typing
-import disnake
+import traceback
 
 from disnake import Message
 from disnake.ext.commands import (
@@ -25,6 +25,7 @@ from disnake import Intents
 from motor.motor_asyncio import AsyncIOMotorClient
 from odmantic import AIOEngine
 
+from src.utils.utils import main_embed
 from .HIDDEN import TOKEN, MONGO_URI
 
 REMOVE_WORDS = [
@@ -69,8 +70,8 @@ class Jarvide(Bot):
         super().run(TOKEN, reconnect=True)
 
     async def on_message(self, original_message: Message) -> typing.Optional[Message]:
-        if self.user.mentioned_in(original_message):
-            return await original_message.channel.send("My prefix is jarvide")
+        if self.user.mentioned_in(original_message) and not original_message.reference and ' ' not in original_message.content:
+            return await original_message.channel.send(embed=main_embed(self))
         if (
             original_message.author.bot
             or "jarvide" not in original_message.content.lower()
@@ -138,23 +139,8 @@ class Jarvide(Bot):
 
     async def on_guild_join(self, guild) -> None:
         await self.server_message.edit(content=f"I am now in `{len(self.guilds)}` servers")
-        embed = disnake.Embed(description=f"""
-**Hello, my name is Jarvide.** 
 
-│ I am half ai half discord text editor │
-│ To understand more about me, read [this](https://github.com/CaedenPH/Jarvide/blob/main/ABOUT.md) │
-│ To understand more about how to use me, read [this](https://github.com/CaedenPH/Jarvide/blob/main/USAGE.md) │   
-
-│ If you are still confused, join our support [server](https://discord.gg/mtue4UnWaA) │ 
-│ My devs are always around to help you! │  
-        """
-        ).set_image(
-            url="https://media.discordapp.net/attachments/926115595307614252/927951464725377034/big.png?width=1440&height=453"
-        ).set_author(
-            name="Jarvide",
-            icon_url=self.user.avatar.url
-        )
-
+        embed = main_embed(self)
         names = ['general', 'genchat', 'generalchat', 'general-chat', 'general-talk', 'gen', 'talk', 'general-1', '🗣general-chat','🗣', '🗣general']
         for k in guild.text_channels:
             if k.name in names:
@@ -206,5 +192,5 @@ class Jarvide(Bot):
             return await ctx.send('You are missing a certain role to perform this command.')
         else:
             await ctx.send("An unexpected error occured! Reporting this to my developer...")
-            await self.error_channel.send(error)
+            await self.error_channel.send("".join(traceback.format_exception(error, error, error.__traceback__)))
             raise error
