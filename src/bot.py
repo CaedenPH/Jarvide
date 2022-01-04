@@ -133,24 +133,6 @@ class Jarvide(Bot):
     async def on_command_error(self, ctx: Context, error: Exception):
         
         if isinstance(error, MissingRequiredArgument):
-            aliases = ctx.command.aliases.append(ctx.command.name)
-            desc = f"```\n{ctx.prefix}[{'/'.join(aliases)}] {ctx.command.signature}\n```"
-            desc = underline(desc, desc.index(f"<{errororiginal.param}>", len(f"<{errororiginal.param}")))
-            return await ctx.send(desc)
-
-        elif isinstance(error, CommandNotFound):
-            results = []
-            cmd = ctx.message.split(ctx.prefix)[0]
-            for i in ctx.bot.commands:
-                
-                if len(difflib.get_close_matches(
-                                            cmd, i.name
-                                            )) > 0:
-                    results.append(
-                        f"- `{i.name}`\n"
-                    )
-                    
-            await ctx.send(f"No such a command, you meant any of those?\n{results}")        
             return
 
         elif isinstance(error, DisabledCommand):
@@ -160,7 +142,7 @@ class Jarvide(Bot):
             return await ctx.send(f'Too many arguments passed.\n```yaml\nusage: {ctx.prefix}{ctx.command.aliases.append(ctx.command.name)} {ctx.command.signature}')
 
         elif isinstance(error, CommandOnCooldown):
-            return await ctx.send(f'Command is on cooldown {error.rate} uses per {datetime.timedelta(seconds = error.per)} Try again after {datetime.timedelta(seconds = error.retry_after)}}')
+            return await ctx.send(f'Command is on cooldown. Try again after {datetime.timedelta(seconds = error.retry_after)}}')
 
         elif isinstance(error, NotOwner):
             return await ctx.send('Only my owner can use this command.')
@@ -175,10 +157,10 @@ class Jarvide(Bot):
             return await ctx.send('No such channel found.')
 
         elif isinstance(error, MissingPermissions):
-            return await ctx.send(f'You need the {"".join(error.missing_permissions)} permissions to be able to do this')
+            return await ctx.send(f'You need the {"".join(error.missing_permissions)} permissions to be able to do this.')
 
         elif isinstance(error, BotMissingPermissions):
-            return await ctx.send(f'I need the {"",join(error.missinng_permissions)} permissions to be able to do this')
+            return await ctx.send(f'I need the {"",join(error.missing_permissions)} permissions to be able to do this.')
 
         elif isinstance(error, MissingRole):
             return await ctx.send('You are missing a certain role to perform this command.')
