@@ -27,6 +27,7 @@ Learn more about Jarvide [here.](ABOUT.md)
 | Snowy       |
 | okimii      |love coding and capybaras|  
 | Robin       | Aspiring software developer |
+| Osama       | Thinks he is good at coding (he is trash) |
 
 
 
