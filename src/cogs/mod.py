@@ -137,6 +137,14 @@ class Mod(commands.Cog):
             )
         )
 
+    @commands.command(aliases=['unsilence'])
+    @commands.guild_only()
+    @commands.has_permissions(moderate_members=True)
+    @commands.bot_has_permissions(moderate_members=True)
+    async def unmute(self, ctx, member: disnake.Member, *, reason):
+        await member.timeout(until=None, reason=reason)
+        await ctx.send(embed=disnake.Embed(title="unmuted", description=f"{member.mention} was unmuted."))
+
 
 def setup(bot: commands.Bot) -> None:
     bot.add_cog(Mod(bot))
