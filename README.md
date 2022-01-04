@@ -10,7 +10,8 @@
 
 Learn more about Jarvide [here.](ABOUT.md)
 
-
+## **Dashboard**
+> Since the bot dashboard is a complex project in and of itself, it has its own seperate GitHub repository you can view [here](https://github.com/Robin5605/jarvide-dashboard).
 
 ### **The Team**
 
