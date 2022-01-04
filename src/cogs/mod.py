@@ -127,7 +127,7 @@ class Mod(commands.Cog):
     async def timeout(self, ctx, member: disnake.Member, time: str, *, reason=None):
         if len(str) > 2:
             return await ctx.reply("Invalid time input, expected: [1s/1h/1m/1d]") 
-        durations = { "days": time[0] if time[1] == "d" else 0, "hours": time[0] if time[1] == "h" else 0, "minutes": time[0] if time[1] == "s" else 0 }
+        durations = { "days": time[0:len(time)-2] if time[-1] == "d" else 0, "hours": time[0:len(time)-2] if time[-1] == "h" else 0, "minutes": time[0:len(time)-2] if time[-1] == "s" else 0 }
         now = datetime.datetime.utcnow()
         change = datetime.timedelta(**durations)
         duration = now + change
