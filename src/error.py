@@ -8,7 +8,7 @@ from typing import Optional
 async def send_error(
     ctx: commands.Context,
     error: str,
-    errororiginal: commands.MissingRequiredArgument,
+    errororiginal: Exception,
     sendtochannel: bool
 ) -> None:
     if sendtochannel:
