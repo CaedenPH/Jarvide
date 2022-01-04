@@ -104,6 +104,8 @@ class Fun(commands.Cog):
 
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
+        self.emoji = '🍿'
+        self.short_help_doc = 'Fun commands to play around'
 
     @commands.command(aliases=["gaypercent", "howgay"])
     async def gaymeter(self, ctx, member: disnake.Member = None) -> None:

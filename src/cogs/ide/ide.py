@@ -12,6 +12,8 @@ class Ide(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self.emoji = '📂'
+        self.short_help_doc = 'IDE commands , to view and edit your code'
         self.active_commands = {}
         self.check_activity.start()
 

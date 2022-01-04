@@ -14,6 +14,8 @@ class Misc(commands.Cog):
 
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
+        self.emoji = '🌀'
+        self.short_help_doc = 'Commands which don\'t fit anywhere else'
         self.google = async_cse.Search(KEY)
     
     # embed 

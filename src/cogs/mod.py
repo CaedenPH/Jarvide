@@ -12,6 +12,8 @@ class Mod(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self.emoji = '🔨'
+        self.short_help_doc = 'Moderation related commands'
 
     @commands.command()
     @commands.guild_only()
