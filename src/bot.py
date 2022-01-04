@@ -98,11 +98,10 @@ class Jarvide(commands.Bot):
 
             new_message = copy.copy(original_message)
             new_message.content = f"jarvide {cmd.name}{args}"
-            print(new_message.content)
             await super().process_commands(new_message)
 
     async def on_ready(self) -> None:
-        self.send_guild = self.get_guild(926811692019626064)
+        self.send_guild = self.get_guild(926997883381772309)
         print("Set up")
 
     async def on_command_error(self, ctx, error):

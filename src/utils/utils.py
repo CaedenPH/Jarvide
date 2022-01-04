@@ -137,7 +137,6 @@ class ExitButton(disnake.ui.Button):
             await interaction.response.defer()
         except disnake.errors.InteractionResponded:
             pass
-        await interaction.response.defer()
 
         for child in self.view.children:
             if isinstance(child, disnake.ui.Button):

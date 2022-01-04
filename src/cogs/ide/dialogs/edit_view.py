@@ -1,8 +1,9 @@
 from __future__ import annotations
+
 import disnake
 
 from disnake.ext import commands
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from src.utils.utils import EmbedFactory, ExitButton, SaveButton, add_lines, get_info
 
@@ -21,23 +22,85 @@ def clear_codeblock(content: str):
     return content
 
 
-def update_buttons(cls: EditView):
-    if cls.page == 1:
-        cls.previous_button.disabled = True
-    else:
-        cls.previous_button.disabled = False
+def page_integrity(page: int, pages: int, method: Literal["back", "next"]):
+    if page == 0:
+        if method == "back":
+            return False
+        return True
+    elif page == (pages - 1):
+        if method == "back":
+            return True
+        return False
+    return True
 
-    if cls.page == len(cls.pages) - 2:
-        cls.next_button.disabled = True
-    else:
-        cls.next_button.disabled = False
+
+class OptionView(disnake.ui.View):
+    def __init__(self,
+                 ctx: commands.Context,
+                 file: File, pages: list[str],
+                 bot_message: disnake.Message,
+                 view: EditView
+                 ):
+        super().__init__()
+        self.ctx = ctx
+        self.bot_message = bot_message
+        self.pages = pages
+        self.file = file
+        self.view = view
+
+    @disnake.ui.select(options=[disnake.SelectOption(label="Find")])
+    async def find_option(self, select: disnake.ui.Select, interaction: disnake.MessageInteraction):
+        await interaction.message.delete()
+        await interaction.response.send_message("What do you want to find?", ephemeral=True)
+        content: str = (
+            await self.ctx.bot.wait_for(
+                "message",
+                check=lambda m: m.author == interaction.author and m.channel == interaction.channel,
+            )
+        ).content
+        try:
+            page_occurrence = [i for i, c in enumerate(self.pages) if any([content in li for li in c])]
+        except IndexError:
+            return await self.ctx.send("No occurrence found!")
+        lines = self.file.content.splitlines()
+        line_occurrence = [i for i, c in enumerate(lines) if content in c]
+        current_line = 0
+        await self.ctx.send(f"Found {self.file.content.count(content)} occurrence of `{content}` "
+                            f"({len(line_occurrence)} lines, {len(page_occurrence)} pages) "
+                            f"in **{self.file.filename}**! [Type \"next\" or \"back\" to go "
+                            f"to the next or last occurrence, or \"quit\" to quit the search!]"
+                            )
+        while True:
+            message: disnake.Message = await self.ctx.bot.wait_for(
+                "message",
+                check=lambda m: m.author == interaction.author and
+                m.channel == interaction.channel and m.content.lower() in ("back", "next", "quit"),
+            )
+            if message.content.lower() == "back":
+                if page_integrity(current_line, len(line_occurrence), "back"):
+                    current_line -= 1
+                else:
+                    current_line = len(line_occurrence) - 1
+            elif message.content.lower() == "next":
+                if page_integrity(current_line, len(line_occurrence), "next"):
+                    current_line += 1
+                else:
+                    current_line = 0
+            else:
+                break
+            self.view.page = line_occurrence[current_line] // 50
+            await self.ctx.send(f"Found occurrence in line {line_occurrence[current_line] + 1}!", delete_after=10)
+            embed = self.bot_message.embeds[0]
+            embed.description = f"```py\n{''.join(self.pages[line_occurrence[current_line] // 50])}\n```"
+            await self.bot_message.edit(embed=embed, view=self.view)
+            await message.delete()
 
 
 class EditView(disnake.ui.View):
     async def interaction_check(self, interaction: disnake.MessageInteraction) -> bool:
         return (
-            interaction.author == self.ctx.author
-            and interaction.channel == self.ctx.channel
+                interaction.author == self.ctx.author
+                and interaction.channel == self.ctx.channel
         )
 
     async def on_timeout(self) -> None:
@@ -55,14 +118,14 @@ class EditView(disnake.ui.View):
         )
 
     def __init__(
-        self,
-        ctx,
-        file_: "File",
-        bot_message=None,
-        file_view=None,
-        lines: list[str] = None,
+            self,
+            ctx,
+            file_: "File",
+            bot_message=None,
+            file_view=None,
+            lines: list[str] = None,
     ):
-        super().__init__(timeout=15)
+        super().__init__(timeout=120)
 
         self.ctx = ctx
         self.bot = ctx.bot
@@ -90,15 +153,18 @@ class EditView(disnake.ui.View):
             ),
         )
 
-    @disnake.ui.button(label="Write", style=disnake.ButtonStyle.gray)
-    async def write_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+    @disnake.ui.button(label="Options", style=disnake.ButtonStyle.gray)
+    async def options_button(
+            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
-        ...
+        await interaction.response.send_message(
+            "᲼",
+            view=OptionView(self.ctx, self.file, self.pages, self.bot_message, self)
+        )
 
     @disnake.ui.button(label="Replace", style=disnake.ButtonStyle.gray)
     async def replace_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.send_message(
             "**Format:**\n[line number]\n```py\n<code>\n```**Example:**"
@@ -109,8 +175,7 @@ class EditView(disnake.ui.View):
         content: str = (
             await self.ctx.bot.wait_for(
                 "message",
-                check=lambda m: m.author == interaction.author
-                and m.channel == interaction.channel,
+                check=lambda m: m.author == interaction.author and m.channel == interaction.channel,
             )
         ).content
         if content[0].isdigit():
@@ -134,7 +199,7 @@ class EditView(disnake.ui.View):
 
     @disnake.ui.button(label="Append", style=disnake.ButtonStyle.gray)
     async def append_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.send_message(
             "Type something... (This will append your code with a new line) `[Click save to see the result]`",
@@ -145,23 +210,21 @@ class EditView(disnake.ui.View):
             (
                 await self.ctx.bot.wait_for(
                     "message",
-                    check=lambda m: m.author == interaction.author
-                    and m.channel == interaction.channel,
+                    check=lambda m: m.author == interaction.author and m.channel == interaction.channel,
                 )
             ).content
         )
 
     @disnake.ui.button(label="Rename", style=disnake.ButtonStyle.grey)
     async def rename_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.send_message(
             "What would you like the filename to be?", ephemeral=True
         )
         filename = await self.bot.wait_for(
             "message",
-            check=lambda m: self.ctx.author == m.author
-            and m.channel == self.ctx.channel,
+            check=lambda m: self.ctx.author == m.author and m.channel == self.ctx.channel,
         )
         if len(filename.content) > 12:
             if self.SUDO:
@@ -181,47 +244,47 @@ class EditView(disnake.ui.View):
 
     @disnake.ui.button(label="Prev", style=disnake.ButtonStyle.blurple, row=2)
     async def previous_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.defer()
-        update_buttons(self)
-        self.page -= 1
+        if page_integrity(self.page, len(self.pages), "back"):
+            self.page -= 1
+        else:
+            self.page = len(self.pages) - 1
         embed = (
             disnake.Embed(
                 description=f"```py\n{''.join(self.pages[self.page])}\n```\nPage: {self.page + 1}/{len(self.pages)}",
                 timestamp=self.ctx.message.created_at,
-            )
-            .set_author(
+            ).set_author(
                 name=f"{self.ctx.author.name}'s automated paginator for {self.file.filename}",
                 icon_url=self.ctx.author.avatar.url,
-            )
-            .set_footer(text="The official jarvide text editor and ide")
+            ).set_footer(text="The official jarvide text editor and ide")
         )
         await self.bot_message.edit(embed=embed, view=self)
 
     @disnake.ui.button(label="Next", style=disnake.ButtonStyle.blurple, row=2)
     async def next_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.defer()
-        update_buttons(self)
-        self.page += 1
+        if page_integrity(self.page, len(self.pages), "next"):
+            self.page += 1
+        else:
+            self.page = 0
         embed = (
             disnake.Embed(
                 description=f"```py\n{''.join(self.pages[self.page])}\n```\nPage: {self.page + 1}/{len(self.pages)}",
                 timestamp=self.ctx.message.created_at,
-            )
-            .set_author(
+            ).set_author(
                 name=f"{self.ctx.author.name}'s automated paginator for {self.file.filename}",
                 icon_url=self.ctx.author.avatar.url,
-            )
-            .set_footer(text="The official jarvide text editor and ide")
+            ).set_footer(text="The official jarvide text editor and ide")
         )
         await self.bot_message.edit(embed=embed, view=self)
 
     @disnake.ui.button(label="Undo", style=disnake.ButtonStyle.blurple, row=2)
     async def undo_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         if not self.undo:
             return await interaction.response.send_message(
@@ -234,7 +297,7 @@ class EditView(disnake.ui.View):
 
     @disnake.ui.button(label="Redo", style=disnake.ButtonStyle.blurple, row=2)
     async def redo_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         if not self.redo:
             return await interaction.response.send_message(
@@ -247,7 +310,7 @@ class EditView(disnake.ui.View):
 
     @disnake.ui.button(label="Clear", style=disnake.ButtonStyle.danger, row=3)
     async def clear_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         self.undo.append(self.file_view.file.content)
         self.file_view.file.content = ""
@@ -256,7 +319,7 @@ class EditView(disnake.ui.View):
 
     @disnake.ui.button(label="Back", style=disnake.ButtonStyle.danger, row=3)
     async def settings_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         embed = EmbedFactory.ide_embed(self.ctx, await get_info(self.file))
         self.undo = []
