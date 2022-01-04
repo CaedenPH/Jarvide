@@ -68,7 +68,7 @@ class Misc(commands.Cog):
         await ctx.send(content="🏓**Pong**", embed=embed)
 
     @commands.command(aliases=["insult"])
-    async def roast(self, ctx: commands.Context, *, user: disnake.Member = None):
+    async def roast(self, ctx: commands.Context, *, user: disnake.Member):
         async with aiohttp.ClientSession() as cs:
             async with cs.get(
                 "https://evilinsult.com/generate_insult.php?lang=en&type=json"
