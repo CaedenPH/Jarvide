@@ -1,5 +1,4 @@
 from __future__ import annotations
-
 import disnake
 
 from disnake.ext import commands
@@ -73,7 +72,7 @@ class EditView(disnake.ui.View):
         self.file_view = file_view
         self.undo = self.file_view.file.undo
         self.redo = self.file_view.file.redo
-        self.pages = [lines[x:x + 50] for x in range(0, len(lines), 50)]
+        self.pages = [lines[x: x + 50] for x in range(0, len(lines), 50)]
         self.page = 0
         self.SUDO = self.ctx.me.guild_permissions.manage_messages
 
@@ -91,20 +90,11 @@ class EditView(disnake.ui.View):
             ),
         )
 
-    @disnake.ui.button(label="Find", style=disnake.ButtonStyle.gray)
+    @disnake.ui.button(label="Write", style=disnake.ButtonStyle.gray)
     async def write_button(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
-        await interaction.response.send_message("Find something...", ephemeral=True)
-        content: str = (
-            await self.ctx.bot.wait_for(
-                "message",
-                check=lambda m: m.author == interaction.author
-                and m.channel == interaction.channel,
-            )
-        ).content
-
-        self.file_view.file.content.find()
+        ...
 
     @disnake.ui.button(label="Replace", style=disnake.ButtonStyle.gray)
     async def replace_button(
@@ -138,7 +128,7 @@ class EditView(disnake.ui.View):
             code = clear_codeblock(content)
         self.undo.append(self.content)
         sliced = self.file_view.file.content.splitlines()
-        del sliced[from_:to + 1]
+        del sliced[from_: to + 1]
         sliced.insert(from_, code)
         self.file_view.file.content = "\n".join(sliced)
 
