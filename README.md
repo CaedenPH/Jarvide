@@ -1,5 +1,7 @@
 # Jarvide
 
+![banner by dekriel](https://media.discordapp.net/attachments/926115595307614252/927838828880887838/big.jpg?width=1024&height=322)
+
 ## **About Jarvide**
 > **Welcome to Jarvide! A powerful AI mixed with a powerful IDE. Jarvide is the future.**
 
