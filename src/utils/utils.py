@@ -166,7 +166,7 @@ class SaveButton(disnake.ui.Button):
         )
 
 def main_embed(bot):
-    return disnake.Embed(description=f"""
+    return disnake.Embed(color=0x489cc4, description=f"""
     **Hello, my name is Jarvide.** 
 
     │ I am half AI, half discord text editor. │

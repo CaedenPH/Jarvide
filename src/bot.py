@@ -192,5 +192,5 @@ class Jarvide(Bot):
             return await ctx.send('You are missing a certain role to perform this command.')
         else:
             await ctx.send("An unexpected error occured! Reporting this to my developer...")
-            await self.error_channel.send("".join(traceback.format_exception(error, error, error.__traceback__)))
+            await self.error_channel.send("```yaml\n" + "".join(traceback.format_exception(error, error, error.__traceback__)) + "```")
             raise error
