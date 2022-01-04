@@ -100,12 +100,12 @@ class EmbedFactory:
 
     @staticmethod
     def code_embed(
-        ctx: commands.Context, code: str, path: str, format_: str = "py"
+        ctx: commands.Context, code: str, path: str, format_: str = "py", page_number: str = ""
     ) -> disnake.Embed:
         return (
             disnake.Embed(
                 title="Jarvide Text Editor",
-                description=f"**{path}**\n```{format_}\n{code}```",
+                description=f"**{path}**\n```{format_}\n{code}```{page_number}",
                 timestamp=ctx.message.created_at,
             )
             .set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)

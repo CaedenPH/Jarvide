@@ -34,29 +34,29 @@ def page_integrity(page: int, pages: int, method: Literal["back", "next"]):
     return True
 
 
-class OptionView(disnake.ui.View):
+class OptionSelect(disnake.ui.Select):
     def __init__(
         self,
         ctx: commands.Context,
         file: File,
         pages: list[str],
         bot_message: disnake.Message,
-        view: EditView,
+        parent: EditView
     ):
         super().__init__()
         self.ctx = ctx
         self.bot_message = bot_message
         self.pages = pages
         self.file = file
-        self.view = view
+        self.parent = parent
+        self.options = [
+            disnake.SelectOption(value="1", label="Find"),
+            disnake.SelectOption(value="2", label="Go to page...")
+        ]
 
-    @disnake.ui.select(options=[disnake.SelectOption(label="Find")])
-    async def find_option(
-        self, select: disnake.ui.Select, interaction: disnake.MessageInteraction
-    ):
-        await interaction.message.delete()
+    async def find_option(self, interaction: disnake.MessageInteraction):
         await interaction.response.send_message(
-            "What do you want to find?", ephemeral=True
+            "What do you want to find? (Case-sensitive)", ephemeral=True
         )
         content: str = (
             await self.ctx.bot.wait_for(
@@ -99,15 +99,59 @@ class OptionView(disnake.ui.View):
                     current_line = 0
             else:
                 break
-            self.view.page = line_occurrence[current_line] // 50
+            self.parent.page = line_occurrence[current_line] // 50
             await self.ctx.send(
                 f"Found occurrence in line {line_occurrence[current_line] + 1}!",
                 delete_after=10,
             )
             embed = self.bot_message.embeds[0]
             embed.description = f"```py\n{''.join(self.pages[line_occurrence[current_line] // 50])}\n```"
-            await self.bot_message.edit(embed=embed, view=self.view)
+            await self.bot_message.edit(embed=embed, view=self.parent)
             await message.delete()
+
+    async def goto_option(self, interaction: disnake.MessageInteraction):
+        await interaction.response.send_message("Enter page number...", ephemeral=True)
+        message: disnake.Message = (
+            await self.ctx.bot.wait_for(
+                "message",
+                check=lambda m: m.author == interaction.author
+                and m.channel == interaction.channel,
+            )
+        )
+        content = message.content
+        await message.delete()
+        if not content.isdigit():
+            return await self.ctx.send("Not a digit, operation is cancelled.", delete_after=10)
+        elif len(self.pages) < int(content) < 1:
+            return await self.ctx.send("You cannot enter a number below 1 or above "
+                                       "number of pages, operation is cancelled.",
+                                       delete_after=10
+                                       )
+        self.parent.page = int(content) - 1
+        embed = self.bot_message.embeds[0]
+        embed.description = f"```py\n{''.join(self.pages[self.parent.page])}\n```"
+        await self.bot_message.edit(embed=embed, view=self.parent)
+
+    async def callback(self, interaction: disnake.MessageInteraction):
+        await interaction.message.delete()
+        clicked = self.values[0]
+        if clicked == "1":
+            await self.find_option(interaction)
+        elif clicked == "2":
+            await self.goto_option(interaction)
+
+
+class OptionView(disnake.ui.View):
+    def __init__(
+        self,
+        ctx: commands.Context,
+        file: File,
+        pages: list[str],
+        bot_message: disnake.Message,
+        parent: EditView
+    ):
+        super().__init__()
+        self.add_item(OptionSelect(ctx, file, pages, bot_message, parent))
 
 
 class EditView(disnake.ui.View):

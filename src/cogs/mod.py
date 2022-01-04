@@ -125,8 +125,7 @@ class Mod(commands.Cog):
     @commands.has_permissions(moderate_members=True)
     @commands.bot_has_permissions(moderate_members=True)
     async def timeout(self, ctx, member: disnake.Member, time: str, *, reason=None):
-        
-       if len(time) > 3:
+        if len(time) > 3:
             return await ctx.reply("Invalid time input, expected: [1s/1h/1m/1d]")
         
         durations = {
@@ -139,7 +138,7 @@ class Mod(commands.Cog):
         duration = now + change
         await member.timeout(until=duration, reason=reason)
         embed = disnake.Embed(
-            description=f":white_check_mark: {member.mention} has been timed out until {time}.",
+            description=f":white_check_mark: {member.mention} has been timed out until {duration}.",
             color=disnake.Color.blurple(),
         )
         await ctx.send(embed=embed)

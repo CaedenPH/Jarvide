@@ -112,7 +112,7 @@ class FileView(disnake.ui.View):
         view = EditView(self.ctx, self.file, self.bot_message, self, content)
         await self.bot_message.edit(
             embed=EmbedFactory.code_embed(
-                self.ctx, "".join(content[:50]), self.file.filename
+                self.ctx, "".join(content[:50]), self.file.filename, f"\n1/{len(content)}"
             ),
             view=view,
         )
