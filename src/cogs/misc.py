@@ -55,7 +55,7 @@ class Misc(
                         for res in results[:5]
                     ]
                 ),
-                color=0x90EE90,
+                color=0x489cc4,
             )
             .set_footer(
                 text=f"Requested by {ctx.author}", icon_url=ctx.author.display_avatar
