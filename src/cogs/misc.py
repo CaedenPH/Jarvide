@@ -15,7 +15,8 @@ class Misc(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
         self.google = async_cse.Search(KEY)
-
+    
+    # embed 
     async def overlay(
         self, ctx: commands.Context, endpoint: str, member: disnake.Member = None
     ):
@@ -27,6 +28,7 @@ class Misc(commands.Cog):
 
     @commands.command(name="google", aliases=["find", "search"])
     async def google(self, ctx, *, query):
+        # google command
         safesearch = True
         if isinstance(ctx.channel, disnake.TextChannel):
             safesearch = not ctx.channel.is_nsfw()
@@ -48,7 +50,8 @@ class Misc(commands.Cog):
             url=response[0].url,
         )
         await ctx.reply(embed=embed, mention_author=False)
-
+    
+    # get bot latency 
     @commands.command()
     async def ping(self, ctx: commands.Context):
         if round(self.bot.latency * 1000) > 150:
@@ -69,7 +72,8 @@ class Misc(commands.Cog):
             .set_footer(text="Discord API issues could lead to high roundtrip times")
         )
         await ctx.send(content="🏓**Pong**", embed=embed)
-
+    
+    # roasts...someone?
     @commands.command()
     async def roast(self, ctx: commands.Context, *, member: disnake.Member):
         async with aiohttp.ClientSession() as cs:
@@ -81,7 +85,8 @@ class Misc(commands.Cog):
                 color = 0x90EE90
                 embed = disnake.Embed(color=color, description=insult)
                 await ctx.send(f"{member.mention}", embed=embed)
-
+    
+    # gets a random meme
     @commands.command()
     async def meme(self, ctx: commands.Context):
         async with aiohttp.ClientSession() as cs:
@@ -94,6 +99,7 @@ class Misc(commands.Cog):
                 ).set_image(url=post["url"])
                 await ctx.send(embed=embed)
 
+    # gets a reddit post
     @commands.command()
     async def reddit(self, ctx: commands.Context, subreddit: str):
         async with aiohttp.ClientSession() as cs:
@@ -117,7 +123,8 @@ class Misc(commands.Cog):
                     )
 
                 await ctx.send(embed=embed)
-
+    
+    # random stuff
     @commands.command()
     async def gay(self, ctx, *, member: disnake.Member = None):
         await self.overlay(ctx, "gay", member)
