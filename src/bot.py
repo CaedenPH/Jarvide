@@ -124,22 +124,25 @@ class Jarvide(Bot):
     async def on_ready(self) -> None:
         self.send_guild = self.get_guild(926811692019626064)
         print("Set up")
-
+    
+    def underline(text, at, for_):
+            import itertools
+            underline = "".join(itertools.repeat(" ", at)) + "".join(itertools.repeat("^", for_))
+            return text + "\n" + underline
+    
     async def on_command_error(self, ctx: Context, error: Exception):
+        
         if isinstance(error, MissingRequiredArgument):
-            return await ctx.send(f'```py\n{ctx.command.name} {ctx.command.signature}\n```\nNot enough arguments passed.')
-
-        elif isinstance(error, CommandNotFound):
             return
 
         elif isinstance(error, DisabledCommand):
             return await ctx.send('This command is disabled.')
 
         elif isinstance(error, TooManyArguments):
-            return await ctx.send('Too many arguments passed.')
+            return await ctx.send(f'Too many arguments passed.\n```yaml\nusage: {ctx.prefix}{ctx.command.aliases.append(ctx.command.name)} {ctx.command.signature}')
 
         elif isinstance(error, CommandOnCooldown):
-            return await ctx.send('Command is on cooldown. Try again later.')
+            return await ctx.send(f'Command is on cooldown. Try again after {datetime.timedelta(seconds = error.retry_after)}}')
 
         elif isinstance(error, NotOwner):
             return await ctx.send('Only my owner can use this command.')
@@ -154,10 +157,10 @@ class Jarvide(Bot):
             return await ctx.send('No such channel found.')
 
         elif isinstance(error, MissingPermissions):
-            return await ctx.send('You cannot invoke this command because you do not have enough permissions.')
+            return await ctx.send(f'You need the {"".join(error.missing_permissions)} permissions to be able to do this.')
 
         elif isinstance(error, BotMissingPermissions):
-            return await ctx.send('I cannot execute this command because I am missing certain permissions.')
+            return await ctx.send(f'I need the {"",join(error.missing_permissions)} permissions to be able to do this.')
 
         elif isinstance(error, MissingRole):
             return await ctx.send('You are missing a certain role to perform this command.')
