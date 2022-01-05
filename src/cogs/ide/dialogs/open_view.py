@@ -117,8 +117,7 @@ class OpenView(disnake.ui.View):
 
             await url.edit(suppress=True)
             regex = re.compile(
-                r"https://github\.com/(?P<repo>[a-zA-Z0-9-]+/[\w.-]+)"
-                r"/blob/(?P<branch>\w*)/(?P<path>[^#>]+)"
+                r"https://github\.com/(?P<repo>[a-zA-Z0-9-]+/[\w.-]+)/blob/(?P<branch>\w*)/(?P<path>[^#>]+)"
             )
             try:
                 repo, branch, path = re.findall(regex, url.content)[0]
@@ -137,19 +136,18 @@ class OpenView(disnake.ui.View):
             )
             json = await a.json()
             if "content" not in json:
-                await interaction.channel.send(
-                    "Not a valid github link, please try again.", delete_after=5
+                b = await session.get(
+                    f"https://raw.githubusercontent.com/{repo}/{branch}/{path}",
+                    headers={"Accept": "application/vnd.github.v3+json"}
                 )
-                if self.SUDO:
-                    await url.delete()
-                return
+                content = (await b.text()).replace("`", "`​")
+            else:
+                content = json["content"]
 
-            content = json["content"]
+                content = base64.b64decode(content).decode("utf-8")
+
         await url.add_reaction(THUMBS_UP)
-
-        content = base64.b64decode(content).decode("utf-8").replace("`", "`​")
         file_ = File(content=content, filename=url.content.split("/")[-1], bot=self.bot)
-
         description = await get_info(file_)
         embed = EmbedFactory.ide_embed(self.ctx, description)
         await self.bot_message.edit(
