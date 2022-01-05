@@ -344,7 +344,7 @@ class LinePaginator(_AbstractPaginator):
         for line in self.lines:
             if len(line) > 4096:
                 raise LineTooLong(
-                    f"Pxpected the line at index {line_index} to be less than 4096 characters"
+                    f"Expected the line at index {line_index} to be less than 4096 characters"
                 )
 
             lines.append(line)
