@@ -155,7 +155,6 @@ class Mod(commands.Cog):
                 )
             )
 
-
     @commands.command()
     @commands.guild_only()
     @commands.has_permissions(manage_roles=True)
@@ -163,7 +162,6 @@ class Mod(commands.Cog):
     async def role(self, ctx, *, member: disnake.Member, *, role: disnake.Role, *, reason="No Reason Provided."):
         await member.add_roles(role,reason=reason)
         await ctx.send(f"I gave the {role} role to {member.name}.")
-
 
 
 def setup(bot: commands.Bot) -> None:
