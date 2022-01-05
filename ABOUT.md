@@ -1,6 +1,21 @@
+## **Info**
+
 ### **Jarvis**
-> Jarvide is an A.I from Iron Man that executes commands and retrieves informaton via normal, logical speaking. A phrase like "hey jarvide, can you kick Caeden please" would kick the member Caeden, or if there are multiple give an option of which one.
+> Jarvide is an A.I. from Iron Man that executes commands
+> and retrieves information via normal, logical speaking.
+> A phrase like "hey jarvide, can you kick Caeden please"
+> would kick the member Caeden, or if there are multiple
+> give an option of which one.
 
+### **Contribution**
+> Everyone can contribute to this project, but they do have to follow
+> a set of [rules](CONTRIBUTING.md). The user does at all times need to
+> follow the [CoC.](CODE_OF_CONDUCT.md)<br>A user that deliberately tries
+> to break this will be permanently not be able to PR or commit to this project.
 
-### **Text editor (IDE)**
-> Have you used the linux commandline editor, nano? This discord text editor is like nano , and implements safe, reliable and fast file storing with editing and compiling technology. The database is secure and cannot be accessed or broken into by anyone, not even the core developers. You can upload or create files and these files would be saved into a filesystem which you can open at any time. If you have an open file you can compile it and run it (depending on the filetype). You can also edit the content and replace text. You can also pull and push to github depending on the file/folder you uploaded.
+### **Terms of Service**
+> Jarvide has a [ToS](TOS.md) to protect our contributors and our bot Jarvide.
+
+## **Usage & FAQ**
+
+For our usage & FAQ [documentation](https://github.com/CaedenPH/Jarvide/wiki) we use GitHub's build-in wiki.

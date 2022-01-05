@@ -114,9 +114,9 @@ class Jarvide(Bot):
 
         cmd = commands_in_message[0][0]
         ctx = await super().get_context(original_message)
-        userAuthorized = await cmd.can_run(ctx)
+        user_authorized = await cmd.can_run(ctx)
 
-        if userAuthorized:
+        if user_authorized:
             args = original_message.content.partition(
                 [
                     i
@@ -182,7 +182,8 @@ class Jarvide(Bot):
 
         elif isinstance(error, TooManyArguments):
             return await ctx.send(
-                f"Too many arguments passed.\n```yaml\nusage: {ctx.prefix}{ctx.command.aliases.append(ctx.command.name)} {ctx.command.signature}"
+                f"Too many arguments passed.\n```yaml\nusage: {ctx.prefix}"
+                f"{ctx.command.aliases.append(ctx.command.name)} {ctx.command.signature} "
             )
 
         elif isinstance(error, CommandOnCooldown):
@@ -218,9 +219,10 @@ class Jarvide(Bot):
             )
         else:
             await ctx.send(
-                "An unexpected error occured! Reporting this to my developer..."
+                "An unexpected error occurred! Reporting this to my developer..."
             )
             await self.error_channel.send(
-                f"```yaml\n{''.join(traceback.format_exception(error, error, error.__traceback__))}\n```"  # type: ignore
+                # type: ignore
+                f"```yaml\n{''.join(traceback.format_exception(error, error, error.__traceback__))}\n```"
             )
             raise error

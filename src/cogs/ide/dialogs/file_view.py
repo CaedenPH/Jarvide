@@ -39,6 +39,7 @@ class FileView(disnake.ui.View):
         self.file = file_
         self.SUDO = self.ctx.me.guild_permissions.manage_messages
         self.bot_message = bot_message
+        self.extension = None
 
         self.add_item(ExitButton(ctx, bot_message, row=1))
         self.add_item(SaveButton(ctx, bot_message, file_, row=0))
