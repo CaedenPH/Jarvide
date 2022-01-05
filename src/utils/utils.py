@@ -58,10 +58,10 @@ class File:
 
     @classmethod
     async def from_url(
-        cls: Type[Self],
-        *,
-        bot: commands.Bot,
-        url,
+            cls: Type[Self],
+            *,
+            bot: commands.Bot,
+            url,
     ) -> Self:
 
         async with aiohttp.ClientSession() as session:
@@ -84,7 +84,7 @@ class File:
 class EmbedFactory:
     @staticmethod
     def ide_embed(
-        ctx: commands.Context, description: str, format_: str = "yaml"
+            ctx: commands.Context, description: str, format_: str = "yaml"
     ) -> disnake.Embed:
         return (
             disnake.Embed(
@@ -92,15 +92,15 @@ class EmbedFactory:
                 description=f"```{format_}\n{description}```",
                 timestamp=ctx.message.created_at,
             )
-            .set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
-            .set_footer(
+                .set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+                .set_footer(
                 text="The official jarvide text editor and ide. Expires in 5min"
             )
         )
 
     @staticmethod
     def code_embed(
-        ctx: commands.Context, code: str, path: str, format_: str = "py", page_number: str = ""
+            ctx: commands.Context, code: str, path: str, format_: str = "py", page_number: str = ""
     ) -> disnake.Embed:
         return (
             disnake.Embed(
@@ -108,8 +108,8 @@ class EmbedFactory:
                 description=f"**{path}**\n```{format_}\n{code}```{page_number}",
                 timestamp=ctx.message.created_at,
             )
-            .set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
-            .set_footer(text="The official jarvide text editor and ide")
+                .set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+                .set_footer(text="The official jarvide text editor and ide")
         )
 
 
@@ -165,6 +165,7 @@ class SaveButton(disnake.ui.Button):
             embed=embed, view=SaveFile(self.ctx, self.bot_message, self.file)
         )
 
+
 def main_embed(bot):
     return disnake.Embed(color=0x489cc4, description=f"""
     **Hello, my name is Jarvide.** 
@@ -176,10 +177,9 @@ def main_embed(bot):
     │ If you are still confused, join my [support server](https://discord.gg/mtue4UnWaA). │ 
     │ My devs are always around to assist you! │  
             """
-            ).set_image(
-                url="https://media.discordapp.net/attachments/926115595307614252/927951464725377034/big.png?width=1440&height=453"
-            ).set_author(
-                name="Jarvide",
-                icon_url=bot.user.avatar.url
-            )
-
+                         ).set_image(
+        url="https://media.discordapp.net/attachments/926115595307614252/927951464725377034/big.png?width=1440&height=453"
+    ).set_author(
+        name="Jarvide",
+        icon_url=bot.user.avatar.url
+    )

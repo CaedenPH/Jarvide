@@ -189,7 +189,7 @@ class EditView(disnake.ui.View):
         self.file_view = file_view
         self.undo = self.file_view.file.undo
         self.redo = self.file_view.file.redo
-        self.pages = [lines[x : x + 50] for x in range(0, len(lines), 50)]
+        self.pages = [lines[x: x + 50] for x in range(0, len(lines), 50)]
         self.page = 0
         self.SUDO = self.ctx.me.guild_permissions.manage_messages
 
@@ -248,7 +248,7 @@ class EditView(disnake.ui.View):
             code = clear_codeblock(content)
         self.undo.append(self.content)
         sliced = self.file_view.file.content.splitlines()
-        del sliced[from_ : to + 1]
+        del sliced[from_: to + 1]
         sliced.insert(from_, code)
         self.file_view.file.content = "\n".join(sliced)
 

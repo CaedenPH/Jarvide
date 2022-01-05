@@ -1,6 +1,5 @@
 import disnake
 import aiohttp
-import random
 import async_cse
 
 
@@ -26,9 +25,10 @@ class Misc(
         self.short_help_doc = "Commands which don't fit anywhere else"
         self.google = async_cse.Search(KEY)
 
+    @staticmethod
     async def overlay(
-        self, ctx: commands.Context, endpoint: str, member: disnake.Member = None
-    ) -> disnake.Message:
+            ctx: commands.Context, endpoint: str, member: disnake.Member = None
+    ) -> None:
         """Shortcut method"""
         member = member or ctx.author
         await ctx.send(
@@ -44,7 +44,7 @@ class Misc(
         """Search stuff up on google"""
         results = await self.google.search(query, safesearch=True, image_search=False)
         if not results:
-            return await ctx.send_error("No Results Found")
+            return await ctx.send("No Results Found")
 
         await ctx.send(
             embed=disnake.Embed(
@@ -58,7 +58,7 @@ class Misc(
                 color=0x489cc4,
             )
             .set_footer(
-                text=f"Requested by {ctx.author}", icon_url=ctx.author.display_avatar
+                text=f"Requested by {ctx.author}", icon_url=ctx.author.display_avatar.url
             )
             .set_author(
                 name=ctx.author,

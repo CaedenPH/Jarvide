@@ -99,8 +99,8 @@ class JarvideHelp(HelpCommand):
                 continue
             cog: Cog = _bot.get_cog(cog_name)
             embed.add_field(
-                name=f"{cog.emoji} {cog.qualified_name.upper()} COMMANDS [{len(cog.get_commands())}]",
-                value=f"➥ {cog.short_help_doc}",
+                name=f"{cog.emoji} {cog.qualified_name.upper()} COMMANDS [{len(cog.get_commands())}]",  # type: ignore
+                value=f"➥ {cog.short_help_doc}",  # type: ignore
                 inline=False,
             )
         embed.set_author(
@@ -197,7 +197,7 @@ class NavigatorMenu(Select):
                 SelectOption(
                     label=f"{cog.qualified_name.upper()} COMMANDS",
                     description=cog.description.replace("cog", "module"),
-                    emoji= cog.emoji
+                    emoji=cog.emoji  # type: ignore
                 )
             )
         super().__init__(placeholder="Navigate to Category", options=options)

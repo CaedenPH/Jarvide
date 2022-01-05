@@ -49,7 +49,7 @@ class Jarvide(Bot):
             command_prefix="jarvide",
             case_insensitive=True,
             strip_after_prefix=True,
-            help_command=None,  # type: ignore,
+            help_command=None,  # type: ignore
             intents=Intents.all()
         )
         self.engine = AIOEngine(AsyncIOMotorClient(MONGO_URI))
@@ -141,16 +141,17 @@ class Jarvide(Bot):
         await self.server_message.edit(content=f"I am now in `{len(self.guilds)}` servers and can see `{len(self.users)}` users")
 
         embed = main_embed(self)
-        names = ['general', 'genchat', 'generalchat', 'general-chat', 'general-talk', 'gen', 'talk', 'general-1', '🗣general-chat','🗣', '🗣general']
+        names = ['general', 'genchat', 'generalchat', 'general-chat', 'general-talk', 'gen', 'talk', 'general-1', '🗣general-chat', '🗣', '🗣general']
         for k in guild.text_channels:
             if k.name in names: 
                 return await k.send(embed=embed)
         try:
             await guild.system_channel.send(embed=embed)
         except:
-            pass #TODO: see what errors it raises
+            pass  # TODO: see what errors it raises
 
-    def underline(self, text, at, for_):
+    @staticmethod
+    def underline(text, at, for_):
         underline = (" " * at) + ("^" * for_)
         return text + "\n" + underline
 
@@ -192,5 +193,7 @@ class Jarvide(Bot):
             return await ctx.send('You are missing a certain role to perform this command.')
         else:
             await ctx.send("An unexpected error occured! Reporting this to my developer...")
-            await self.error_channel.send("```yaml\n" + "".join(traceback.format_exception(error, error, error.__traceback__)) + "```")
+            await self.error_channel.send(
+                f"```yaml\n{''.join(traceback.format_exception(error, error, error.__traceback__))}\n```"  # type: ignore
+            )
             raise error

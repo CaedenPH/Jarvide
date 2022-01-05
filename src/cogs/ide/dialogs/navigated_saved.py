@@ -67,7 +67,10 @@ class DefaultButtons(disnake.ui.View):
                 f"{directory.content} doesn't exist!", delete_after=15
             )
         self.path = f"{self.path}{path.name[8:]}/"
-        embed = EmbedFactory.ide_embed(self.ctx, f"Moved into dir: {self.path}\n{''.join(['-' for i in range(len(self.path) + len('Moved into dir: '))])}")
+        embed = EmbedFactory.ide_embed(
+            self.ctx, f"Moved into dir: {self.path}\n"
+                      f"{''.join(['-' for _ in range(len(self.path) + len('Moved into dir: '))])}"
+        )
 
         await self.bot_message.edit(
             embed=embed
@@ -210,6 +213,7 @@ class DefaultButtons(disnake.ui.View):
         
         await interaction.channel.send(f"I could not find a folder or file called {directory.content} in {self.path}") 
 
+
 class OpenFromSaved(DefaultButtons):
     def __init__(self, ctx, bot_message):
         super().__init__(ctx, bot_message)
@@ -233,7 +237,6 @@ class OpenFromSaved(DefaultButtons):
             check=lambda m: self.ctx.author == m.author
             and m.channel == self.ctx.channel,
         )
-        
 
         file_model = await self.bot.engine.find_one(
             FileModel,
@@ -269,7 +272,6 @@ class SaveFile(DefaultButtons):
         self.bot_message = bot_message
         self.file = file_
         self.add_item(ExitButton(self.ctx, self.bot_message, row=2))
-
 
     @disnake.ui.button(label="Save", style=disnake.ButtonStyle.danger, row=2)
     async def save_button(
