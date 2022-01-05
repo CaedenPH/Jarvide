@@ -47,7 +47,9 @@ class DefaultButtons(disnake.ui.View):
     async def current_directory(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
-        await interaction.response.send_message("What folder would you like to move into?", ephemeral=True)
+        await interaction.response.send_message(
+            "What folder would you like to move into?", ephemeral=True
+        )
         directory = await self.bot.wait_for(
             "message",
             check=lambda m: self.ctx.author == m.author
@@ -57,7 +59,7 @@ class DefaultButtons(disnake.ui.View):
             FileModel,
             FileModel.user_id == self.ctx.author.id,
             FileModel.folder == self.path,
-            FileModel.name == "folder: " + directory.content
+            FileModel.name == "folder: " + directory.content,
         )
 
         if not path:
@@ -68,13 +70,12 @@ class DefaultButtons(disnake.ui.View):
             )
         self.path = f"{self.path}{path.name[8:]}/"
         embed = EmbedFactory.ide_embed(
-            self.ctx, f"Moved into dir: {self.path}\n"
-                      f"{''.join(['-' for _ in range(len(self.path) + len('Moved into dir: '))])}"
+            self.ctx,
+            f"Moved into dir: {self.path}\n"
+            f"{''.join(['-' for _ in range(len(self.path) + len('Moved into dir: '))])}",
         )
 
-        await self.bot_message.edit(
-            embed=embed
-        )
+        await self.bot_message.edit(embed=embed)
 
     @disnake.ui.button(label="View folder", style=disnake.ButtonStyle.green)
     async def view_folder(
@@ -105,8 +106,10 @@ class DefaultButtons(disnake.ui.View):
     @disnake.ui.button(label="New folder", style=disnake.ButtonStyle.green)
     async def create_folder(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
-    ):  
-        await interaction.response.send_message("What is the name of the folder you would like to create?", ephemeral=True)
+    ):
+        await interaction.response.send_message(
+            "What is the name of the folder you would like to create?", ephemeral=True
+        )
         folder = await self.bot.wait_for(
             "message",
             check=lambda m: self.ctx.author == m.author
@@ -115,7 +118,10 @@ class DefaultButtons(disnake.ui.View):
         if len(folder.content) >= 12:
             if self.SUDO:
                 await folder.delete()
-            return await interaction.channel.send("The folder name has to be less than 12 characters long!", delete_after=15)
+            return await interaction.channel.send(
+                "The folder name has to be less than 12 characters long!",
+                delete_after=15,
+            )
 
         dir_files = [
             k.name
@@ -123,7 +129,7 @@ class DefaultButtons(disnake.ui.View):
                 FileModel,
                 FileModel.user_id == self.ctx.author.id,
                 FileModel.folder == self.path,
-                FileModel.name == folder.content
+                FileModel.name == folder.content,
             )
         ]
         if folder.content in dir_files:
@@ -154,8 +160,7 @@ class DefaultButtons(disnake.ui.View):
             [
                 f"{k.name}"
                 for k in await self.bot.engine.find(
-                    FileModel, 
-                    FileModel.user_id == self.ctx.author.id
+                    FileModel, FileModel.user_id == self.ctx.author.id
                 )
             ]
         )
@@ -176,7 +181,8 @@ class DefaultButtons(disnake.ui.View):
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.send_message(
-            "What file/folder do you want to delete? Specify relative path", ephemeral=True
+            "What file/folder do you want to delete? Specify relative path",
+            ephemeral=True,
         )
         directory = await self.bot.wait_for(
             "message",
@@ -206,12 +212,14 @@ class DefaultButtons(disnake.ui.View):
             FileModel.name == "folder: " + folder,
             FileModel.folder == self.path,
         )
-         
+
         if folder_:
             await self.bot.engine.delete(folder_)
-            await interaction.channel.send(f"Successfully deleted {file_.name}") 
-        
-        await interaction.channel.send(f"I could not find a folder or file called {directory.content} in {self.path}") 
+            await interaction.channel.send(f"Successfully deleted {file_.name}")
+
+        await interaction.channel.send(
+            f"I could not find a folder or file called {directory.content} in {self.path}"
+        )
 
 
 class OpenFromSaved(DefaultButtons):
@@ -226,7 +234,7 @@ class OpenFromSaved(DefaultButtons):
     @disnake.ui.button(label="Select file", style=disnake.ButtonStyle.danger, row=2)
     async def select_button(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
-    ):  
+    ):
         from . import FileView
 
         await interaction.response.send_message(
@@ -248,7 +256,9 @@ class OpenFromSaved(DefaultButtons):
         if not file_model:
             if self.SUDO:
                 await filename.delete()
-            return await interaction.channel.send(f"{filename.content} doesnt exist!", delete_after=15)
+            return await interaction.channel.send(
+                f"{filename.content} doesnt exist!", delete_after=15
+            )
 
         file_ = await File.from_url(bot=self.bot, url=file_model.file_url)
         embed = EmbedFactory.ide_embed(
@@ -296,8 +306,12 @@ class SaveFile(DefaultButtons):
             create_epoch=int(time.time()),
             folder=self.path,
         )
-        overwrote = f"Overwrote file {self.file.filename}" + ''.join(['-' for _ in range(len(self.file.filename)+len('Saved '))]) + "\n"
-        n = '\n'
+        overwrote = (
+            f"Overwrote file {self.file.filename}"
+            + "".join(["-" for _ in range(len(self.file.filename) + len("Saved "))])
+            + "\n"
+        )
+        n = "\n"
         embed = EmbedFactory.ide_embed(
             self.ctx,
             f"Saved {self.file.filename}\n{''.join(['-' for _ in range(len(self.file.filename)+len('Saved '))])}{overwrote if self.file.filename in dir_files else n}{await get_info(attachment)}",

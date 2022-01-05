@@ -102,12 +102,12 @@ class FileView(disnake.ui.View):
 
             await interaction.response.defer()
             await TextPaginator(
-                interaction, 
+                interaction,
                 f"```yaml\n{output}```",
                 embed_author_kwargs={
                     "name": f"{self.ctx.author.name} evaluator for {self.file.filename}",
-                    "icon_url": self.ctx.author.avatar.url, 
-                }
+                    "icon_url": self.ctx.author.avatar.url,
+                },
             ).start()
 
     @disnake.ui.button(label="Edit", style=disnake.ButtonStyle.green)
@@ -119,7 +119,10 @@ class FileView(disnake.ui.View):
         view = EditView(self.ctx, self.file, self.bot_message, self, content)
         await self.bot_message.edit(
             embed=EmbedFactory.code_embed(
-                self.ctx, "".join(content[:50]), self.file.filename, f"\n1/{len(content)}"
+                self.ctx,
+                "".join(content[:50]),
+                self.file.filename,
+                f"\n1/{len(content)}",
             ),
             view=view,
         )

@@ -12,18 +12,18 @@ class Mod(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.emoji = '🔨'
-        self.short_help_doc = 'Moderation related commands'
+        self.emoji = "🔨"
+        self.short_help_doc = "Moderation related commands"
 
     @commands.command()
     @commands.guild_only()
     @commands.has_permissions(kick_members=True)
     @commands.bot_has_permissions(kick_members=True)
     async def kick(
-            self,
-            ctx: commands.Context,
-            member: disnake.Member = None,
-            reason: str = "No Reason Provided.",
+        self,
+        ctx: commands.Context,
+        member: disnake.Member = None,
+        reason: str = "No Reason Provided.",
     ):
         if not member:
             return await ctx.send(
@@ -48,10 +48,10 @@ class Mod(commands.Cog):
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_permissions(ban_members=True)
     async def ban(
-            self,
-            ctx: commands.Context,
-            member: disnake.Member = None,
-            reason="No Reason Provided.",
+        self,
+        ctx: commands.Context,
+        member: disnake.Member = None,
+        reason="No Reason Provided.",
     ):
         if not member:
             await ctx.send(f"{ctx.author.mention}, please provide a member to ban.")
@@ -75,10 +75,10 @@ class Mod(commands.Cog):
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_permissions(ban_members=True)
     async def unban(
-            self,
-            ctx: commands.Context,
-            user: typing.Union[disnake.User, int] = None,
-            reason="No Reason Provided.",
+        self,
+        ctx: commands.Context,
+        user: typing.Union[disnake.User, int] = None,
+        reason="No Reason Provided.",
     ):
         if not user:
             await ctx.send(
@@ -107,7 +107,7 @@ class Mod(commands.Cog):
     @commands.has_permissions(manage_channels=True)
     @commands.bot_has_permissions(manage_channels=True)
     async def slowmode(
-            self, ctx, channel: disnake.TextChannel = None, slowmode: int = None
+        self, ctx, channel: disnake.TextChannel = None, slowmode: int = None
     ):
         channel = channel or ctx.channel
         if not slowmode:
@@ -121,7 +121,7 @@ class Mod(commands.Cog):
             )
             return
 
-    @commands.command(aliases=['mute', 'to', 'silence', 'shush'])
+    @commands.command(aliases=["mute", "to", "silence", "shush"])
     @commands.guild_only()
     @commands.has_permissions(moderate_members=True)
     @commands.bot_has_permissions(moderate_members=True)
@@ -130,22 +130,28 @@ class Mod(commands.Cog):
         change = time_str.convert(time)
         duration = now + change
         await member.timeout(until=duration, reason=reason)
-        await member.send(f"You have been timed out from: {ctx.guild.name}, until <t:{int(duration.timestamp())}:f>")
+        await member.send(
+            f"You have been timed out from: {ctx.guild.name}, until <t:{int(duration.timestamp())}:f>"
+        )
         await ctx.send(
             embed=disnake.Embed(
                 title="Timed Out!",
                 description=f"{member.mention} was timed out until <t:{int(duration.timestamp())}:f> for reason: {reason}",
-                color=disnake.Colour.green()
+                color=disnake.Colour.green(),
             )
         )
 
-    @commands.command(aliases=['unsilence'])
+    @commands.command(aliases=["unsilence"])
     @commands.guild_only()
     @commands.has_permissions(moderate_members=True)
     @commands.bot_has_permissions(moderate_members=True)
     async def unmute(self, ctx, member: disnake.Member, *, reason):
         await member.timeout(until=None, reason=reason)
-        await ctx.send(embed=disnake.Embed(title="unmuted", description=f"{member.mention} was unmuted."))
+        await ctx.send(
+            embed=disnake.Embed(
+                title="unmuted", description=f"{member.mention} was unmuted."
+            )
+        )
 
 
 def setup(bot: commands.Bot) -> None:

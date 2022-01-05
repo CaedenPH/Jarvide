@@ -12,8 +12,8 @@ class Ide(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.emoji = '📂'
-        self.short_help_doc = 'IDE commands , to view and edit your code'
+        self.emoji = "📂"
+        self.short_help_doc = "IDE commands , to view and edit your code"
         self.active_commands = {}
         self.check_activity.start()
 
@@ -26,7 +26,11 @@ class Ide(commands.Cog):
                     del self.active_commands[channel][user]
                     return
                 if all(
-                    all(k.disabled for k in child.children if isinstance(k, disnake.Button))
+                    all(
+                        k.disabled
+                        for k in child.children
+                        if isinstance(k, disnake.Button)
+                    )
                     for child in message.components
                     if isinstance(child, disnake.ActionRow)
                 ):
@@ -35,9 +39,7 @@ class Ide(commands.Cog):
     @commands.command(
         help="""Have you used the linux commandline editor, nano? This discord text editor is like nano , and implements safe, reliable and fast file storing with editing and compiling technology. The database is secure and cannot be accessed or broken into by anyone, not even the core developers. You can upload or create files and these files would be saved into a filesystem which you can open at any time. If you have an open file you can compile it and run it (depending on the filetype). You can also edit the content and replace text. You can also pull and push to github depending on the file/folder you uploaded."""
     )
-    async def ide(
-        self, ctx: commands.Context
-    ) -> disnake.Message:
+    async def ide(self, ctx: commands.Context) -> disnake.Message:
         if (
             ctx.channel in self.active_commands
             and ctx.author in self.active_commands[ctx.channel]

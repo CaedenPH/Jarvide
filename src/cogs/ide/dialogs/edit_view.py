@@ -41,7 +41,7 @@ class OptionSelect(disnake.ui.Select):
         file: File,
         pages: list[str],
         bot_message: disnake.Message,
-        parent: EditView
+        parent: EditView,
     ):
         super().__init__()
         self.ctx = ctx
@@ -51,7 +51,7 @@ class OptionSelect(disnake.ui.Select):
         self.parent = parent
         self.options = [
             disnake.SelectOption(value="1", label="Find"),
-            disnake.SelectOption(value="2", label="Go to page...")
+            disnake.SelectOption(value="2", label="Go to page..."),
         ]
 
     async def find_option(self, interaction: disnake.MessageInteraction):
@@ -111,22 +111,23 @@ class OptionSelect(disnake.ui.Select):
 
     async def goto_option(self, interaction: disnake.MessageInteraction):
         await interaction.response.send_message("Enter page number...", ephemeral=True)
-        message: disnake.Message = (
-            await self.ctx.bot.wait_for(
-                "message",
-                check=lambda m: m.author == interaction.author
-                and m.channel == interaction.channel,
-            )
+        message: disnake.Message = await self.ctx.bot.wait_for(
+            "message",
+            check=lambda m: m.author == interaction.author
+            and m.channel == interaction.channel,
         )
         content = message.content
         await message.delete()
         if not content.isdigit():
-            return await self.ctx.send("Not a digit, operation is cancelled.", delete_after=10)
+            return await self.ctx.send(
+                "Not a digit, operation is cancelled.", delete_after=10
+            )
         elif len(self.pages) < int(content) < 1:
-            return await self.ctx.send("You cannot enter a number below 1 or above "
-                                       "number of pages, operation is cancelled.",
-                                       delete_after=10
-                                       )
+            return await self.ctx.send(
+                "You cannot enter a number below 1 or above "
+                "number of pages, operation is cancelled.",
+                delete_after=10,
+            )
         self.parent.page = int(content) - 1
         embed = self.bot_message.embeds[0]
         embed.description = f"```py\n{''.join(self.pages[self.parent.page])}\n```"
@@ -148,7 +149,7 @@ class OptionView(disnake.ui.View):
         file: File,
         pages: list[str],
         bot_message: disnake.Message,
-        parent: EditView
+        parent: EditView,
     ):
         super().__init__()
         self.add_item(OptionSelect(ctx, file, pages, bot_message, parent))
@@ -189,7 +190,7 @@ class EditView(disnake.ui.View):
         self.file_view = file_view
         self.undo = self.file_view.file.undo
         self.redo = self.file_view.file.redo
-        self.pages = [lines[x: x + 50] for x in range(0, len(lines), 50)]
+        self.pages = [lines[x : x + 50] for x in range(0, len(lines), 50)]
         self.page = 0
         self.SUDO = self.ctx.me.guild_permissions.manage_messages
 
@@ -248,7 +249,7 @@ class EditView(disnake.ui.View):
             code = clear_codeblock(content)
         self.undo.append(self.content)
         sliced = self.file_view.file.content.splitlines()
-        del sliced[from_: to + 1]
+        del sliced[from_ : to + 1]
         sliced.insert(from_, code)
         self.file_view.file.content = "\n".join(sliced)
 

@@ -138,7 +138,7 @@ class OpenView(disnake.ui.View):
             if "content" not in json:
                 b = await session.get(
                     f"https://raw.githubusercontent.com/{repo}/{branch}/{path}",
-                    headers={"Accept": "application/vnd.github.v3+json"}
+                    headers={"Accept": "application/vnd.github.v3+json"},
                 )
                 content = (await b.text()).replace("`", "`​")
             else:
