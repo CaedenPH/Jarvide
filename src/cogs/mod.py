@@ -25,6 +25,9 @@ class Mod(commands.Cog):
             member: disnake.Member = None,
             reason: str = "No Reason Provided.",
     ):
+        """
+        Kicks a member from a guild
+        """
         if not member:
             return await ctx.send(
                 f"{ctx.author.mention}, please provide a member to kick."
@@ -53,6 +56,9 @@ class Mod(commands.Cog):
             member: disnake.Member = None,
             reason="No Reason Provided.",
     ):
+        """
+        Bans a member outside of a guild
+        """
         if not member:
             await ctx.send(f"{ctx.author.mention}, please provide a member to ban.")
             return
@@ -80,6 +86,9 @@ class Mod(commands.Cog):
             user: typing.Union[disnake.User, int] = None,
             reason="No Reason Provided.",
     ):
+        """
+        unbans someone from a guild
+        """
         if not user:
             await ctx.send(
                 f"{ctx.author.mention}, please provide an ID of a user to unban."
@@ -109,6 +118,9 @@ class Mod(commands.Cog):
     async def slowmode(
             self, ctx, channel: disnake.TextChannel = None, slowmode: int = None
     ):
+        """
+        changed/disabled slowmode in a channel
+        """
         channel = channel or ctx.channel
         if not slowmode:
             return await ctx.send(
@@ -126,6 +138,9 @@ class Mod(commands.Cog):
     @commands.has_permissions(moderate_members=True)
     @commands.bot_has_permissions(moderate_members=True)
     async def timeout(self, ctx, member: disnake.Member, time: str, *, reason=None):
+        """
+        timesout (or mute) a member from a guild
+        """
         now = disnake.utils.utcnow()
         change = time_str.convert(time)
         duration = now + change
@@ -144,6 +159,9 @@ class Mod(commands.Cog):
     @commands.has_permissions(moderate_members=True)
     @commands.bot_has_permissions(moderate_members=True)
     async def unmute(self, ctx, member: disnake.Member, *, reason):
+        """
+        unmutes a member (or removes timeout) from a guild
+        """
         await member.timeout(until=None, reason=reason)
         await ctx.send(embed=disnake.Embed(title="unmuted", description=f"{member.mention} was unmuted."))
 
