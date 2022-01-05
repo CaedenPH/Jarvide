@@ -3,6 +3,7 @@ import typing
 
 import time_str
 from disnake.ext import commands
+from disnake.ext.commands import Context
 
 from src.utils.confirmation import prompt
 
@@ -10,10 +11,10 @@ from src.utils.confirmation import prompt
 class Mod(commands.Cog):
     """Moderation related commands."""
 
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
         self.emoji = "🔨"
-        self.short_help_doc = "Moderation related commands"
+        self.short_help_doc = self.__doc__
 
     @commands.command()
     @commands.guild_only()
@@ -21,23 +22,23 @@ class Mod(commands.Cog):
     @commands.bot_has_permissions(kick_members=True)
     async def kick(
         self,
-        ctx: commands.Context,
+        ctx: Context,
         member: disnake.Member = None,
         reason: str = "No Reason Provided.",
     ):
-        """Kicks a member from a guild"""
+        """ Kicks a member from a guild """
         if not member:
             return await ctx.send(
                 f"{ctx.author.mention}, please provide a member to kick."
-            )
+                )
 
         elif member == ctx.author:
-            await ctx.send(f"{ctx.author.mention}, you cannot kick yourself!")
-            return
+            return await ctx.send(f"{ctx.author.mention}, you cannot kick yourself!")
 
         choice = await prompt(
             ctx, message="Are you sure you want to kick this user?", timeout=60
-        )
+            )
+
         if choice:
             await member.kick(reason=reason)
             await ctx.send(f"{member.mention} has been kicked.")
@@ -50,22 +51,20 @@ class Mod(commands.Cog):
     @commands.bot_has_permissions(ban_members=True)
     async def ban(
         self,
-        ctx: commands.Context,
+        ctx: Context,
         member: disnake.Member = None,
         reason="No Reason Provided.",
     ):
-        """Bans a member outside of a guild"""
+        """ Bans a member outside of a guild """
         if not member:
-            await ctx.send(f"{ctx.author.mention}, please provide a member to ban.")
-            return
+            return await ctx.send(f"{ctx.author.mention}, please provide a member to ban.")
 
         elif member == ctx.author:
-            await ctx.send(f"{ctx.author.mention}, you cannot ban yourself!")
-            return
+            return await ctx.send(f"{ctx.author.mention}, you cannot ban yourself!")
 
         choice = await prompt(
             ctx, message="Are you sure you want to ban this user?", timeout=60
-        )
+            )
         if choice:
             await member.ban(reason=reason)
             await ctx.send(f"{member.mention} has been banned.")
@@ -78,29 +77,27 @@ class Mod(commands.Cog):
     @commands.bot_has_permissions(ban_members=True)
     async def unban(
         self,
-        ctx: commands.Context,
+        ctx: Context,
         user: typing.Union[disnake.User, int] = None,
         reason="No Reason Provided.",
     ):
-        """unbans someone from a guild"""
+        """ unbans someone from a guild """
         if not user:
-            await ctx.send(
+            return await ctx.send(
                 f"{ctx.author.mention}, please provide an ID of a user to unban."
-            )
-            return
+                )
 
         elif user == ctx.author:
-            await ctx.send(f"{ctx.author.mention}, you cannot unban yourself!")
-            return
+            return await ctx.send(f"{ctx.author.mention}, you cannot unban yourself!")
 
         choice = await prompt(
             ctx, message="Are you sure you want to ban this user?", timeout=60
-        )
+            )
         if choice:
             await ctx.guild.unban(
                 user if isinstance(user, disnake.User) else disnake.Object(user),
                 reason=reason,
-            )
+                )
             await ctx.send("Successfully unbanned that user.")
         else:
             await ctx.send("Cancelled the unban")
@@ -109,9 +106,7 @@ class Mod(commands.Cog):
     @commands.guild_only()
     @commands.has_permissions(manage_channels=True)
     @commands.bot_has_permissions(manage_channels=True)
-    async def slowmode(
-        self, ctx, channel: disnake.TextChannel = None, slowmode: int = None
-    ):
+    async def slowmode(self, ctx: Context, channel: disnake.TextChannel = None, slowmode: int = None):
         """Change/disable slowmode in a channel"""
         channel = channel or ctx.channel
         if not slowmode:
@@ -120,17 +115,16 @@ class Mod(commands.Cog):
             )
         else:
             await channel.edit(slowmode_delay=slowmode)
-            await ctx.send(
+            return await ctx.send(
                 f"I've set the channel slowmode to {slowmode} {'seconds' if slowmode > 1 else 'second'}."
-            )
-            return
+                )
 
     @commands.command(aliases=["mute", "to", "silence", "shush"])
     @commands.guild_only()
     @commands.has_permissions(moderate_members=True)
     @commands.bot_has_permissions(moderate_members=True)
     async def timeout(self, ctx, member: disnake.Member, time: str, *, reason=None):
-        """Timeout (or mute) a member from a guild"""
+        """ timesout (or mute) a member from a guild """
         now = disnake.utils.utcnow()
         change = time_str.convert(time)
         duration = now + change
@@ -141,23 +135,25 @@ class Mod(commands.Cog):
         await ctx.send(
             embed=disnake.Embed(
                 title="Timed Out!",
-                description=f"{member.mention} was timed out until <t:{int(duration.timestamp())}:f> for reason: {reason}",
+                description=(
+                    f"{member.mention} was timed out until <t:{int(duration.timestamp())}:f> for reason: {reason}"
+                    ),
                 color=disnake.Colour.green(),
+                )
             )
-        )
 
     @commands.command(aliases=["unsilence"])
     @commands.guild_only()
     @commands.has_permissions(moderate_members=True)
     @commands.bot_has_permissions(moderate_members=True)
     async def unmute(self, ctx, member: disnake.Member, *, reason):
-        """Unmute a member (or removes timeout) from a guild"""
+        """ unmutes a member (or removes timeout) from a guild """
         await member.timeout(until=None, reason=reason)
         await ctx.send(
             embed=disnake.Embed(
                 title="unmuted", description=f"{member.mention} was unmuted."
+                )
             )
-        )
 
 
 def setup(bot: commands.Bot) -> None:

@@ -25,7 +25,7 @@ class _AbstractPaginator(View, ABC):
     In order to use this paginator, you need to subclass this object and override the `get_pages` method
     with your own that adds pages to ``self.pages``.
 
-    NOTE: Never ``.start`` the paginator if you haven't subclassed it and overriden the `get_pages` method.
+    NOTE: Never ``.start`` the paginator if you haven't subclassed it and overridden the `get_pages` method.
 
     Parameters
     ----------
@@ -194,7 +194,7 @@ class TextPaginator(_AbstractPaginator):
         text: :class:`str`
             The text to paginate.
 
-        breakpoint: :class:`int`
+        break_point: :class:`int`
             The breakpoint where it cuts the text and puts the rest on the next page. Defaults to 2000.
 
         prefix: :class:`str`
@@ -228,7 +228,7 @@ class TextPaginator(_AbstractPaginator):
         ctx: Union[Context, MessageInteraction, ApplicationCommandInteraction],
         text: str,
         *,
-        breakpoint: int = 2000,
+        break_point: int = 2000,
         prefix: str = "",
         suffix: str = "",
         message: Message = None,
@@ -244,7 +244,7 @@ class TextPaginator(_AbstractPaginator):
             embed_author_kwargs=embed_author_kwargs,
         )
         self.text = text
-        self.breakpoint = breakpoint
+        self.breakpoint = break_point
         self.prefix = prefix
         self.suffix = suffix
 
@@ -252,12 +252,12 @@ class TextPaginator(_AbstractPaginator):
         text = self.text
         while True:
             if len(text) != 0:
-                new_text = text[0 : self.breakpoint]
+                new_text = text[0: self.breakpoint]
                 if self.prefix:
                     new_text = self.prefix + "\n" + new_text
                 if self.suffix:
                     new_text = new_text + "\n" + self.suffix
-                text = text[self.breakpoint :]
+                text = text[self.breakpoint:]
                 self.pages.append(new_text)
             else:
                 break

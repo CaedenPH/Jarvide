@@ -1,3 +1,5 @@
+from collections.abc import Mapping
+
 from disnake import utils, Embed, Color, MessageInteraction, SelectOption
 from disnake.ui import View, Select
 from disnake.ext.commands import Bot, Command, Cog, command, HelpCommand, Context, Group
@@ -27,7 +29,7 @@ class JarvideHelp(HelpCommand):
 
     async def command_callback(self, ctx, *, cmd=None):
         """
-        Overrided to make the help for Cog case-insensitive
+        Override to make the help for Cog case-insensitive
         """
         await self.prepare_help_command(ctx, cmd)
         bot = ctx.bot
@@ -79,7 +81,7 @@ class JarvideHelp(HelpCommand):
         else:
             return await self.send_command_help(cmd)
 
-    async def send_bot_help(self, mapping):
+    async def send_bot_help(self, mapping: Mapping[Optional[Cog], List[Command]]):
         """
         Bot's Help Command ,
         Views from the HelpView() class
@@ -169,7 +171,7 @@ class JarvideHelp(HelpCommand):
 
     async def send_cog_help(self, cog: Cog):
         """
-        Help for a specific cog , gets embed throgh `embed_from_cog` fn , which is used for both manual and drop menu cog help
+        Help for a specific cog , gets embed through `embed_from_cog` fn , which is used for both manual and drop menu cog help
         """
         embed = await embed_for_cog(cog, self.context)
         await self.context.reply(embed=embed, mention_author=False)

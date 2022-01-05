@@ -210,6 +210,7 @@ class EditView(disnake.ui.View):
         self.undo = self.file_view.file.undo
         self.redo = self.file_view.file.redo
         self.page = 0
+        self.extension = None
         self.SUDO = self.ctx.me.guild_permissions.manage_messages
 
         self.add_item(ExitButton(ctx, bot_message, row=3))
