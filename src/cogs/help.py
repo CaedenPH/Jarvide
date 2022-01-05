@@ -2,6 +2,7 @@ from disnake import utils, Embed, Color, MessageInteraction, SelectOption
 from disnake.ui import View, Select
 from disnake.ext.commands import Bot, Command, Cog, command, HelpCommand, Context, Group
 
+
 class HelpCog(Cog):
     def __init__(self, bot):
         self._original_help_command = bot.help_command
@@ -197,7 +198,7 @@ class NavigatorMenu(Select):
                 SelectOption(
                     label=f"{cog.qualified_name.upper()} COMMANDS",
                     description=cog.description.replace("cog", "module"),
-                    emoji=cog.emoji  # type: ignore
+                    emoji=cog.emoji,  # type: ignore
                 )
             )
         super().__init__(placeholder="Navigate to Category", options=options)

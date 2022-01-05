@@ -19,7 +19,7 @@ from disnake.ext.commands import (
     TooManyArguments,
     CommandOnCooldown,
     MissingRequiredArgument,
-    Context
+    Context,
 )
 from disnake import Intents
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -50,7 +50,7 @@ class Jarvide(Bot):
             case_insensitive=True,
             strip_after_prefix=True,
             help_command=None,  # type: ignore
-            intents=Intents.all()
+            intents=Intents.all(),
         )
         self.engine = AIOEngine(AsyncIOMotorClient(MONGO_URI))
         self.send_guild = None
@@ -137,12 +137,26 @@ class Jarvide(Bot):
         print("Set up")
 
     async def on_guild_join(self, guild) -> None:
-        await self.server_message.edit(content=f"I am now in `{len(self.guilds)}` servers and can see `{len(self.users)}` users")
+        await self.server_message.edit(
+            content=f"I am now in `{len(self.guilds)}` servers and can see `{len(self.users)}` users"
+        )
 
         embed = main_embed(self)
-        names = ['general', 'genchat', 'generalchat', 'general-chat', 'general-talk', 'gen', 'talk', 'general-1', '🗣general-chat', '🗣', '🗣general']
+        names = [
+            "general",
+            "genchat",
+            "generalchat",
+            "general-chat",
+            "general-talk",
+            "gen",
+            "talk",
+            "general-1",
+            "🗣general-chat",
+            "🗣",
+            "🗣general",
+        ]
         for k in guild.text_channels:
-            if k.name in names: 
+            if k.name in names:
                 return await k.send(embed=embed)
         try:
             await guild.system_channel.send(embed=embed)
@@ -157,41 +171,55 @@ class Jarvide(Bot):
     async def on_command_error(self, ctx: Context, error: Exception):
         if isinstance(error, MissingRequiredArgument):
             desc = f"{ctx.prefix} {ctx.command.name} {ctx.command.signature}"
-            inside = self.underline(desc, desc.index(f'<{error.param.name}>'), len(f'<{error.param.name}>'))
+            inside = self.underline(
+                desc, desc.index(f"<{error.param.name}>"), len(f"<{error.param.name}>")
+            )
             desc = f"You missed an argument: \n```\n{inside}\n```"
             return await ctx.send(desc)
 
         elif isinstance(error, DisabledCommand):
-            return await ctx.send('This command is disabled.')
+            return await ctx.send("This command is disabled.")
 
         elif isinstance(error, TooManyArguments):
-            return await ctx.send(f'Too many arguments passed.\n```yaml\nusage: {ctx.prefix}{ctx.command.aliases.append(ctx.command.name)} {ctx.command.signature}')
+            return await ctx.send(
+                f"Too many arguments passed.\n```yaml\nusage: {ctx.prefix}{ctx.command.aliases.append(ctx.command.name)} {ctx.command.signature}"
+            )
 
         elif isinstance(error, CommandOnCooldown):
-            return await ctx.send(f'Command is on cooldown. Try again after {datetime.timedelta(seconds = error.retry_after)}')
+            return await ctx.send(
+                f"Command is on cooldown. Try again after {datetime.timedelta(seconds = error.retry_after)}"
+            )
 
         elif isinstance(error, NotOwner):
-            return await ctx.send('Only my owner can use this command.')
+            return await ctx.send("Only my owner can use this command.")
 
         elif isinstance(error, MemberNotFound):
-            return await ctx.send('No such member found.')
+            return await ctx.send("No such member found.")
 
         elif isinstance(error, UserNotFound):
-            return await ctx.send('No such user found.')   
+            return await ctx.send("No such user found.")
 
         elif isinstance(error, ChannelNotFound):
-            return await ctx.send('No such channel found.')
+            return await ctx.send("No such channel found.")
 
         elif isinstance(error, MissingPermissions):
-            return await ctx.send(f'You need the {"".join(error.missing_permissions)} permissions to be able to do this.')
+            return await ctx.send(
+                f'You need the {"".join(error.missing_permissions)} permissions to be able to do this.'
+            )
 
         elif isinstance(error, BotMissingPermissions):
-            return await ctx.send(f'I need the {"".join(error.missing_permissions)} permissions to be able to do this.')
+            return await ctx.send(
+                f'I need the {"".join(error.missing_permissions)} permissions to be able to do this.'
+            )
 
         elif isinstance(error, MissingRole):
-            return await ctx.send('You are missing a certain role to perform this command.')
+            return await ctx.send(
+                "You are missing a certain role to perform this command."
+            )
         else:
-            await ctx.send("An unexpected error occured! Reporting this to my developer...")
+            await ctx.send(
+                "An unexpected error occured! Reporting this to my developer..."
+            )
             await self.error_channel.send(
                 f"```yaml\n{''.join(traceback.format_exception(error, error, error.__traceback__))}\n```"  # type: ignore
             )

@@ -101,12 +101,12 @@ class FileView(disnake.ui.View):
 
             await interaction.response.defer()
             await TextPaginator(
-                interaction, 
+                interaction,
                 f"```yaml\n{output}```",
                 embed_author_kwargs={
                     "name": f"{self.ctx.author.name} evaluator for {self.file.filename}",
-                    "icon_url": self.ctx.author.avatar.url, 
-                }
+                    "icon_url": self.ctx.author.avatar.url,
+                },
             ).start()
 
     @disnake.ui.button(label="Edit", style=disnake.ButtonStyle.green)
