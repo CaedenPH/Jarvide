@@ -37,7 +37,6 @@ class FileView(disnake.ui.View):
         self.ctx = ctx
         self.bot = ctx.bot
         self.file = file_
-        self.extension = file_.filename.split(".")[-1]
         self.SUDO = self.ctx.me.guild_permissions.manage_messages
         self.bot_message = bot_message
 
@@ -52,14 +51,14 @@ class FileView(disnake.ui.View):
         content = add_lines(self.file.content)
         if len("".join(content)) < 2000:
             embed = EmbedFactory.ide_embed(
-                self.ctx, "".join(content), format_=self.extension
+                self.ctx, "".join(content), format_=self.file.extension
             )
             return await self.bot_message.edit(embed=embed)
 
         return await LinePaginator(
             interaction,
             content,
-            prefix=f"```{self.extension}",
+            prefix=f"```{self.file.extension}",
             suffix="```",
             line_limit=30,
             timeout=None,  # type: ignore
@@ -114,15 +113,17 @@ class FileView(disnake.ui.View):
     async def third_button(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
+        import math
         await interaction.response.defer()
         content: list[str] = add_lines(self.file.content)
-        view = EditView(self.ctx, self.file, self.bot_message, self, content)
+        view = EditView(self.ctx, self.file, self.bot_message, self)
         await self.bot_message.edit(
             embed=EmbedFactory.code_embed(
                 self.ctx,
                 "".join(content[:50]),
                 self.file.filename,
-                f"\n1/{len(content)}",
+                self.file.extension,
+                f"\n1/{math.ceil(len(content)/50)}"
             ),
             view=view,
         )

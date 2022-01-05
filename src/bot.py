@@ -70,18 +70,13 @@ class Jarvide(Bot):
         super().run(TOKEN, reconnect=True)
 
     async def on_message(self, original_message: Message) -> typing.Optional[Message]:
-        if (
-            self.user.mentioned_in(original_message)
-            and not original_message.reference
-            and " " not in original_message.content
-        ):
+        if original_message.content in [f"<@!{self.user.id}>", f"<@{self.user.id}>"]:
             return await original_message.channel.send(embed=main_embed(self))
         if (
             original_message.author.bot
             or "jarvide" not in original_message.content.lower()
         ):
             return
-
         original_message.content = " ".join(
             [
                 word
