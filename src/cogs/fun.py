@@ -141,18 +141,17 @@ class Fun(Cog):
 
     @command()
     @guild_only()
-    async def slap(self, ctx: Context, member: Member = None) -> None:
-        """Slap a member."""
-        if member is None:
-            return await ctx.send("You didn't mention a member.")
-
-        embed2 = Embed(
-            title=f"{ctx.author.mention} has slapped {member.name}"
-        ).set_image(
-            url="https://media.tenor.co/videos/318d19d23b24c54ab51cacf5ef4bfccf/mp4"
-        )
-
-        await ctx.send(embed=embed2)
+    async def slap(self, ctx, member: Member = None):
+        """slap someone"""
+        async with self.bot.session.get(
+                url="https://api.waifu.pics/sfw/slap"
+        ) as resp:
+            await ctx.send(
+                embed=discord.Embed(
+                    description=f"{ctx.author.mention} slaps {target}",
+                    color=disnake.Color.red()
+                ).set_image(url=(await resp.json())["url"])
+            )
 
     @command()
     async def simpmeter(self, ctx: Context, member: Member = None) -> None:
