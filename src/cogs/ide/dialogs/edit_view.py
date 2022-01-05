@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import disnake
 
+from argparse import ArgumentParser
 from disnake.ext import commands
 from typing import TYPE_CHECKING, Literal
 
@@ -54,9 +55,27 @@ class OptionSelect(disnake.ui.Select):
             disnake.SelectOption(value="2", label="Go to page...")
         ]
 
+    @staticmethod
+    def suppress_argparse(statement, *args, **kwargs):
+        try:
+            return statement(*args, **kwargs)
+        except BaseException:
+            pass
+
+    async def refresh_message(self, page):
+        n = "\n"
+        embed = self.bot_message.embeds[0]
+        pages = [self.file.content.splitlines()[x: x + 50] for x in range(0, len(self.file.content.splitlines()), 50)]
+        embed.description = f"```py\n{n.join(pages[page])}\n```\n{page + 1}/{len(pages)}"
+        await self.bot_message.edit(embed=embed, view=self.parent)
+
     async def find_option(self, interaction: disnake.MessageInteraction):
         await interaction.response.send_message(
-            "What do you want to find? (Case-sensitive)", ephemeral=True
+            "What do you want to find? (Case-sensitive)\n"
+            "For advanced use look the available flags below:\n"
+            "\t`-replace <*chars>`: Replace every occurrence with `chars`\n"
+            "\n**Example:**\n```\n-replace foo\nbar\n```",
+            ephemeral=True
         )
         content: str = (
             await self.ctx.bot.wait_for(
@@ -65,6 +84,17 @@ class OptionSelect(disnake.ui.Select):
                 and m.channel == interaction.channel,
             )
         ).content
+        parser = ArgumentParser(add_help=False, allow_abbrev=False)
+        parser.add_argument("-replace", nargs='+')
+        args = self.suppress_argparse(parser.parse_args, content.splitlines()[0].split())
+        if content.startswith("-"):
+            content = "".join(content.splitlines()[1:])
+        if args:
+            if args.replace:
+                self.file.content = self.file.content.replace(content, "".join(args.replace))
+                await self.refresh_message(self.parent.page)
+                return await self.ctx.send(f"Replaced all `{content}` occurrences with `{''.join(args.replace)}`!")
+
         try:
             page_occurrence = [
                 i for i, c in enumerate(self.pages) if any([content in li for li in c])
@@ -86,6 +116,7 @@ class OptionSelect(disnake.ui.Select):
                 check=lambda m: m.author == interaction.author
                 and m.channel == interaction.channel
                 and m.content.lower() in ("back", "next", "quit"),
+                timeout=60
             )
             if message.content.lower() == "back":
                 if page_integrity(current_line, len(line_occurrence), "back"):
@@ -98,15 +129,14 @@ class OptionSelect(disnake.ui.Select):
                 else:
                     current_line = 0
             else:
+                await self.ctx.send("Exited!", delete_after=10)
                 break
             self.parent.page = line_occurrence[current_line] // 50
             await self.ctx.send(
                 f"Found occurrence in line {line_occurrence[current_line] + 1}!",
                 delete_after=10,
             )
-            embed = self.bot_message.embeds[0]
-            embed.description = f"```py\n{''.join(self.pages[line_occurrence[current_line] // 50])}\n```"
-            await self.bot_message.edit(embed=embed, view=self.parent)
+            await self.refresh_message(line_occurrence[current_line] // 50)
             await message.delete()
 
     async def goto_option(self, interaction: disnake.MessageInteraction):
@@ -128,9 +158,7 @@ class OptionSelect(disnake.ui.Select):
                                        delete_after=10
                                        )
         self.parent.page = int(content) - 1
-        embed = self.bot_message.embeds[0]
-        embed.description = f"```py\n{''.join(self.pages[self.parent.page])}\n```"
-        await self.bot_message.edit(embed=embed, view=self.parent)
+        await self.refresh_message(self.parent.page)
 
     async def callback(self, interaction: disnake.MessageInteraction):
         await interaction.message.delete()
@@ -176,11 +204,9 @@ class EditView(disnake.ui.View):
         ctx,
         file_: "File",
         bot_message=None,
-        file_view=None,
-        lines: list[str] = None,
+        file_view=None
     ):
         super().__init__(timeout=120)
-
         self.ctx = ctx
         self.bot = ctx.bot
         self.file = file_
@@ -189,12 +215,16 @@ class EditView(disnake.ui.View):
         self.file_view = file_view
         self.undo = self.file_view.file.undo
         self.redo = self.file_view.file.redo
-        self.pages = [lines[x: x + 50] for x in range(0, len(lines), 50)]
         self.page = 0
         self.SUDO = self.ctx.me.guild_permissions.manage_messages
 
         self.add_item(ExitButton(ctx, bot_message, row=3))
         self.add_item(SaveButton(ctx, bot_message, file_, row=2))
+
+    @property
+    def pages(self):
+        lines = add_lines(self.file.content)
+        return ["".join(lines[x: x + 50]) for x in range(0, len(lines), 50)]
 
     async def edit(self, inter):
         await inter.response.defer()

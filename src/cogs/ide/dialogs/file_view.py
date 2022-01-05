@@ -116,7 +116,7 @@ class FileView(disnake.ui.View):
     ):
         await interaction.response.defer()
         content: list[str] = add_lines(self.file.content)
-        view = EditView(self.ctx, self.file, self.bot_message, self, content)
+        view = EditView(self.ctx, self.file, self.bot_message, self)
         await self.bot_message.edit(
             embed=EmbedFactory.code_embed(
                 self.ctx, "".join(content[:50]), self.file.filename, f"\n1/{len(content)}"
