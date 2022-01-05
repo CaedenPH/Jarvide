@@ -37,8 +37,8 @@ class File:
         self.content = content
         self.undo = []  # passed in EditView
         self.redo = []  # this too
-
         self.setup()
+        self.extension = self.filename.split(".")[-1]
 
     def setup(self) -> None:
         if hasattr(self.filename, "content"):
@@ -170,16 +170,17 @@ def main_embed(bot):
     return disnake.Embed(color=0x489cc4, description=f"""
     **Hello, my name is Jarvide.** 
 
-    │ I am half AI, half discord text editor. │
+    │ I am half AI, half discord [text editor](https://github.com/CaedenPH/Jarvide/blob/main/ABOUT.md). │
     │ To understand more about me, read [this](https://github.com/CaedenPH/Jarvide/blob/main/ABOUT.md). │
     │ To understand more about how to use me, read [this](https://github.com/CaedenPH/Jarvide/blob/main/USAGE.md). │   
-
+    │ Locate my FAQ's [here](https://github.com/caedenph/blob/main/FAQs.md) │
+    
     │ If you are still confused, join my [support server](https://discord.gg/mtue4UnWaA). │ 
-    │ My devs are always around to assist you! │  
+    │ [My devs](https://discord.gg/mtue4UnWaA) are always around to assist you! │  
             """
                          ).set_image(
         url="https://media.discordapp.net/attachments/926115595307614252/927951464725377034/big.png?width=1440&height=453"
     ).set_author(
         name="Jarvide",
         icon_url=bot.user.avatar.url
-    )
+    ).set_footer(text="Jarvide's data is completely secure, so you shouldn't worry about data loss!")

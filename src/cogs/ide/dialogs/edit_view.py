@@ -62,13 +62,6 @@ class OptionSelect(disnake.ui.Select):
         except BaseException:
             pass
 
-    async def refresh_message(self, page):
-        n = "\n"
-        embed = self.bot_message.embeds[0]
-        pages = [self.file.content.splitlines()[x: x + 50] for x in range(0, len(self.file.content.splitlines()), 50)]
-        embed.description = f"```py\n{n.join(pages[page])}\n```\n{page + 1}/{len(pages)}"
-        await self.bot_message.edit(embed=embed, view=self.parent)
-
     async def find_option(self, interaction: disnake.MessageInteraction):
         await interaction.response.send_message(
             "What do you want to find? (Case-sensitive)\n"
@@ -92,7 +85,7 @@ class OptionSelect(disnake.ui.Select):
         if args:
             if args.replace:
                 self.file.content = self.file.content.replace(content, "".join(args.replace))
-                await self.refresh_message(self.parent.page)
+                await self.parent.refresh_message(self.parent.page)
                 return await self.ctx.send(f"Replaced all `{content}` occurrences with `{''.join(args.replace)}`!")
 
         try:
@@ -136,7 +129,7 @@ class OptionSelect(disnake.ui.Select):
                 f"Found occurrence in line {line_occurrence[current_line] + 1}!",
                 delete_after=10,
             )
-            await self.refresh_message(line_occurrence[current_line] // 50)
+            await self.parent.refresh_message(line_occurrence[current_line] // 50)
             await message.delete()
 
     async def goto_option(self, interaction: disnake.MessageInteraction):
@@ -158,7 +151,7 @@ class OptionSelect(disnake.ui.Select):
                                        delete_after=10
                                        )
         self.parent.page = int(content) - 1
-        await self.refresh_message(self.parent.page)
+        await self.parent.refresh_message(self.parent.page)
 
     async def callback(self, interaction: disnake.MessageInteraction):
         await interaction.message.delete()
@@ -226,6 +219,13 @@ class EditView(disnake.ui.View):
         lines = add_lines(self.file.content)
         return ["".join(lines[x: x + 50]) for x in range(0, len(lines), 50)]
 
+    async def refresh_message(self, page):
+        n = "\n"
+        embed = self.bot_message.embeds[0]
+        pages = [self.file.content.splitlines()[x: x + 50] for x in range(0, len(self.file.content.splitlines()), 50)]
+        embed.description = f"```{self.file.extension}\n{n.join(pages[page])}\n```\n{page + 1}/{len(pages)}"
+        await self.bot_message.edit(embed=embed, view=self)
+
     async def edit(self, inter):
         await inter.response.defer()
 
@@ -281,6 +281,7 @@ class EditView(disnake.ui.View):
         del sliced[from_: to + 1]
         sliced.insert(from_, code)
         self.file_view.file.content = "\n".join(sliced)
+        await self.refresh_message(self.page)
 
     @disnake.ui.button(label="Append", style=disnake.ButtonStyle.gray)
     async def append_button(
@@ -300,6 +301,7 @@ class EditView(disnake.ui.View):
                 )
             ).content
         )
+        await self.refresh_message(self.page)
 
     @disnake.ui.button(label="Rename", style=disnake.ButtonStyle.grey)
     async def rename_button(
@@ -340,7 +342,8 @@ class EditView(disnake.ui.View):
             self.page = len(self.pages) - 1
         embed = (
             disnake.Embed(
-                description=f"```py\n{''.join(self.pages[self.page])}\n```\nPage: {self.page + 1}/{len(self.pages)}",
+                description=f"```{self.file.extension}\n"
+                            f"{''.join(self.pages[self.page])}\n```\nPage: {self.page + 1}/{len(self.pages)}",
                 timestamp=self.ctx.message.created_at,
             )
             .set_author(
@@ -362,7 +365,8 @@ class EditView(disnake.ui.View):
             self.page = 0
         embed = (
             disnake.Embed(
-                description=f"```py\n{''.join(self.pages[self.page])}\n```\nPage: {self.page + 1}/{len(self.pages)}",
+                description=f"```{self.file.extension}\n{''.join(self.pages[self.page])}"
+                            f"\n```\nPage: {self.page + 1}/{len(self.pages)}",
                 timestamp=self.ctx.message.created_at,
             )
             .set_author(
