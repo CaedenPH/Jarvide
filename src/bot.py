@@ -22,6 +22,7 @@ from disnake.ext.commands import (
     Context,
 )
 from disnake import Intents
+from disnake.ext.commands.errors import CommandNotFound
 from motor.motor_asyncio import AsyncIOMotorClient
 from odmantic import AIOEngine
 
@@ -40,6 +41,11 @@ REMOVE_WORDS = [
     "you",
     "is",
     "can",
+    "fuck",
+    "shit",
+    "me",
+    "this",
+    "mf",
 ]
 
 
@@ -56,6 +62,7 @@ class Jarvide(Bot):
         self.send_guild = None
         self.error_channel = None
         self.server_message = None
+        self.bugs =  range(10000, 100000)
 
     def setup(self) -> None:
         for filename in os.listdir("./src/cogs"):
@@ -86,16 +93,16 @@ class Jarvide(Bot):
                 )
             ]
         )
-        message_content = "".join(
+        original_message.content = "".join(
             [
                 char
                 for char in original_message.content
-                if char not in string.punctuation
+                if (char in string.ascii_letters or char.isspace())
+
             ]
         )
-
         message_content = " ".join(
-            word for word in message_content.split() if word != "jarvide"
+            word for word in original_message.content.split() if word != "jarvide"
         )
 
         list_of_commands = {c: [c.name, *c.aliases] for c in self.commands}
@@ -115,7 +122,6 @@ class Jarvide(Bot):
         cmd = commands_in_message[0][0]
         ctx = await super().get_context(original_message)
         user_authorized = await cmd.can_run(ctx)
-
         if user_authorized:
             args = original_message.content.partition(
                 [
@@ -131,6 +137,7 @@ class Jarvide(Bot):
 
     async def on_ready(self) -> None:
         self.send_guild = self.get_guild(926811692019626064)
+        self.report_channel = self.get_channel(928402833475264572)
         self.error_channel = self.get_channel(927596019468873748)
         channel = self.get_channel(927523239259942972)
         self.server_message = await channel.fetch_message(927971357738811463)
@@ -169,7 +176,10 @@ class Jarvide(Bot):
         return text + "\n" + underline
 
     async def on_command_error(self, ctx: Context, error: Exception):
-        if isinstance(error, MissingRequiredArgument):
+        if isinstance(error, CommandNotFound):
+            return
+
+        elif isinstance(error, MissingRequiredArgument):
             desc = f"{ctx.prefix} {ctx.command.name} {ctx.command.signature}"
             inside = self.underline(
                 desc, desc.index(f"<{error.param.name}>"), len(f"<{error.param.name}>")

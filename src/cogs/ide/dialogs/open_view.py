@@ -2,12 +2,20 @@ import aiohttp
 import base64
 import disnake
 import re
+import random
 
 from src.utils import EmbedFactory, File, get_info
 from .file_view import FileView
 
 THUMBS_UP = "👍"
+bug_string = """
+Thank you for reporting a bug! My team will work hard to solve this!
 
+
+My team might want to ask you some questions, so we would love you to keep dm's open or join our support server! 
+[ discord.gg/mtue4UnWaA ]
+-----------------------------------------------------------
+Bug id: {}"""
 
 class OpenView(disnake.ui.View):
     def __init__(self, ctx, bot_message=None):
@@ -50,11 +58,10 @@ class OpenView(disnake.ui.View):
             message := await self.bot.wait_for(
                 "message",
                 check=lambda m: self.ctx.author == m.author
-                and m.channel == self.ctx.channel,
+                and m.channel == self.ctx.channel
+                and not self.is_exited
             )
         ).attachments:
-            if self.is_exited:
-                return
             if self.SUDO:
                 await message.delete()
             num += 1
@@ -110,11 +117,9 @@ class OpenView(disnake.ui.View):
             url = await self.bot.wait_for(
                 "message",
                 check=lambda m: self.ctx.author == m.author
-                and m.channel == self.ctx.channel,
+                and m.channel == self.ctx.channel
+                and not self.is_exited
             )
-            if self.is_exited:
-                return
-
             await url.edit(suppress=True)
             regex = re.compile(
                 r"https://github\.com/(?P<repo>[a-zA-Z0-9-]+/[\w.-]+)/blob/(?P<branch>\w*)/(?P<path>[^#>]+)"
@@ -185,12 +190,10 @@ class OpenView(disnake.ui.View):
             message := await self.bot.wait_for(
                 "message",
                 check=lambda m: self.ctx.author == m.author
-                and m.channel == self.ctx.channel,
+                and m.channel == self.ctx.channel
+                and not self.is_exited
             )
         ).content.startswith(PASTE_URLS):
-            if self.is_exited:
-                return
-
             if self.SUDO:
                 await message.delete()
             else:
@@ -211,10 +214,9 @@ class OpenView(disnake.ui.View):
         filename = await self.bot.wait_for(
             "message",
             check=lambda m: self.ctx.author == m.author
-            and m.channel == self.ctx.channel,
+            and m.channel == self.ctx.channel
+            and not self.is_exited
         )
-        if self.is_exited:
-            return
 
         await filename.add_reaction(THUMBS_UP)
         url = message.content.replace("/hastebin/", "/hastebin/raw/")
@@ -246,10 +248,9 @@ class OpenView(disnake.ui.View):
         filename = await self.bot.wait_for(
             "message",
             check=lambda m: self.ctx.author == m.author
-            and m.channel == self.ctx.channel,
+            and m.channel == self.ctx.channel
+            and not self.is_exited
         )
-        if self.is_exited:
-            return
         if len(filename.content) > 12:
             if self.SUDO:
                 await filename.delete()
@@ -263,8 +264,6 @@ class OpenView(disnake.ui.View):
             check=lambda m: self.ctx.author == m.author
             and m.channel == self.ctx.channel,
         )
-        if self.is_exited:
-            return
         await message.add_reaction(THUMBS_UP)
         content = message.content
 
@@ -310,3 +309,41 @@ class OpenView(disnake.ui.View):
 
         embed = EmbedFactory.ide_embed(self.ctx, "Goodbye!")
         await self.bot_message.edit(view=self, embed=embed)
+
+    @disnake.ui.button(label="Report a bug", style=disnake.ButtonStyle.blurple, row=1)
+    async def report_button(
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+    ):  
+        responses = []
+
+        for iteration, question in enumerate(['sum up your report in less than 10 words', 'explain your report. present as detailed of a description as you can provide, including button clicks, errors shown (if any), file open, and intention'], start=1):
+            if iteration == 1:
+                await interaction.response.send_message(f"Please {question}\nType q to end your report\nQuestion number {iteration}/2", ephemeral=True)
+            else:
+                await interaction.channel.send(f"Please {question}\nType q to end your report\nQuestion number {iteration}/2")
+
+            message = await self.bot.wait_for("message", timeout=560, check=lambda m: 
+                m.author == interaction.author
+                and m.channel == interaction.channel
+                and not self.is_exited,
+            )
+            if message.content.lower() == 'q':
+                if self.SUDO:
+                    await message.delete()
+                return
+            responses.append(message.content)
+
+        embed = disnake.Embed(
+            title=responses[0],
+            description="```yaml\n" + responses[0] + "```",
+            timestamp=interaction.message.created_at
+        ).set_author(
+            name=f"From {interaction.author.name}",
+            icon_url=interaction.author.avatar.url
+        )
+
+        await self.bot.report_channel.send(embed=embed)
+        bug_id = random.choice(self.bot.bugs)
+
+        embed = EmbedFactory.ide_embed(self.ctx, bug_string.format(bug_id))
+        await interaction.channel.send(embed=embed)
