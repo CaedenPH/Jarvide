@@ -37,7 +37,8 @@ class Ide(commands.Cog):
                     del self.active_commands[channel][user]
 
     @commands.command(
-        help="""Have you used the linux commandline editor, nano? This discord text editor is like nano , and implements safe, reliable and fast file storing with editing and compiling technology. The database is secure and cannot be accessed or broken into by anyone, not even the core developers. You can upload or create files and these files would be saved into a filesystem which you can open at any time. If you have an open file you can compile it and run it (depending on the filetype). You can also edit the content and replace text. You can also pull and push to github depending on the file/folder you uploaded."""
+        help="""Have you used the linux commandline editor, nano? This discord text editor is like nano , and implements safe, reliable and fast file storing with editing and compiling technology. The database is secure and cannot be accessed or broken into by anyone, not even the core developers. You can upload or create files and these files would be saved into a filesystem which you can open at any time. If you have an open file you can compile it and run it (depending on the filetype). You can also edit the content and replace text. You can also pull and push to github depending on the file/folder you uploaded.""",
+        aliases = ['texteditor', 'editor']
     )
     async def ide(self, ctx: commands.Context) -> disnake.Message:
         if (
