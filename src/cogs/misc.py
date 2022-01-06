@@ -61,7 +61,7 @@ class Misc(
             )
         )
 
-    @command()
+    @command(aliases = ['latency'])
     async def ping(self, ctx: Context):
         """Returns Jarvide's latency."""
         if round(self.bot.latency * 1000) > 150:
@@ -83,7 +83,7 @@ class Misc(
         )
         await ctx.send(content="🏓**Pong**", embed=embed)
 
-    @command()
+    @command(aliases = ['insult'])
     async def roast(self, ctx: Context, *, member: Member):
         """Roast someone!"""
         async with aiohttp.ClientSession() as cs:
