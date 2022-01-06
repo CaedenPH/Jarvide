@@ -1,9 +1,9 @@
-import datetime
 import os
 import string
 import copy
 import typing
 import traceback
+import random
 
 from disnake import Message
 from disnake.ext.commands import (
@@ -21,7 +21,7 @@ from disnake.ext.commands import (
     MissingRequiredArgument,
     Context,
 )
-from disnake import Intents
+from disnake import Intents, Embed, Color
 from disnake.ext.commands.errors import CommandNotFound
 from motor.motor_asyncio import AsyncIOMotorClient
 from odmantic import AIOEngine
@@ -196,15 +196,15 @@ class Jarvide(Bot):
                 f"{ctx.command.aliases.append(ctx.command.name)} {ctx.command.signature} "
             )
 
-        elif isinstance(error, commands.CommandOnCooldown):
+        elif isinstance(error, CommandOnCooldown):
             title = ["Slow down!", "You're going a little too fast bud...", "Hold your horses!",
              "Noooooo!", "Woah now, slow it down...", "Take a breather...", "NEGATORY."]
-            cooldown_embed = disnake.Embed(
+            cooldown_embed = Embed(
                 title=random.choice(title),
                 description=f"This command is on a cooldown! try again in `{round(error.retry_after, 2)}` seconds.",
-                color=disnake.Color.red()
+                color=Color.red()
             )
-        await ctx.send(embed=cooldown_embed)
+            await ctx.send(embed=cooldown_embed)
 
         elif isinstance(error, NotOwner):
             return await ctx.send("Only my owner can use this command.")
