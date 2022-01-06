@@ -196,10 +196,15 @@ class Jarvide(Bot):
                 f"{ctx.command.aliases.append(ctx.command.name)} {ctx.command.signature} "
             )
 
-        elif isinstance(error, CommandOnCooldown):
-            return await ctx.send(
-                f"Command is on cooldown. Try again after {datetime.timedelta(seconds = error.retry_after)}"
+        elif isinstance(error, commands.CommandOnCooldown):
+            title = ["Slow down!", "You're going a little too fast bud...", "Hold your horses!",
+             "Noooooo!", "Woah now, slow it down...", "Take a breather...", "NEGATORY."]
+            cooldown_embed = disnake.Embed(
+                title=random.choice(title),
+                description=f"This command is on a cooldown! try again in `{round(error.retry_after, 2)}` seconds.",
+                color=disnake.Color.red()
             )
+        await ctx.send(embed=cooldown_embed)
 
         elif isinstance(error, NotOwner):
             return await ctx.send("Only my owner can use this command.")

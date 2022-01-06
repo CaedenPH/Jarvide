@@ -91,7 +91,7 @@ class Mod(commands.Cog):
             return await ctx.send(f"{ctx.author.mention}, you cannot unban yourself!")
 
         choice = await prompt(
-            ctx, message="Are you sure you want to ban this user?", timeout=60
+            ctx, message="Are you sure you want to unban this user?", timeout=60
             )
         if choice:
             await ctx.guild.unban(
