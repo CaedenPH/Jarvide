@@ -3,7 +3,6 @@ import typing
 import time_str
 from disnake.ext import commands
 from disnake.ext.commands import Context
-
 from src.utils.confirmation import prompt
 
 
@@ -41,7 +40,7 @@ class Mod(commands.Cog):
             try :
                 await member.kick(reason=reason)
                 await ctx.send(f"{member.mention} has been kicked.")
-            except : 
+            except disnake.Forbidden: 
                 await ctx.reply(f'Unable to kick **{member.name}** due to role hierarchy')
         else:
             await ctx.send(f"Cancelled kick.")
@@ -71,7 +70,7 @@ class Mod(commands.Cog):
             try :
                 await member.ban(reason=reason)
                 await ctx.send(f"{member.mention} has been banned.")
-            except :
+            except disnake.Forbidden:
                 await ctx.reply(f'Unable to ban **{member.name}** due to role hierarchy')
         else:
             await ctx.send(f"Cancelled ban.")
@@ -109,8 +108,7 @@ class Mod(commands.Cog):
     @commands.bot_has_permissions(manage_channels=True)
     async def slowmode(self, ctx: Context, channel: disnake.TextChannel = None, slowmode: int = None):
         """Change/disable slowmode in a channel"""
-        if channel not in ctx.guild.channels:
-            return await ctx.send('The channel must be from the same server')
+
         channel = channel or ctx.channel
         if not slowmode:
             return await ctx.send(
