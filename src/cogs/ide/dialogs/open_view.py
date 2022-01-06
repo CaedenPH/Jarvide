@@ -124,7 +124,7 @@ class OpenView(disnake.ui.View):
                 break
             except IndexError:
                 await interaction.channel.send(
-                    "Not a valid github link, please try again.", delete_after=5
+                    "Invalid github link, please try again.", delete_after=5
                 )
                 if self.SUDO:
                     await url.delete()
@@ -141,6 +141,13 @@ class OpenView(disnake.ui.View):
                     headers={"Accept": "application/vnd.github.v3+json"},
                 )
                 content = (await b.text()).replace("`", "`​")
+                if content == "404: Not Found":
+                    await interaction.channel.send(
+                        "Invalid github link, please exit the IDE and try again.", delete_after=5
+                    )
+                    if self.SUDO:
+                        await url.delete()
+                    return
             else:
                 content = json["content"]
 

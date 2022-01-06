@@ -5,6 +5,7 @@ from disnake.ui import View, Select
 from disnake.ext.commands import Bot, Command, Cog, command, HelpCommand, Context, Group
 from typing import Optional, List
 
+
 class HelpCog(Cog):
     def __init__(self, bot):
         self._original_help_command = bot.help_command
