@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+import datetime
+
 import disnake
+import time
 
 from argparse import ArgumentParser
 from disnake.ext import commands
 from typing import TYPE_CHECKING, Literal
 
 from src.utils.utils import EmbedFactory, ExitButton, SaveButton, add_lines, get_info
+from src.utils import LinePaginator
 
 if TYPE_CHECKING:
     from src.utils import File
@@ -35,24 +39,68 @@ def page_integrity(page: int, pages: int, method: Literal["back", "next"]):
     return True
 
 
-class OptionSelect(disnake.ui.Select):
-    def __init__(
-        self,
-        ctx: commands.Context,
-        file: File,
-        pages: list[str],
-        bot_message: disnake.Message,
-        parent: EditView,
-    ):
-        super().__init__()
-        self.ctx = ctx
-        self.bot_message = bot_message
-        self.pages = pages
-        self.file = file
+class RestoreVersion(disnake.ui.Button):
+    def __init__(self, parent, row: int = 1):
+        super().__init__(style=disnake.ButtonStyle.green, label="Restore Version", row=row)
         self.parent = parent
+        self.bot_message = self.parent.parent.bot_message
+        self.ctx = self.parent.parent.ctx
+
+    async def callback(self, interaction: disnake.MessageInteraction):
+        await interaction.response.send_message(
+            f"Successfully restored version!",
+            ephemeral=True
+        )
+        self.parent.parent.file.content = self.parent.parent.file.version_history[int(self.parent.values[0])]
+        await self.parent.parent.parent.refresh_message(0)
+
+
+class VersionHistorySelect(disnake.ui.Select):
+    def __init__(self, parent):
+        super().__init__()
+        self.parent = parent
+        self.options = []
+        self.functions = {}
+
+        for k in self.parent.parent.version_history.keys():
+            self.options.append(disnake.SelectOption(value=str(k), label=str(datetime.datetime.fromtimestamp(k))))
+
+    async def callback(self, interaction: disnake.MessageInteraction):
+        await interaction.response.defer()
+        paginator = LinePaginator(
+            interaction,
+            add_lines(self.parent.parent.version_history[int(interaction.values[0])]),
+            prefix=f"```{self.parent.file.extension}",
+            suffix="```",
+            line_limit=30,
+            timeout=None,  # type: ignore
+            embed_author_kwargs={
+                "name": f"{self.parent.ctx.author.name}'s automated paginator for {self.parent.file.filename}",
+                "icon_url": self.parent.ctx.author.avatar.url,
+            },
+        )
+        paginator.add_item(RestoreVersion(self))
+        await paginator.start()
+
+
+class VersionHistoryView(disnake.ui.View):
+    def __init__(self, parent):
+        super().__init__()
+        self.add_item(VersionHistorySelect(parent))
+
+
+class OptionSelect(disnake.ui.Select):
+    def __init__(self, parent: EditView):
+        super().__init__()
+        self.parent = parent
+        self.ctx = self.parent.ctx
+        self.bot_message = self.parent.bot_message
+        self.file = self.parent.file
+        self.pages = self.parent.pages
         self.options = [
             disnake.SelectOption(value="1", label="Find"),
             disnake.SelectOption(value="2", label="Go to page..."),
+            disnake.SelectOption(value="3", label="Version History")
         ]
 
     @staticmethod
@@ -84,6 +132,7 @@ class OptionSelect(disnake.ui.Select):
             content = "".join(content.splitlines()[1:])
         if args:
             if args.replace:
+                self.parent.create_undo()
                 self.file.content = self.file.content.replace(content, "".join(args.replace))
                 await self.parent.refresh_message(self.parent.page)
                 return await self.ctx.send(f"Replaced all `{content}` occurrences with `{''.join(args.replace)}`!")
@@ -154,6 +203,9 @@ class OptionSelect(disnake.ui.Select):
         self.parent.page = int(content) - 1
         await self.parent.refresh_message(self.parent.page)
 
+    async def version_history(self, interaction: disnake.MessageInteraction):
+        await interaction.response.send_message("Showing version history...", view=VersionHistoryView(self))
+
     async def callback(self, interaction: disnake.MessageInteraction):
         await interaction.message.delete()
         clicked = self.values[0]
@@ -161,19 +213,14 @@ class OptionSelect(disnake.ui.Select):
             await self.find_option(interaction)
         elif clicked == "2":
             await self.goto_option(interaction)
+        elif clicked == "3":
+            await self.version_history(interaction)
 
 
 class OptionView(disnake.ui.View):
-    def __init__(
-        self,
-        ctx: commands.Context,
-        file: File,
-        pages: list[str],
-        bot_message: disnake.Message,
-        parent: EditView,
-    ):
+    def __init__(self, parent: EditView):
         super().__init__()
-        self.add_item(OptionSelect(ctx, file, pages, bot_message, parent))
+        self.add_item(OptionSelect(parent))
 
 
 class EditView(disnake.ui.View):
@@ -193,28 +240,27 @@ class EditView(disnake.ui.View):
         )
         await self.bot_message.edit(view=self, embed=embed)
 
-    def __init__(
-        self,
-        ctx,
-        file_: "File",
-        bot_message=None,
-        file_view=None
-    ):
+    def __init__(self, file_view=None):
         super().__init__(timeout=120)
-        self.ctx = ctx
-        self.bot = ctx.bot
-        self.file = file_
-        self.content = file_.content
-        self.bot_message = bot_message
-        self.file_view = file_view
-        self.undo = self.file_view.file.undo
-        self.redo = self.file_view.file.redo
+        self.parent = file_view
+
+        self.ctx = self.parent.ctx
+        self.bot = self.parent.ctx.bot
+        self.file = self.parent.file
+        self.bot_message = self.parent.bot_message
+        self.undo = self.parent.file.undo
+        self.redo = self.parent.file.redo
+        self.version_history = self.parent.file.version_history
         self.page = 0
         self.extension = None
         self.SUDO = self.ctx.me.guild_permissions.manage_messages
 
-        self.add_item(ExitButton(ctx, bot_message, row=3))
-        self.add_item(SaveButton(ctx, bot_message, file_, row=2))
+        self.add_item(ExitButton(self.parent.ctx, self.parent.bot_message, row=3))
+        self.add_item(SaveButton(self.parent.ctx, self.parent.bot_message, self.parent.file, row=2))
+
+    def create_undo(self):
+        self.undo.append(self.file.content)
+        self.version_history[int(time.time())] = self.file.content
 
     @property
     def pages(self):
@@ -222,10 +268,9 @@ class EditView(disnake.ui.View):
         return ["".join(lines[x: x + 50]) for x in range(0, len(lines), 50)]
 
     async def refresh_message(self, page):
-        n = "\n"
         embed = self.bot_message.embeds[0]
-        pages = [self.file.content.splitlines()[x: x + 50] for x in range(0, len(self.file.content.splitlines()), 50)]
-        embed.description = f"```{self.file.extension}\n{n.join(pages[page])}\n```\n{page + 1}/{len(pages)}"
+        pages = self.pages
+        embed.description = f"```{self.file.extension}\n{''.join(pages[page])}\n```\n{page + 1}/{len(pages)}"
         await self.bot_message.edit(embed=embed, view=self)
 
     async def edit(self, inter):
@@ -234,7 +279,7 @@ class EditView(disnake.ui.View):
         await self.bot_message.edit(
             embed=EmbedFactory.code_embed(
                 self.ctx,
-                "".join(add_lines(self.file_view.file.content)),
+                "".join(add_lines(self.file.content)),
                 self.file.filename,
             ),
         )
@@ -245,7 +290,7 @@ class EditView(disnake.ui.View):
     ):
         await interaction.response.send_message(
             "᲼",
-            view=OptionView(self.ctx, self.file, self.pages, self.bot_message, self),
+            view=OptionView(self),
         )
 
     @disnake.ui.button(label="Replace", style=disnake.ButtonStyle.gray)
@@ -254,8 +299,7 @@ class EditView(disnake.ui.View):
     ):
         await interaction.response.send_message(
             "**Format:**\n[line number]\n```py\n<code>\n```**Example:**"
-            "\n12-25\n```py\nfor i in range(10):\n\tprint('foo')\n```"
-            "\n`[Click save to see the result]`",
+            "\n12-25\n```py\nfor i in range(10):\n\tprint('foo')\n```",
             ephemeral=True,
         )
         content: str = (
@@ -276,13 +320,13 @@ class EditView(disnake.ui.View):
                 from_, to = int(line_no) - 1, int(line_no) - 1
             code = clear_codeblock("\n".join(content.splitlines()[1:]))
         else:
-            from_, to = 0, len(self.file_view.file.content) - 1
+            from_, to = 0, len(self.file.content) - 1
             code = clear_codeblock(content)
-        self.undo.append(self.content)
-        sliced = self.file_view.file.content.splitlines()
+        sliced = self.file.content.splitlines()
         del sliced[from_ : to + 1]
         sliced.insert(from_, code)
-        self.file_view.file.content = "\n".join(sliced)
+        self.create_undo()
+        self.file.content = "\n".join(sliced)
         await self.refresh_message(self.page)
 
     @disnake.ui.button(label="Append", style=disnake.ButtonStyle.gray)
@@ -293,8 +337,7 @@ class EditView(disnake.ui.View):
             "Type something... (This will append your code with a new line) `[Click save to see the result]`",
             ephemeral=True,
         )
-        self.undo.append(self.file_view.file.content)
-        self.file_view.file.content += "\n" + clear_codeblock(
+        self.file.content += "\n" + clear_codeblock(
             (
                 await self.ctx.bot.wait_for(
                     "message",
@@ -388,8 +431,9 @@ class EditView(disnake.ui.View):
                 "You have made no changes and have nothing to undo!", ephemeral=True
             )
 
-        self.redo.append(self.file_view.file.content)
-        self.file_view.file.content = self.undo.pop(-1)
+        self.redo.append(self.file.content)
+        self.create_undo()
+        self.file.content = self.undo.pop(-1)
         await self.edit(interaction)
 
     @disnake.ui.button(label="Redo", style=disnake.ButtonStyle.blurple, row=2)
@@ -400,17 +444,16 @@ class EditView(disnake.ui.View):
             return await interaction.response.send_message(
                 "You have made no changes and have nothing to undo!", ephemeral=True
             )
-
-        self.undo.append(self.file_view.file.content)
-        self.file_view.file.content = self.redo.pop(-1)
+        self.create_undo()
+        self.file.content = self.redo.pop(-1)
         await self.edit(interaction)
 
     @disnake.ui.button(label="Clear", style=disnake.ButtonStyle.danger, row=3)
     async def clear_button(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
-        self.undo.append(self.file_view.file.content)
-        self.file_view.file.content = ""
+        self.create_undo()
+        self.file.content = ""
 
         await self.edit(interaction)
 
@@ -421,7 +464,7 @@ class EditView(disnake.ui.View):
         embed = EmbedFactory.ide_embed(self.ctx, await get_info(self.file))
         self.undo = []
         self.redo = []
-        await self.bot_message.edit(embed=embed, view=self.file_view)
+        await self.bot_message.edit(embed=embed, view=self.parent)
 
 
 def setup(bot: commands.Bot):

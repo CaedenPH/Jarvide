@@ -117,7 +117,7 @@ class FileView(disnake.ui.View):
         import math
         await interaction.response.defer()
         content: list[str] = add_lines(self.file.content)
-        view = EditView(self.ctx, self.file, self.bot_message, self)
+        view = EditView(self)
         await self.bot_message.edit(
             embed=EmbedFactory.code_embed(
                 self.ctx,

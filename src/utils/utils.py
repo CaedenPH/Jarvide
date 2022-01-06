@@ -37,6 +37,7 @@ class File:
         self.content = content
         self.undo = []  # passed in EditView
         self.redo = []  # this too
+        self.version_history = {}
         self.setup()
         self.extension = self.filename.split(".")[-1]
 
