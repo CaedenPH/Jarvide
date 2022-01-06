@@ -101,23 +101,21 @@ class Fun(Cog):
         self.emoji = "🍿"
         self.short_help_doc = "Fun commands to play around with!"
 
-    @command()
+    @command(aliases = ['gaymeter', 'gaypercent'])
     async def howgay(self, ctx, member: Member = None) -> None:
         """Shows how gay you are."""
-        if not member:
-            member = ctx.author
+        member = member or ctx.author
 
         await ctx.send(f"{member.mention} is {random.randint(1, 100)}% gay")
 
-    @command()
+    @command(['cutemeter', 'cutepercent')
     async def howcute(self, ctx: Context, member: Member = None):
         """Shows how cute you are."""
-        if member is None:
-            member = ctx.author
+        member = member or ctx.author
 
         await ctx.send(f"{member.mention} is {random.randint(1, 100)}% cute!")
 
-    @command()
+    @command(aliases = ['pick', 'random'])
     async def choose(self, ctx: Context, *arguments):
         """Chooses between multiple choices."""
 
@@ -154,19 +152,17 @@ class Fun(Cog):
 
         await ctx.send(embed=embed2)
 
-    @command()
+    @command(aliases = ['howsimp')
     async def simpmeter(self, ctx: Context, member: Member = None) -> None:
         """Shows how much of a simp you are."""
-        if member is None:
-            member = ctx.author
+        member = member or ctx.author
 
         await ctx.send(f"{member.mention} is {random.randint(1, 100)}% a simp!")
 
-    @command()
+    @command(aliases = ['howlongpp', 'pplength'])
     async def ppmeter(self, ctx: Context, member: Member = None) -> None:
         """Shows your how long is your pp."""
-        if member is None:
-            member = ctx.author
+        member = member or ctx.author
 
         inches = random.randint(1, 12)
         size = "small" if inches <= 6 else "big"
