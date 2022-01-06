@@ -27,7 +27,10 @@ class Misc(
         member = member or ctx.author
         await ctx.send(
             embed=Embed(color=0x90EE90)
-            .set_author(name=ctx.author, icon_url=ctx.author.avatar.url)
+            if member is None:
+                embed.set_author(name=ctx.author, icon_url=ctx.author.avatar.url)
+            else:
+                embed.set_author(name=member, icon_url=member.avatar.url)
             .set_image(
                 url=f"https://some-random-api.ml/canvas/{endpoint}?avatar={member.avatar.with_format('png').url}"
             )
