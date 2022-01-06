@@ -169,7 +169,7 @@ class Mod(commands.Cog):
         try : 
             await member.add_roles(role,reason=reason)
         except :
-            return await ctx.send('Unable to add that role to '+member.name)
+            return await ctx.send(f'Unable to add that role to {member.name}')
         await ctx.send(f"I gave the {role} role to {member.name}.")
 
 
