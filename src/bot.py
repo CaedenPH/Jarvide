@@ -2,30 +2,11 @@ import os
 import string
 import copy
 import typing
-import traceback
-import random
-
 from disnake import Message
-from disnake.ext.commands import (
-    Bot,
-    BotMissingPermissions,
-    MissingPermissions,
-    MissingRole,
-    DisabledCommand,
-    NotOwner,
-    ChannelNotFound,
-    MemberNotFound,
-    UserNotFound,
-    TooManyArguments,
-    CommandOnCooldown,
-    MissingRequiredArgument,
-    Context,
-)
-from disnake import Intents, Embed, Color
-from disnake.ext.commands.errors import CommandNotFound
+from disnake.ext.commands import Bot
+from disnake import Intents
 from motor.motor_asyncio import AsyncIOMotorClient
 from odmantic import AIOEngine
-
 from src.utils.utils import main_embed
 from .HIDDEN import TOKEN, MONGO_URI
 
