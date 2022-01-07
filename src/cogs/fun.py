@@ -1,12 +1,12 @@
 import asyncio
+import disnake
+import random
 import typing
 
-import disnake
 from disnake import MessageInteraction, Embed, Member, ButtonStyle
-from disnake.ext.commands import Cog, Bot, command, guild_only, Context
-
-import random
 from disnake.ui import View, button, Button
+from disnake.ext.commands import Cog, Bot, command, guild_only, Context
+from typing import Optional
 
 
 class Casino(View):
@@ -141,7 +141,7 @@ class Fun(Cog):
 
     @command()
     @guild_only()
-    async def slap(self, ctx: Context, member: Member = None) -> typing.Optional[disnake.Message]:
+    async def slap(self, ctx: Context, member: Member = None) -> Optional[disnake.Message]:
         """Slap a member."""
         if member is None:
             return await ctx.send("You didn't mention a member.")
