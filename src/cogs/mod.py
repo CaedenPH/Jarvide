@@ -147,7 +147,7 @@ class Mod(commands.Cog):
     @commands.guild_only()
     @commands.has_permissions(moderate_members=True)
     @commands.bot_has_permissions(moderate_members=True)
-    async def unmute(self, ctx, member: disnake.Member, *, reason):
+    async def unmute(self, ctx, member: disnake.Member, *, reason = None):
         """ unmutes a member (or removes timeout) from a guild """
         await member.timeout(until=None, reason=reason)
         await ctx.send(
