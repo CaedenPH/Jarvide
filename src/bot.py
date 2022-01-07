@@ -177,7 +177,6 @@ class Jarvide(Bot):
         return text + "\n" + underline
 
     async def on_command_error(self, ctx: Context, error: Exception):
-        print(ctx.command)
         if isinstance(error, CommandNotFound):
             return
 
