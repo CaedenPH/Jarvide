@@ -59,33 +59,34 @@ class Jarvide(Bot):
         super().run(TOKEN, reconnect=True)
 
     async def on_message(self, original_message: Message) -> typing.Optional[Message]:
+        new_msg = copy.copy(original_message)
         new_message = copy.copy(original_message)
-        if original_message.content in [f"<@!{self.user.id}>", f"<@{self.user.id}>"]:
-            return await original_message.channel.send(embed=main_embed(self))
+        if new_msg.content in [f"<@!{self.user.id}>", f"<@{self.user.id}>"]:
+            return await new_msg.channel.send(embed=main_embed(self))
         if (
-            original_message.author.bot
-            or "jarvide" not in original_message.content.lower()
+            new_msg.author.bot
+            or "jarvide" not in new_msg.content.lower()
         ):
             return
-        original_message.content = " ".join(
+        new_msg.content = " ".join(
             [
                 word
-                for word in original_message.content.lower().split()
+                for word in new_msg.content.lower().split()
                 if not any(
                     word.startswith(censored_word) for censored_word in REMOVE_WORDS
                 )
             ]
         )
-        original_message.content = "".join(
+        new_msg.content = "".join(
             [
                 char
-                for char in original_message.content
+                for char in new_msg.content
                 if (char in string.ascii_letters or char.isspace())
 
             ]
         )
         message_content = " ".join(
-            word for word in original_message.content.split() if word != "jarvide"
+            word for word in new_msg.content.split() if word != "jarvide"
         )
 
         list_of_commands = {c: [c.name, *c.aliases] for c in self.commands}
@@ -104,17 +105,17 @@ class Jarvide(Bot):
                 commands_in_message = commands_in_message[::-1]
 
         cmd = commands_in_message[0][0]
-        ctx = await super().get_context(original_message)
+        ctx = await super().get_context(new_msg)
         user_authorized = await cmd.can_run(ctx)
         if user_authorized:
             args = new_message.content.partition(
                 [
                     i
                     for i in list_of_commands[cmd]
-                    if i in original_message.content.lower()
+                    if i in new_msg.content.lower()
                 ][0]
             )[2]
-            new_message = copy.copy(original_message)
+            new_message = copy.copy(new_msg)
             new_message.content = f"jarvide {cmd.name}{args}"
             await super().process_commands(new_message)
 

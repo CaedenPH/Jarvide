@@ -79,7 +79,7 @@ class Listeners(commands.Cog):
             )
 
         except UnicodeDecodeError:
-            await message.delete()
+            await _message.delete()
             return await ctx.send("Unable to read file.", delete_after=10)
         await _message.edit(content="Readable file found!", view=OpenIDEButton(ctx, file_, _message))
 
