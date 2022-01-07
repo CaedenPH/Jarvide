@@ -1,10 +1,12 @@
 import asyncio
+import disnake
+import random
+import typing
 
 from disnake import MessageInteraction, Embed, Member, ButtonStyle
-from disnake.ext.commands import Cog, Bot, command, guild_only, Context
-
-import random
 from disnake.ui import View, button, Button
+from disnake.ext.commands import Cog, Bot, command, guild_only, Context
+from typing import Optional
 
 
 class Casino(View):
@@ -108,7 +110,7 @@ class Fun(Cog):
 
         await ctx.send(f"{member.mention} is {random.randint(1, 100)}% gay")
 
-    @command(['cutemeter', 'cutepercent')
+    @command(aliases=['cutemeter', 'cutepercent'])
     async def howcute(self, ctx: Context, member: Member = None):
         """Shows how cute you are."""
         member = member or ctx.author
@@ -139,7 +141,7 @@ class Fun(Cog):
 
     @command()
     @guild_only()
-    async def slap(self, ctx: Context, member: Member = None) -> None:
+    async def slap(self, ctx: Context, member: Member = None) -> Optional[disnake.Message]:
         """Slap a member."""
         if member is None:
             return await ctx.send("You didn't mention a member.")
@@ -152,7 +154,7 @@ class Fun(Cog):
 
         await ctx.send(embed=embed2)
 
-    @command(aliases = ['howsimp')
+    @command(aliases = ['howsimp'])
     async def simpmeter(self, ctx: Context, member: Member = None) -> None:
         """Shows how much of a simp you are."""
         member = member or ctx.author

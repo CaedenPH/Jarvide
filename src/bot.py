@@ -112,6 +112,7 @@ class Jarvide(Bot):
                 list_of_commands.items(),
             )
         )
+        commands_in_message.reverse()
         if len(commands_in_message) <= 0:
             return
 
