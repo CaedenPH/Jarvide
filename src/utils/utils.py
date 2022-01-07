@@ -9,6 +9,14 @@ from disnake.ext import commands
 from typing import TypeVar, Type
 
 
+j = "<:j_:929074874012536925>"
+a = "<:a_:929075107144544276>"
+r = "<:r_:929075409318985868>"
+v = "<:v_:929075430911266906>"
+i = "<:i_:929075454927863829>"
+d = "<:d_:929075589409824799>"
+e = "<:e_:929075607533396058>"
+
 def add_lines(content: str) -> list[str]:
     enumerated = list(enumerate(content.split("\n"), 1))
     lines = []
@@ -175,6 +183,7 @@ def main_embed(bot):
     return (
         disnake.Embed(
             color=0x489CC4,
+            title=f"{j}{a}{r}{v}{i}{d}{e}",
             description=f"""
     **Hello, my name is Jarvide.**
 
@@ -195,7 +204,7 @@ def main_embed(bot):
             url="https://media.discordapp.net/attachments/926115595307614252/927951464725377034/big.png?width=1440"
                 "&height=453 "
         ).set_author(
-            name="Jarvide",
+            name=f"Hello!",
             icon_url=bot.user.avatar.url
         ).set_footer(text="Jarvide's data is completely secure, so you shouldn't worry about data loss!")
     )

@@ -2,6 +2,7 @@ import aiohttp
 import base64
 import disnake
 import re
+import asyncio
 
 from disnake.ext import commands
 from typing import Optional
@@ -41,7 +42,6 @@ class Listeners(commands.Cog):
             repo, branch, path = re.findall(regex, message.content)[0]
         except IndexError:
             return
-        _message = await ctx.send("Fetching github link...")
         await message.edit(suppress=True)
         async with aiohttp.ClientSession() as session:
             a = await session.get(
@@ -56,12 +56,13 @@ class Listeners(commands.Cog):
                 )
                 content = (await b.text()).replace("`", "`​")
                 if content == "404: Not Found":
-                    await ctx.send("Invalid github link.")
-                    await _message.delete()
                     return
             else:
                 content = base64.b64decode(json["content"]).decode("utf-8")
         file_ = File(content=content, filename=path.split("/")[-1], bot=self.bot)
+
+        _message = await ctx.send("Fetching github link...")
+        await asyncio.sleep(2)
         await _message.edit(content="Working github link found!", view=OpenIDEButton(ctx, file_, _message))
 
     @commands.Cog.listener("on_message")
@@ -70,7 +71,6 @@ class Listeners(commands.Cog):
             return
         ctx = await self.bot.get_context(message)
         real_file = message.attachments[0]
-        _message = await ctx.send("Resolving file integrity...")
         try:
             file_ = File(
                 content=await real_file.read(),
@@ -79,8 +79,34 @@ class Listeners(commands.Cog):
             )
 
         except UnicodeDecodeError:
-            await _message.delete()
-            return await ctx.send("Unable to read file.", delete_after=10)
+            pass
+
+        _message = await ctx.send("Resolving file integrity...")
+        await asyncio.sleep(2)
+        await _message.edit(content="Readable file found!", view=OpenIDEButton(ctx, file_, _message))
+
+    @commands.Cog.listener("on_message")
+    async def codeblock_detect(self, message: disnake.Message) -> Optional[disnake.Message]:
+        if not (
+            message.content.startswith('```') and 
+            message.content.endswith('```')
+        ):
+            return
+
+        ctx = await self.bot.get_context(message)
+        clean_message = disnake.utils.remove_markdown(message.content).splitlines()
+        extension, content = clean_message[0], ''.join(clean_message[1:])
+        try:
+            file_ = File(
+                content=content,
+                filename=f"unamed.{extension}",
+                bot=self.bot,
+            )
+        except UnicodeDecodeError:
+            return
+
+        _message = await ctx.send("Resolving file integrity...")
+        await asyncio.sleep(2)
         await _message.edit(content="Readable file found!", view=OpenIDEButton(ctx, file_, _message))
 
 
