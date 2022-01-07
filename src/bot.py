@@ -62,7 +62,7 @@ class Jarvide(Bot):
         self.send_guild = None
         self.error_channel = None
         self.server_message = None
-        self.bugs =  range(10000, 100000)
+        self.bugs = range(10000, 100000)
 
     def setup(self) -> None:
         for filename in os.listdir("./src/cogs"):
@@ -77,6 +77,7 @@ class Jarvide(Bot):
         super().run(TOKEN, reconnect=True)
 
     async def on_message(self, original_message: Message) -> typing.Optional[Message]:
+        new_message = copy.copy(original_message)
         if original_message.content in [f"<@!{self.user.id}>", f"<@{self.user.id}>"]:
             return await original_message.channel.send(embed=main_embed(self))
         if (
@@ -124,14 +125,13 @@ class Jarvide(Bot):
         ctx = await super().get_context(original_message)
         user_authorized = await cmd.can_run(ctx)
         if user_authorized:
-            args = original_message.content.partition(
+            args = new_message.content.partition(
                 [
                     i
                     for i in list_of_commands[cmd]
                     if i in original_message.content.lower()
                 ][0]
             )[2]
-
             new_message = copy.copy(original_message)
             new_message.content = f"jarvide {cmd.name}{args}"
             await super().process_commands(new_message)
