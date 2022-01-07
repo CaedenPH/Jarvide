@@ -90,9 +90,9 @@ class ErrorHandler(Cog):
         elif isinstance(error, BotMissingPermissions):
             await ctx.send(
                 embed=Embed(
-                    description=f"I am missing {self.perms_parser(error.missing_permissions)} permissions required to run the command"
-                ),
-                color=Color.red(),
+                    description=f"I am missing {self.perms_parser(error.missing_permissions)} permissions required to run the command",
+                    color=Color.red()
+                )
             )
         elif isinstance(error, MemberNotFound):
             await ctx.send(
@@ -160,7 +160,7 @@ class ErrorHandler(Cog):
             await ctx.send(
                 "An unexpected error occurred! Reporting this to my developer..."
             )
-            await self.error_channel.send(
+            await self.bot.error_channel.send(
                 # type: ignore
                 f"```yaml\n{''.join(traceback.format_exception(error, error, error.__traceback__))}\n```"
             )
