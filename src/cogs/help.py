@@ -102,6 +102,8 @@ class JarvideHelp(HelpCommand):
             if cog_name.lower() in ("jishaku", "helpcog", "staff", "errorhandler", "ide"):
                 continue
             cog: Cog = _bot.get_cog(cog_name)
+            if getattr(cog, "ignore", None):
+                continue
             embed.add_field(
                 name=f"{cog.emoji} {cog.qualified_name.upper()} COMMANDS [{len(cog.get_commands())}]",  # type: ignore
                 value=f"➥ {cog.short_help_doc}",  # type: ignore
@@ -197,6 +199,8 @@ class NavigatorMenu(Select):
             if cog_name.lower() in ("jishaku", "helpcog", "staff", "ide" , "errorhandler"):
                 continue
             cog: Cog = ctx.bot.get_cog(cog_name)
+            if getattr(cog, "ignore", None):
+                continue
             options.append(
                 SelectOption(
                     label=f"{cog.qualified_name.upper()} COMMANDS",
