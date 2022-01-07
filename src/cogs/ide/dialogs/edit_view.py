@@ -218,13 +218,29 @@ class OptionSelect(disnake.ui.Select):
 
 
 class OptionView(disnake.ui.View):
+    async def interaction_check(self, interaction: disnake.MessageInteraction) -> bool:
+        return (
+            interaction.author == self.parent.ctx.author
+            and interaction.channel == self.parent.ctx.channel
+        )
+
     def __init__(self, parent: EditView):
+        self.parent = parent
+
         super().__init__()
         self.add_item(OptionSelect(parent))
 
 
+
+
+
+
+
 class EditView(disnake.ui.View):
     async def interaction_check(self, interaction: disnake.MessageInteraction) -> bool:
+        
+        self.writing_mode = False
+
         return (
             interaction.author == self.ctx.author
             and interaction.channel == self.ctx.channel
@@ -252,11 +268,12 @@ class EditView(disnake.ui.View):
         self.redo = self.parent.file.redo
         self.version_history = self.parent.file.version_history
         self.page = 0
+        self.writing_mode = False
         self.extension = None
         self.SUDO = self.ctx.me.guild_permissions.manage_messages
 
+        self.add_item(SaveButton(self.parent.ctx, self.parent.bot_message, self.parent.file, row=3))
         self.add_item(ExitButton(self.parent.ctx, self.parent.bot_message, row=3))
-        self.add_item(SaveButton(self.parent.ctx, self.parent.bot_message, self.parent.file, row=2))
 
     def create_undo(self):
         self.undo.append(self.file.content)
@@ -348,33 +365,44 @@ class EditView(disnake.ui.View):
         )
         await self.refresh_message(self.page)
 
-    @disnake.ui.button(label="Rename", style=disnake.ButtonStyle.grey)
-    async def rename_button(
+    @disnake.ui.button(label="Writer mode", style=disnake.ButtonStyle.grey)
+    async def writer_mode(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.send_message(
-            "What would you like the filename to be?", ephemeral=True
-        )
-        filename = await self.bot.wait_for(
-            "message",
-            check=lambda m: self.ctx.author == m.author
-            and m.channel == self.ctx.channel,
-        )
-        if len(filename.content) > 12:
-            if self.SUDO:
-                await filename.delete()
-            return await interaction.channel.send(
-                "That filename is too long! The maximum limit is 12 character"
-            )
+            "Hello! Welcome to writer mode. In this mode every message you send will write to your open file\n"
+            "If you want to the bot to ignore your message, start it with !\n"
+            "To end this mode either click another button or type q\n"
+            "This will time out after 5 minutes without a response\n", 
+            ephemeral=True
+            )   
 
-        file_ = File(filename=filename, content=self.file.content, bot=self.bot)
-        description = await get_info(file_)
+        self.writing_mode = True
+        while (
+            message:=await self.bot.wait_for(
+                "message", 
+                timeout=300, 
+                check=lambda m: 
+                    (
+                        m.author == self.ctx.author,
+                        m.channel == self.ctx.channel,
+                    )
+                )
+            ):
+            content = message.content.lower()
+            if not self.writing_mode:
+                return 
+            if content == "q":
+                return await interaction.send("You have exited writer mode!")
+            if content.startswith("!"):
+                continue
 
-        self.file = file_
-        self.extension = file_.filename.split(".")[-1]
+            
+            self.file.content += "\n" + clear_codeblock(content)
+            self.create_undo()
+            await self.refresh_message(self.page)
 
-        embed = EmbedFactory.ide_embed(self.ctx, description)
-        await self.bot_message.edit(embed=embed)
+
 
     @disnake.ui.button(label="Prev", style=disnake.ButtonStyle.blurple, row=2)
     async def previous_button(
@@ -447,6 +475,34 @@ class EditView(disnake.ui.View):
         self.create_undo()
         self.file.content = self.redo.pop(-1)
         await self.edit(interaction)
+
+    @disnake.ui.button(label="Rename", style=disnake.ButtonStyle.green, row=3)
+    async def rename_button(
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+    ):
+        await interaction.response.send_message(
+            "What would you like the filename to be?", ephemeral=True
+        )
+        filename = await self.bot.wait_for(
+            "message",
+            check=lambda m: self.ctx.author == m.author
+            and m.channel == self.ctx.channel,
+        )
+        if len(filename.content) > 12:
+            if self.SUDO:
+                await filename.delete()
+            return await interaction.send(
+                "That filename is too long! The maximum limit is 12 character"
+            )
+
+        file_ = File(filename=filename, content=self.file.content, bot=self.bot)
+        description = await get_info(file_)
+
+        self.file = file_
+        self.extension = file_.filename.split(".")[-1]
+
+        embed = EmbedFactory.ide_embed(self.ctx, description)
+        await self.bot_message.edit(embed=embed)
 
     @disnake.ui.button(label="Clear", style=disnake.ButtonStyle.danger, row=3)
     async def clear_button(
