@@ -70,6 +70,7 @@ class Jarvide(Bot):
                 self.load_extension(f"src.cogs.{filename[:-3]}")
 
         self.load_extension("src.cogs.ide.ide")
+        self.load_extension("src.cogs.ide.auto_detect")
         self.load_extension("jishaku")
 
     def run(self) -> None:

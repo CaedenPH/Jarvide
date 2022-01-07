@@ -17,6 +17,7 @@ My team might want to ask you some questions, so we would love you to keep dm's 
 -----------------------------------------------------------
 Bug id: {}"""
 
+
 class OpenView(disnake.ui.View):
     def __init__(self, ctx, bot_message=None):
         super().__init__(timeout=300)
