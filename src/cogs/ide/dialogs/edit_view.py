@@ -131,8 +131,7 @@ class OptionSelect(disnake.ui.Select):
         content: str = (
             await self.ctx.bot.wait_for(
                 "message",
-                check=lambda m: m.author == interaction.author
-                                and m.channel == interaction.channel,
+                check=lambda m: m.author == interaction.author and m.channel == interaction.channel,
             )
         ).content
         parser = ArgumentParser(add_help=False, allow_abbrev=False)
@@ -166,8 +165,8 @@ class OptionSelect(disnake.ui.Select):
             message: disnake.Message = await self.ctx.bot.wait_for(
                 "message",
                 check=lambda m: m.author == interaction.author
-                                and m.channel == interaction.channel
-                                and m.content.lower() in ("back", "next", "quit"),
+                and m.channel == interaction.channel
+                and m.content.lower() in ("back", "next", "quit"),
                 timeout=60
             )
             if message.content.lower() == "back":
@@ -195,8 +194,7 @@ class OptionSelect(disnake.ui.Select):
         await interaction.response.send_message("Enter page number...", ephemeral=True)
         message: disnake.Message = await self.ctx.bot.wait_for(
             "message",
-            check=lambda m: m.author == interaction.author
-                            and m.channel == interaction.channel,
+            check=lambda m: m.author == interaction.author and m.channel == interaction.channel,
         )
         content = message.content
         await message.delete()
@@ -327,8 +325,7 @@ class EditView(disnake.ui.View):
         content: str = (
             await self.ctx.bot.wait_for(
                 "message",
-                check=lambda m: m.author == interaction.author
-                                and m.channel == interaction.channel,
+                check=lambda m: m.author == interaction.author and m.channel == interaction.channel,
             )
         ).content
         if content[0].isdigit():
@@ -363,8 +360,7 @@ class EditView(disnake.ui.View):
             (
                 await self.ctx.bot.wait_for(
                     "message",
-                    check=lambda m: m.author == interaction.author
-                                    and m.channel == interaction.channel,
+                    check=lambda m: m.author == interaction.author and m.channel == interaction.channel,
                 )
             ).content
         )
@@ -420,12 +416,10 @@ class EditView(disnake.ui.View):
                 description=f"```{self.file.extension}\n"
                             f"{''.join(self.pages[self.page])}\n```\nPage: {self.page + 1}/{len(self.pages)}",
                 timestamp=self.ctx.message.created_at,
-            )
-                .set_author(
+            ).set_author(
                 name=f"{self.ctx.author.name}'s automated paginator for {self.file.filename}",
                 icon_url=self.ctx.author.avatar.url,
-            )
-                .set_footer(text="The official jarvide text editor and ide")
+            ).set_footer(text="The official jarvide text editor and ide")
         )
         await self.bot_message.edit(embed=embed, view=self)
 
@@ -443,12 +437,10 @@ class EditView(disnake.ui.View):
                 description=f"```{self.file.extension}\n{''.join(self.pages[self.page])}"
                             f"\n```\nPage: {self.page + 1}/{len(self.pages)}",
                 timestamp=self.ctx.message.created_at,
-            )
-                .set_author(
+            ).set_author(
                 name=f"{self.ctx.author.name}'s automated paginator for {self.file.filename}",
                 icon_url=self.ctx.author.avatar.url,
-            )
-                .set_footer(text="The official jarvide text editor and ide")
+            ).set_footer(text="The official jarvide text editor and ide")
         )
         await self.bot_message.edit(embed=embed, view=self)
 
@@ -487,8 +479,7 @@ class EditView(disnake.ui.View):
         )
         filename = await self.bot.wait_for(
             "message",
-            check=lambda m: self.ctx.author == m.author
-                            and m.channel == self.ctx.channel,
+            check=lambda m: self.ctx.author == m.author and m.channel == self.ctx.channel,
         )
         if len(filename.content) > 12:
             if self.SUDO:

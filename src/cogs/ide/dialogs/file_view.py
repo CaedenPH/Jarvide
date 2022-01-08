@@ -168,8 +168,7 @@ class FileView(disnake.ui.View):
         )
         filename = await self.bot.wait_for(
             "message",
-            check=lambda m: self.ctx.author == m.author
-                            and m.channel == self.ctx.channel,
+            check=lambda m: self.ctx.author == m.author and m.channel == self.ctx.channel,
         )
         if len(filename.content) > 12:
             if self.SUDO:
@@ -199,8 +198,7 @@ class FileView(disnake.ui.View):
         while not (
                 channel := await self.bot.wait_for(
                     "message",
-                    check=lambda m: self.ctx.author == m.author
-                                    and m.channel == self.ctx.channel,
+                    check=lambda m: self.ctx.author == m.author and m.channel == self.ctx.channel,
                 )
         ).channel_mentions:
             if self.SUDO:
