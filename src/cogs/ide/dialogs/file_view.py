@@ -106,7 +106,7 @@ class FileView(disnake.ui.View):
 
                 try:
                     json = await data.json()
-                except JSONDecodeError:
+                except (JSONDecodeError, aiohttp.ContentTypeError):
                     await interaction.response.defer()
                     return await interaction.send(
                         "Something went wrong! Maybe the file is too long!",

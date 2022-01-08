@@ -380,15 +380,12 @@ class EditView(disnake.ui.View):
 
         self.writing_mode = True
         while (
-                message := await self.bot.wait_for(
-                    "message",
-                    timeout=300,
-                    check=lambda m:
-                    (
-                            m.author == self.ctx.author,
-                            m.channel == self.ctx.channel,
-                    )
-                )
+            message:=
+            await self.ctx.bot.wait_for(
+                "message",
+                check=lambda m: m.author == interaction.author
+                and m.channel == interaction.channel,
+            )
         ):
             content = message.content.lower()
             if not self.writing_mode:
