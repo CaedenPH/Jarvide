@@ -20,6 +20,8 @@ from disnake.ext.commands import (
 from disnake import Embed, Color
 import traceback, datetime, random
 
+from disnake.ext.commands.errors import CommandNotFound, RoleNotFound
+
 
 class ErrorHandler(Cog):
     def __init__(self, bot: Bot):
@@ -49,7 +51,9 @@ class ErrorHandler(Cog):
 
     @Cog.listener()
     async def on_command_error(self, ctx: Context, error: Exception):
-        if isinstance(error, MissingRequiredArgument):
+        if isinstance(error, CommandNotFound):
+            return
+        elif isinstance(error, MissingRequiredArgument):
             desc = (
                 f"{ctx.prefix} {ctx.command.name} {self.signature_parser(ctx.command)}"
             )
@@ -60,6 +64,13 @@ class ErrorHandler(Cog):
             await ctx.send(
                 embed=Embed(
                     description=f"Seems like you didn't provide a required argument : `{error.param.name}`{desc}",
+                    color=Color.red(),
+                )
+            )
+        elif isinstance(error, RoleNotFound):
+            await ctx.send(
+                embed=Embed(
+                    description=f"Unable to find a role named `{error.argument}`",
                     color=Color.red(),
                 )
             )
@@ -83,28 +94,28 @@ class ErrorHandler(Cog):
         elif isinstance(error, MissingPermissions):
             await ctx.send(
                 embed=Embed(
-                    description=f"You are missing {self.perms_parser(error.missing_permissions)} permissions required to run the command",
+                    description=f"You are missing `{self.perms_parser(error.missing_permissions)}` permissions required to run the command",
                     color=Color.red(),
                 ),
             )
         elif isinstance(error, BotMissingPermissions):
             await ctx.send(
                 embed=Embed(
-                    description=f"I am missing {self.perms_parser(error.missing_permissions)} permissions required to run the command",
+                    description=f"I am missing `{self.perms_parser(error.missing_permissions)}` permissions required to run the command",
                     color=Color.red()
                 )
             )
         elif isinstance(error, MemberNotFound):
             await ctx.send(
                 embed=Embed(
-                    description=f"Unable to find any member named {error.argument} in {ctx.guild.name}",
+                    description=f"Unable to find any member named `{error.argument}` in `{ctx.guild.name}`",
                     color=Color.red(),
                 )
             )
         elif isinstance(error, UserNotFound):
             await ctx.send(
                 embed=Embed(
-                    description=f"Unable to find a user named {error.argument}",
+                    description=f"Unable to find a user named `{error.argument}`",
                     color=Color.red(),
                 )
             )
@@ -112,14 +123,14 @@ class ErrorHandler(Cog):
         elif isinstance(error, ChannelNotFound):
             await ctx.send(
                 embed=Embed(
-                    description=f"No channel named {error.argument} found",
+                    description=f"No channel named `{error.argument}` found",
                     color=Color.red(),
                 )
             )
         elif isinstance(error, MissingRole):
             await ctx.send(
                 embed=Embed(
-                    description=f"You need {error.missing_role} role in order to use this command",
+                    description=f"You need `{error.missing_role}` role in order to use this command",
                     color=Color.red(),
                 )
             )
@@ -127,7 +138,7 @@ class ErrorHandler(Cog):
             await ctx.send(
                 embed=Embed(
                     title="No No",
-                    description=f"{ctx.command.name} is an owner only command , only bot owner(s) can use it",
+                    description=f"`{ctx.command.name}` is an owner only command , only bot owner(s) can use it",
                     color=Color.red(),
                 )
             )

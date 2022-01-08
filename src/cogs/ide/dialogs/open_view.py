@@ -71,7 +71,7 @@ class OpenView(disnake.ui.View):
                     self.ctx, "Nice try. You can't break this bot!"
                 )
                 return await self.bot_message.edit(embed=embed)
-            await interaction.channel.send("Upload a file", delete_after=5)
+            await interaction.send("Upload a file", delete_after=5)
 
         real_file = message.attachments[0]
         try:
@@ -81,7 +81,7 @@ class OpenView(disnake.ui.View):
                 bot=self.bot,
             )
         except UnicodeDecodeError:
-            return await interaction.channel.send("Upload a valid text file!")
+            return await interaction.send("Upload a valid text file!")
         await message.add_reaction(THUMBS_UP)
 
         description = (
@@ -129,7 +129,7 @@ class OpenView(disnake.ui.View):
                 repo, branch, path = re.findall(regex, url.content)[0]
                 break
             except IndexError:
-                await interaction.channel.send(
+                await interaction.send(
                     "Invalid github link, please try again.", delete_after=5
                 )
                 if self.SUDO:
@@ -148,7 +148,7 @@ class OpenView(disnake.ui.View):
                 )
                 content = (await b.text()).replace("`", "`​")
                 if content == "404: Not Found":
-                    await interaction.channel.send(
+                    await interaction.send(
                         "Invalid github link, please exit the IDE and try again.", delete_after=5
                     )
                     if self.SUDO:
@@ -206,12 +206,12 @@ class OpenView(disnake.ui.View):
                     self.ctx, "Nice try. You can't break this bot!"
                 )
                 return await self.bot_message.edit(embed=embed)
-            await interaction.channel.send(
+            await interaction.send(
                 f"That url is not supported! Our supported urls are {PASTE_URLS}",
                 delete_after=5,
             )
 
-        await interaction.channel.send("What would you like the filename to be?")
+        await interaction.send("What would you like the filename to be?")
         filename = await self.bot.wait_for(
             "message",
             check=lambda m: self.ctx.author == m.author
@@ -255,11 +255,11 @@ class OpenView(disnake.ui.View):
         if len(filename.content) > 12:
             if self.SUDO:
                 await filename.delete()
-            return await interaction.channel.send(
+            return await interaction.send(
                 "That filename is too long! The maximum limit is 12 character"
             )
 
-        await interaction.channel.send("What is the content?")
+        await interaction.send("What is the content?")
         message = await self.bot.wait_for(
             "message",
             check=lambda m: self.ctx.author == m.author
@@ -321,7 +321,7 @@ class OpenView(disnake.ui.View):
             if iteration == 1:
                 await interaction.response.send_message(f"Please {question}\nType q to end your report\nQuestion number {iteration}/2", ephemeral=True)
             else:
-                await interaction.channel.send(f"Please {question}\nType q to end your report\nQuestion number {iteration}/2")
+                await interaction.send(f"Please {question}\nType q to end your report\nQuestion number {iteration}/2")
 
             message = await self.bot.wait_for("message", timeout=560, check=lambda m: 
                 m.author == interaction.author
@@ -347,4 +347,4 @@ class OpenView(disnake.ui.View):
         bug_id = random.choice(self.bot.bugs)
 
         embed = EmbedFactory.ide_embed(self.ctx, bug_string.format(bug_id))
-        await interaction.channel.send(embed=embed)
+        await interaction.send(embed=embed)

@@ -15,16 +15,32 @@ class OpenIDEButton(disnake.ui.View):
     def __init__(self, ctx: commands.Context, file: File, bot_message):
         self.ctx = ctx
         self.file = file
+        self.clicked = False
         self.bot_message = bot_message
-        super().__init__()
+        super().__init__(timeout=15)
+
+    async def on_timeout(self) -> None:
+        if not self.clicked:
+            await self.bot_message.delete()
 
     @disnake.ui.button(style=disnake.ButtonStyle.green, label="Open in IDE", row=1)
-    async def callback(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
+    async def callback(
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+    ):  
+        self.clicked = True
         await interaction.response.defer()
+
         description = await get_info(self.file)
         embed = EmbedFactory.ide_embed(self.ctx, description)
+
+
         view = FileView(self.ctx, self.file, self.bot_message)
         view.bot_message = await self.bot_message.edit(content=None, embed=embed, view=view)
+
+        if self.ctx.channel not in self.ctx.bot.active_commands:
+            self.ctx.bot.active_commands[self.ctx.channel] = {}
+        self.ctx.bot.active_commands[self.ctx.channel][self.ctx.author] = view.bot_message.id
+
 
 
 class Listeners(commands.Cog):
@@ -34,6 +50,15 @@ class Listeners(commands.Cog):
 
     @commands.Cog.listener("on_message")
     async def github_url(self, message: disnake.Message) -> None:
+        if (
+            message.channel in self.bot.active_commands
+            and message.author in self.bot.active_commands[message.channel]
+        ):
+            return 
+
+        if message.author.bot:
+            return
+
         ctx = await self.bot.get_context(message)
         regex = re.compile(
             r"https://github\.com/(?P<repo>[a-zA-Z0-9-]+/[\w.-]+)/blob/(?P<branch>\w*)/(?P<path>[^#>]+)"
@@ -67,8 +92,18 @@ class Listeners(commands.Cog):
 
     @commands.Cog.listener("on_message")
     async def file_detect(self, message: disnake.Message) -> Optional[disnake.Message]:
+        if (
+            message.channel in self.bot.active_commands
+            and message.author in self.bot.active_commands[message.channel]
+        ):
+            return 
+
+        if message.author.bot:
+            return
+
         if not message.attachments:
             return
+
         ctx = await self.bot.get_context(message)
         real_file = message.attachments[0]
         try:
@@ -79,7 +114,7 @@ class Listeners(commands.Cog):
             )
 
         except UnicodeDecodeError:
-            pass
+            return
 
         _message = await ctx.send("Resolving file integrity...")
         await asyncio.sleep(2)
@@ -87,6 +122,15 @@ class Listeners(commands.Cog):
 
     @commands.Cog.listener("on_message")
     async def codeblock_detect(self, message: disnake.Message) -> Optional[disnake.Message]:
+        if (
+            message.channel in self.bot.active_commands
+            and message.author in self.bot.active_commands[message.channel]
+        ):
+            return 
+
+        if message.author.bot:
+            return
+            
         if not (
             message.content.startswith('```') and 
             message.content.endswith('```')

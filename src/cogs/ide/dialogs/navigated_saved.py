@@ -65,7 +65,7 @@ class DefaultButtons(disnake.ui.View):
         if not path:
             if self.SUDO:
                 await directory.delete()
-            return await interaction.channel.send(
+            return await interaction.send(
                 f"{directory.content} doesn't exist!", delete_after=15
             )
         self.path = f"{self.path}{path.name[8:]}/"
@@ -118,7 +118,7 @@ class DefaultButtons(disnake.ui.View):
         if len(folder.content) >= 12:
             if self.SUDO:
                 await folder.delete()
-            return await interaction.channel.send(
+            return await interaction.send(
                 "The folder name has to be less than 12 characters long!",
                 delete_after=15,
             )
@@ -200,7 +200,7 @@ class DefaultButtons(disnake.ui.View):
 
         if file_:
             await self.bot.engine.delete(file_)
-            return await interaction.channel.send(f"Successfully deleted {file_.name}")
+            return await interaction.send(f"Successfully deleted {file_.name}")
 
         folder = directory.content
         if directory.content.endswith("/"):
@@ -215,9 +215,9 @@ class DefaultButtons(disnake.ui.View):
 
         if folder_:
             await self.bot.engine.delete(folder_)
-            await interaction.channel.send(f"Successfully deleted {file_.name}")
+            await interaction.send(f"Successfully deleted {file_.name}")
 
-        await interaction.channel.send(
+        await interaction.send(
             f"I could not find a folder or file called {directory.content} in {self.path}"
         )
 
@@ -256,7 +256,7 @@ class OpenFromSaved(DefaultButtons):
         if not file_model:
             if self.SUDO:
                 await filename.delete()
-            return await interaction.channel.send(
+            return await interaction.send(
                 f"{filename.content} doesnt exist!", delete_after=15
             )
 
