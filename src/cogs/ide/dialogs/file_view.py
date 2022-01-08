@@ -15,11 +15,32 @@ from src.utils import (
 from .edit_view import EditView
 
 
+class BackButton(disnake.ui.View):
+    def __init__(self, parent):
+        self.parent = parent
+        super().__init__()
+
+    @disnake.ui.button(label="Back")
+    async def back_button(self, button: disnake.ui.Button, interaction: disnake.MessageInteraction):
+        await interaction.response.defer()
+        real_file = await self.parent.file.to_real()
+        description = (
+            f"Opened file: {real_file.filename}"
+            f"\nType: {real_file.content_type}"
+            f"\nSize: {real_file.size // 1000} KB ({real_file.size:,} bytes)"
+        )
+        embed = EmbedFactory.ide_embed(self.parent.ctx, description)
+        await self.parent.bot_message.edit(
+            embed=embed,
+            view=FileView(self.parent.ctx, self.parent.file, self.parent.bot_message)
+        )
+
+
 class FileView(disnake.ui.View):
     async def interaction_check(self, interaction: disnake.MessageInteraction) -> bool:
         return (
-            interaction.author == self.ctx.author
-            and interaction.channel == self.ctx.channel
+                interaction.author == self.ctx.author
+                and interaction.channel == self.ctx.channel
         )
 
     async def on_timeout(self) -> None:
@@ -47,7 +68,7 @@ class FileView(disnake.ui.View):
 
     @disnake.ui.button(label="Read", style=disnake.ButtonStyle.green)
     async def first_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.defer()
         content = add_lines(self.file.content)
@@ -55,7 +76,7 @@ class FileView(disnake.ui.View):
             embed = EmbedFactory.ide_embed(
                 self.ctx, "".join(content), format_=self.file.extension
             )
-            return await self.bot_message.edit(embed=embed)
+            return await self.bot_message.edit(embed=embed, view=BackButton(self))
 
         return await LinePaginator(
             interaction,
@@ -72,15 +93,15 @@ class FileView(disnake.ui.View):
 
     @disnake.ui.button(label="Run", style=disnake.ButtonStyle.green)
     async def second_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         content = self.file.content
         name = self.extension
 
         async with aiohttp.ClientSession() as session:
             async with session.post(
-                url="https://emkc.org/api/v1/piston/execute",
-                json={"language": name, "source": content},
+                    url="https://emkc.org/api/v1/piston/execute",
+                    json={"language": name, "source": content},
             ) as data:
 
                 try:
@@ -91,7 +112,7 @@ class FileView(disnake.ui.View):
                         "Something went wrong! Maybe the file is too long!",
                         delete_after=15,
                     )
-                    
+
                 if "message" in json and "runtime is unknown" in json["message"]:
                     await interaction.response.defer()
                     return await interaction.send(
@@ -121,7 +142,7 @@ class FileView(disnake.ui.View):
 
     @disnake.ui.button(label="Edit", style=disnake.ButtonStyle.green)
     async def third_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         import math
         await interaction.response.defer()
@@ -133,14 +154,14 @@ class FileView(disnake.ui.View):
                 "".join(content[:50]),
                 self.file.filename,
                 self.file.extension,
-                f"\n1/{math.ceil(len(content)/50)}"
+                f"\n1/{math.ceil(len(content) / 50)}"
             ),
             view=view,
         )
 
     @disnake.ui.button(label="Rename", style=disnake.ButtonStyle.green)
     async def rename_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.send_message(
             "What would you like the filename to be?", ephemeral=True
@@ -148,7 +169,7 @@ class FileView(disnake.ui.View):
         filename = await self.bot.wait_for(
             "message",
             check=lambda m: self.ctx.author == m.author
-            and m.channel == self.ctx.channel,
+                            and m.channel == self.ctx.channel,
         )
         if len(filename.content) > 12:
             if self.SUDO:
@@ -168,7 +189,7 @@ class FileView(disnake.ui.View):
 
     @disnake.ui.button(label="Move", style=disnake.ButtonStyle.red, row=1)
     async def move_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         await interaction.response.send_message(
             f"What channel would you like to move this ide to? Send the channel #. Like {interaction.channel.mention}",
@@ -176,11 +197,11 @@ class FileView(disnake.ui.View):
         )
         num = 0
         while not (
-            channel := await self.bot.wait_for(
-                "message",
-                check=lambda m: self.ctx.author == m.author
-                and m.channel == self.ctx.channel,
-            )
+                channel := await self.bot.wait_for(
+                    "message",
+                    check=lambda m: self.ctx.author == m.author
+                                    and m.channel == self.ctx.channel,
+                )
         ).channel_mentions:
             if self.SUDO:
                 await channel.delete()
@@ -193,11 +214,11 @@ class FileView(disnake.ui.View):
             await interaction.send(
                 "That is not a valid channel id!", delete_after=15
             )
-        real_channel = channel.channel_mentions[0] 
+        real_channel = channel.channel_mentions[0]
 
         if (
-            real_channel in self.bot.active_commands
-            and self.ctx.author in self.bot.active_commands[ real_channel]
+                real_channel in self.bot.active_commands
+                and self.ctx.author in self.bot.active_commands[real_channel]
         ):
             return await interaction.send("You already have an active IDE in that channel!")
 
@@ -209,11 +230,11 @@ class FileView(disnake.ui.View):
             embed=embed, view=view
         )
 
-        if  real_channel not in self.bot.active_commands:
-            self.bot.active_commands[ real_channel] = {}
+        if real_channel not in self.bot.active_commands:
+            self.bot.active_commands[real_channel] = {}
         self.bot.active_commands[real_channel][self.ctx.author] = view.bot_message.id
 
-        #disabling current
+        # disabling current
         for child in self.children:
             if isinstance(child, disnake.ui.Button):
                 child.disabled = True
@@ -229,7 +250,7 @@ class FileView(disnake.ui.View):
 
     @disnake.ui.button(label="Back", style=disnake.ButtonStyle.red, row=1)
     async def back_button(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         from .open_view import OpenView
 

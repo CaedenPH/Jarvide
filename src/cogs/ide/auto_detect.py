@@ -25,22 +25,19 @@ class OpenIDEButton(disnake.ui.View):
 
     @disnake.ui.button(style=disnake.ButtonStyle.green, label="Open in IDE", row=1)
     async def callback(
-        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
-    ):  
+            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+    ):
         self.clicked = True
         await interaction.response.defer()
 
         description = await get_info(self.file)
         embed = EmbedFactory.ide_embed(self.ctx, description)
 
-
         view = FileView(self.ctx, self.file, self.bot_message)
         view.bot_message = await self.bot_message.edit(content=None, embed=embed, view=view)
-
         if self.ctx.channel not in self.ctx.bot.active_commands:
             self.ctx.bot.active_commands[self.ctx.channel] = {}
         self.ctx.bot.active_commands[self.ctx.channel][self.ctx.author] = view.bot_message.id
-
 
 
 class Listeners(commands.Cog):
@@ -51,10 +48,10 @@ class Listeners(commands.Cog):
     @commands.Cog.listener("on_message")
     async def github_url(self, message: disnake.Message) -> None:
         if (
-            message.channel in self.bot.active_commands
-            and message.author in self.bot.active_commands[message.channel]
+                message.channel in self.bot.active_commands
+                and message.author in self.bot.active_commands[message.channel]
         ):
-            return 
+            return
 
         if message.author.bot:
             return
@@ -93,15 +90,12 @@ class Listeners(commands.Cog):
     @commands.Cog.listener("on_message")
     async def file_detect(self, message: disnake.Message) -> Optional[disnake.Message]:
         if (
-            message.channel in self.bot.active_commands
-            and message.author in self.bot.active_commands[message.channel]
+                message.channel in self.bot.active_commands
+                and message.author in self.bot.active_commands[message.channel]
         ):
-            return 
-
-        if message.author.bot:
             return
 
-        if not message.attachments:
+        if message.author.bot or not message.attachments:
             return
 
         ctx = await self.bot.get_context(message)
@@ -123,17 +117,17 @@ class Listeners(commands.Cog):
     @commands.Cog.listener("on_message")
     async def codeblock_detect(self, message: disnake.Message) -> Optional[disnake.Message]:
         if (
-            message.channel in self.bot.active_commands
-            and message.author in self.bot.active_commands[message.channel]
+                message.channel in self.bot.active_commands
+                and message.author in self.bot.active_commands[message.channel]
         ):
-            return 
+            return
 
         if message.author.bot:
             return
-            
+
         if not (
-            message.content.startswith('```') and 
-            message.content.endswith('```')
+                message.content.startswith('```') and
+                message.content.endswith('```')
         ):
             return
 
