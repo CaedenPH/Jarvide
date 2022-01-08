@@ -1,3 +1,4 @@
+from json.decoder import JSONDecodeError
 import disnake
 import aiohttp
 
@@ -39,7 +40,7 @@ class FileView(disnake.ui.View):
         self.file = file_
         self.SUDO = self.ctx.me.guild_permissions.manage_messages
         self.bot_message = bot_message
-        self.extension = None
+        self.extension = file_.extension
 
         self.add_item(ExitButton(ctx, bot_message, row=1))
         self.add_item(SaveButton(ctx, bot_message, file_, row=0))
@@ -82,17 +83,25 @@ class FileView(disnake.ui.View):
                 json={"language": name, "source": content},
             ) as data:
 
-                json = await data.json()
+                try:
+                    json = await data.json()
+                except JSONDecodeError:
+                    await interaction.response.defer()
+                    return await interaction.send(
+                        "Something went wrong! Maybe the file is too long!",
+                        delete_after=15,
+                    )
+                    
                 if "message" in json and "runtime is unknown" in json["message"]:
                     await interaction.response.defer()
-                    return await interaction.channel.send(
+                    return await interaction.send(
                         "This file has an invalid file extension and therefore I do not know what language to run it in! Try renaming your file",
                         delete_after=15,
                     )
 
                 if "output" not in json:
                     await interaction.response.defer()
-                    return await interaction.channel.send(
+                    return await interaction.send(
                         "Something went wrong! Maybe the file is too long!",
                         delete_after=15,
                     )
@@ -144,7 +153,7 @@ class FileView(disnake.ui.View):
         if len(filename.content) > 12:
             if self.SUDO:
                 await filename.delete()
-            return await interaction.channel.send(
+            return await interaction.send(
                 "That filename is too long! The maximum limit is 12 character"
             )
 
@@ -181,32 +190,42 @@ class FileView(disnake.ui.View):
                     self.ctx, "Nice try. You can't break this bot!"
                 )
                 return await self.bot_message.edit(embed=embed)
-            await interaction.channel.send(
+            await interaction.send(
                 "That is not a valid channel id!", delete_after=15
             )
+        real_channel = channel.channel_mentions[0] 
+
+        if (
+            real_channel in self.bot.active_commands
+            and self.ctx.author in self.bot.active_commands[ real_channel]
+        ):
+            return await interaction.send("You already have an active IDE in that channel!")
 
         embed = EmbedFactory.ide_embed(self.ctx, await get_info(self.file))
+
+        self.ctx.channel = real_channel
         view = FileView(self.ctx, self.file)
-        view.bot_message = await channel.channel_mentions[0].send(
+        view.bot_message = await real_channel.send(
             embed=embed, view=view
         )
 
-        # for child in self.children:
-        #     if isinstance(child, disnake.ui.Button):
-        #         child.disabled = True
+        if  real_channel not in self.bot.active_commands:
+            self.bot.active_commands[ real_channel] = {}
+        self.bot.active_commands[real_channel][self.ctx.author] = view.bot_message.id
 
-        # embed = EmbedFactory.ide_embed(
-        #     self.ctx,
-        #     "Goodbye!"
-        # )
-        # await self.bot_message.edit(
-        #     view=self,
-        #     embed=embed
-        # )
+        #disabling current
+        for child in self.children:
+            if isinstance(child, disnake.ui.Button):
+                child.disabled = True
 
-        # TODO: fix
-
-        await ExitButton(self.ctx, self.bot_message).callback(interaction)
+        embed = EmbedFactory.ide_embed(
+            self.ctx,
+            "Goodbye!"
+        )
+        await self.bot_message.edit(
+            view=self,
+            embed=embed
+        )
 
     @disnake.ui.button(label="Back", style=disnake.ButtonStyle.red, row=1)
     async def back_button(

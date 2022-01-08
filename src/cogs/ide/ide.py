@@ -14,16 +14,16 @@ class Ide(commands.Cog):
         self.bot = bot
         self.emoji = "📂"
         self.short_help_doc = "IDE commands , to view and edit your code"
-        self.active_commands = {}
+        self.bot.active_commands = {}
         self.check_activity.start()
 
     @tasks.loop(seconds=1)
     async def check_activity(self):
-        for channel in copy.copy(self.active_commands):
-            for user in copy.copy(self.active_commands[channel]):
-                message = self.bot.get_message(self.active_commands[channel][user])
+        for channel in copy.copy(self.bot.active_commands):
+            for user in copy.copy(self.bot.active_commands[channel]):
+                message = self.bot.get_message(self.bot.active_commands[channel][user])
                 if not message:
-                    del self.active_commands[channel][user]
+                    del self.bot.active_commands[channel][user]
                     return
                 if all(
                     all(
@@ -34,7 +34,7 @@ class Ide(commands.Cog):
                     for child in message.components
                     if isinstance(child, disnake.ActionRow)
                 ):
-                    del self.active_commands[channel][user]
+                    del self.bot.active_commands[channel][user]
 
     @commands.command(
         help="""Have you used the linux commandline editor, nano? This discord text editor is like nano , and implements safe, reliable and fast file storing with editing and compiling technology. The database is secure and cannot be accessed or broken into by anyone, not even the core developers. You can upload or create files and these files would be saved into a filesystem which you can open at any time. If you have an open file you can compile it and run it (depending on the filetype). You can also edit the content and replace text. You can also pull and push to github depending on the file/folder you uploaded.""",
@@ -42,8 +42,8 @@ class Ide(commands.Cog):
     )
     async def ide(self, ctx: commands.Context) -> disnake.Message:
         if (
-            ctx.channel in self.active_commands
-            and ctx.author in self.active_commands[ctx.channel]
+            ctx.channel in self.bot.active_commands
+            and ctx.author in self.bot.active_commands[ctx.channel]
         ):
             return await ctx.send(
                 "You already have an open ide in this channel! Press the `exit` button to make a new one!",
@@ -57,9 +57,9 @@ class Ide(commands.Cog):
             view=view,
         )
 
-        if ctx.channel not in self.active_commands:
-            self.active_commands[ctx.channel] = {}
-        self.active_commands[ctx.channel][ctx.author] = view.bot_message.id
+        if ctx.channel not in self.bot.active_commands:
+            self.bot.active_commands[ctx.channel] = {}
+        self.bot.active_commands[ctx.channel][ctx.author] = view.bot_message.id
 
 
 def setup(bot: commands.Bot) -> None:

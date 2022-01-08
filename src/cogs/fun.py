@@ -1,7 +1,6 @@
 import asyncio
 import disnake
 import random
-import typing
 
 from disnake import MessageInteraction, Embed, Member, ButtonStyle
 from disnake.ui import View, button, Button
@@ -19,6 +18,11 @@ class Casino(View):
         for child in self.children:
             self.remove_item(child)
             self.stop()
+
+    async def interaction_check(self, interaction: MessageInteraction) -> bool:
+        if interaction.author != self.author:
+            return False
+        return True
 
     @button(
         label="Play",
@@ -43,7 +47,7 @@ class Casino(View):
                 title="Casino Machine $", description=f"```{''.join(result)}```"
                 ).set_footer(text="Get Three numbers in a row for a PRIZE")
             await interaction.edit_original_message(embed=ints, view=self)
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.2)
 
         self.retry.disabled = False
         self.exit.disabled = False
@@ -74,7 +78,7 @@ class Casino(View):
                 title="Casino Machine $", description=f"```{''.join(result)}```"
             ).set_footer(text="Get Three numbers in a row for a PRIZE")
             await interaction.edit_original_message(embed=ints, view=self)
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.2)
 
         self.retry.disabled = False
         self.exit.disabled = False
@@ -176,11 +180,11 @@ class Fun(Cog):
     @command()
     async def casino(self, ctx: Context) -> None:
         """Play the casino!"""
-        embed20 = Embed(title="Casino Machine $", description="```000```").set_footer(
+        embed = Embed(title="Casino Machine $", description="```000```").set_footer(
             text="Get Three numbers in a row for a PRIZE"
         )
 
-        await ctx.send(embed=embed20, view=Casino(ctx.author))
+        await ctx.send(embed=embed, view=Casino(ctx.author))
 
 
 def setup(bot: Bot) -> None:
