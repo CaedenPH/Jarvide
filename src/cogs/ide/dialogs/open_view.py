@@ -323,7 +323,7 @@ class OpenView(disnake.ui.View):
             else:
                 await interaction.send(f"Please {question}\nType q to end your report\nQuestion number {iteration}/2")
 
-            message = await self.bot.wait_for("message", timeout=560, check=lambda m: 
+            message = await self.bot.wait_for("message", timeout=560, check=lambda m:
                 m.author == interaction.author
                 and m.channel == interaction.channel
                 and not self.is_exited,
