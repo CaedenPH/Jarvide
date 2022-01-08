@@ -3,6 +3,8 @@ import base64
 import disnake
 import re
 import asyncio
+import simpleeval
+import string
 
 from disnake.ext import commands
 from typing import Optional
@@ -153,6 +155,53 @@ class Listeners(commands.Cog):
         await asyncio.sleep(2)
         await _message.edit(content="Readable file found!", view=OpenIDEButton(ctx, file_, _message))
 
+    @commands.Cog.listener("on_message")
+    async def calc_detect(self, message: disnake.Message) -> Optional[disnake.Message]:
+        math_operations = ['+', '-', '/', '*', '(', ')']
 
+        # if not 'jarivde' in message.content and message.guild in remove_configs:
+        #     return
+        # TODO: config shit here
+
+        if not any(m in message.content for m in math_operations):
+            return 
+
+        if message.author.bot:
+            return
+
+        content = ''.join([
+            k 
+            for k in message.content
+            if (
+                k.isdigit()
+                or k in math_operations
+            )
+        ]).strip()
+        if not content:
+            return
+        
+        try:
+            result = simpleeval.simple_eval(content)
+        except:
+            return
+        
+        embed = disnake.Embed(
+            color=disnake.Color.green()
+        ).set_footer(
+            text="To disable this type jarvide removeconfig", 
+            icon_url=message.author.avatar.url
+        ).add_field(
+            name="I detected an expression!", 
+            value=f'```yaml\n"{content}"\n```', 
+            inline=False
+        ).add_field(
+            name="Result: ", 
+            value=f"```\n{result}\n```"
+        )
+        try:
+            await message.channel.send(embed=embed)
+        except disnake.HTTPException:
+            return
+        
 def setup(bot):
     bot.add_cog(Listeners(bot))

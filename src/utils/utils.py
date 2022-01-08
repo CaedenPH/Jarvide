@@ -8,14 +8,13 @@ import random
 from disnake.ext import commands
 from typing import TypeVar, Type
 
-
-j = "<:j_:929074874012536925>"
-a = "<:a_:929075107144544276>"
-r = "<:r_:929075409318985868>"
-v = "<:v_:929075430911266906>"
-i = "<:i_:929075454927863829>"
-d = "<:d_:929075589409824799>"
-e = "<:e_:929075607533396058>"
+j = "<:j:929451908354174996>"
+a = "<:a:929451929577328640>"
+r = "<:r:929451948715945984>"
+v = "<:v:929451995302096996>"
+i = "<:i:929452020245606430>"
+d = "<:d:929452037362552923>"
+e = "<:e_:929452059483328592>"
 
 def add_lines(content: str) -> list[str]:
     enumerated = list(enumerate(content.split("\n"), 1))
@@ -183,7 +182,7 @@ def main_embed(bot):
     return (
         disnake.Embed(
             color=0x489CC4,
-            title=f"{j}{a}{r}{v}{i}{d}{e}",
+            title=f"{j}{a}{r}{v}{i}{d}{e}", 
             description=f"""
     **Hello, my name is Jarvide.**
 
