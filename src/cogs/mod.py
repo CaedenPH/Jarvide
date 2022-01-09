@@ -25,10 +25,10 @@ class Mod(commands.Cog):
         reason: str = "No Reason Provided.",
     ):
         """ Kicks a member from a guild """
-        
+
         if member == ctx.author:
             return await ctx.send(f"{ctx.author.mention}, you cannot kick yourself!")
-        
+
         if ctx.author.top_role.position <= member.top_role.position and ctx.author.id != ctx.guild.owner_id: # checking role hierarchy
             return await ctx.send(f'{ctx.author} You can\'t kick **{member.name}**')
 
@@ -40,7 +40,7 @@ class Mod(commands.Cog):
             try :
                 await member.kick(reason=reason)
                 await ctx.send(f"{member.mention} has been kicked.")
-            except disnake.Forbidden: 
+            except disnake.Forbidden:
                 await ctx.reply(f'Unable to kick **{member.name}** due to role hierarchy')
         else:
             await ctx.send(f"Cancelled kick.")
@@ -86,7 +86,7 @@ class Mod(commands.Cog):
         reason="No Reason Provided.",
     ):
         """ unbans someone from a guild """
-       
+
         if user == ctx.author:
             return await ctx.send(f"{ctx.author.mention}, you cannot unban yourself!")
 
@@ -115,7 +115,7 @@ class Mod(commands.Cog):
                 f"{ctx.author.mention}, please provide a number to set the slowmode to."
             )
         else:
-            await channel.edit(slowmode_delay=slowmode)
+            await channel.slowmode_delay(slowmode)
             return await ctx.send(
                 f"I've set the channel slowmode to {slowmode} {'seconds' if slowmode > 1 else 'second'}."
                 )
@@ -164,7 +164,7 @@ class Mod(commands.Cog):
         """ Add a role to the user"""
         if ctx.author.top_role.position <= role.position:
             return await ctx.send('You cannot add that role to someone!')
-        try : 
+        try :
             await member.add_roles(role,reason=reason)
         except :
             return await ctx.send(f'Unable to add that role to {member.name}')
