@@ -108,19 +108,13 @@ class Mod(commands.Cog):
     @commands.bot_has_permissions(manage_channels=True)
     async def slowmode(self, ctx: Context, channel: disnake.TextChannel = None, slowmode: int = None):
         """Change/disable slowmode in a channel"""
-
-        if not channel:
-            channel = ctx.channel
-
-        if slowmode == 0:
-            await channel.slowmode_delay(slowmode)
+        channel = channel or ctx.channel
+        if not slowmode:
             return await ctx.send(
-                f"{ctx.author.mention}, removed slowmode in {channel.mention}."
-            )
-        elif not slowmode:
-            return await cxt.send(f"{ctx.author.mention}, please provide a number to set the slowmode as.")
+                f"{ctx.author.mention}, please provide a number to set the slowmode as."
+                )
         else:
-            await channel.slowmode_delay(slowmode)
+            await channel.edit(slowmode=slowmode)
             return await ctx.send(
                 f"I've set the channel slowmode to {slowmode} {'seconds' if slowmode > 1 else 'second'}."
                 )
