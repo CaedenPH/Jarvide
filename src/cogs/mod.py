@@ -111,11 +111,14 @@ class Mod(commands.Cog):
 
         if not channel:
             channel = ctx.channel
-            
+
         if not slowmode:
             return await ctx.send(
                 f"{ctx.author.mention}, please provide a number to set the slowmode as."
                 )
+        if slowmode == 0:
+            slowmode = None
+
         else:
             await channel.edit(slowmode_delay=slowmode)
             return await ctx.send(
