@@ -1,3 +1,6 @@
+import traceback
+import random
+
 from disnake.ext.commands import (
     Cog,
     Bot,
@@ -18,9 +21,7 @@ from disnake.ext.commands import (
     NoPrivateMessage,
 )
 from disnake import Embed, Color
-import traceback, datetime, random
-
-from disnake.ext.commands.errors import CommandNotFound, RoleNotFound
+from disnake.ext.commands.errors import CommandNotFound, RoleNotFound, NotOwner
 
 
 class ErrorHandler(Cog):
