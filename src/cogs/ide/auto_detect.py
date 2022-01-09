@@ -14,6 +14,12 @@ from src.cogs.ide.dialogs import FileView
 
 
 class OpenIDEButton(disnake.ui.View):
+    async def interaction_check(self, interaction: disnake.MessageInteraction) -> bool:
+        return (
+                interaction.author == self.ctx.author
+                and interaction.channel == self.ctx.channel
+        )
+        
     def __init__(self, ctx: commands.Context, file: File, bot_message):
         self.ctx = ctx
         self.file = file
@@ -151,18 +157,23 @@ class Listeners(commands.Cog):
 
     @commands.Cog.listener("on_message")
     async def calc_detect(self, message: disnake.Message) -> Optional[disnake.Message]:
-        math_operations = ['+', '-', '/', '*', '(', ')']
+        math_operations = ['+', '-', '/', '*', '(', ')', '^', '÷', '.']
 
         # if not 'jarivde' in message.content and message.guild in remove_configs:
         #     return
         # TODO: config shit here
 
         if not any(m in message.content for m in math_operations):
-            return 
-
+            return  
         if message.author.bot:
             return
 
+        for key, value in {
+            '^': '**',
+            '÷': '/',
+            }.items():
+            message.content = message.content.replace(key, value)
+            
         content = ''.join([
             k 
             for k in message.content
@@ -171,12 +182,8 @@ class Listeners(commands.Cog):
                 or k in math_operations
             )
         ]).strip()
+
         if not content:
-            return
-        
-        try:
-            result = simpleeval.simple_eval(content)
-        except:
             return
         
         embed = disnake.Embed(
@@ -188,10 +195,24 @@ class Listeners(commands.Cog):
             name="I detected an expression!", 
             value=f'```yaml\n"{content}"\n```', 
             inline=False
-        ).add_field(
-            name="Result: ", 
-            value=f"```\n{result}\n```"
         )
+
+        try:
+            result = simpleeval.simple_eval(content)
+            embed.add_field(
+                name="Result: ", 
+                value=f"```\n{result}\n```"
+            )
+            
+        except ZeroDivisionError:
+            embed.add_field(
+                name="Wow...you make me question my existance",
+                value="```yaml\nImagine you have zero cookies and you split them amongst 0 friends, how many cookies does each friend get? See, it doesn't make sense and Cookie Monster is sad that there are no cookies, and you are sad that you have no friends.```"
+            )
+        except:
+            return
+        
+        
         try:
             await message.channel.send(embed=embed)
         except disnake.HTTPException:
