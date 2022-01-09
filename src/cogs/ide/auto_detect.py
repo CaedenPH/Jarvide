@@ -93,13 +93,13 @@ class Listeners(commands.Cog):
 
         _message = await ctx.send("Fetching github link...")
         await asyncio.sleep(2)
-        await _message.edit(content="Working github link found!", view=OpenIDEButton(ctx, file_, _message))
+        await _message.edit(content="Working github link found!\nTo disable this type `jarvide removeconfig github`", view=OpenIDEButton(ctx, file_, _message))
 
     @commands.Cog.listener("on_message")
     async def file_detect(self, message: disnake.Message) -> Optional[disnake.Message]:
         if (
-                message.channel in self.bot.active_commands
-                and message.author in self.bot.active_commands[message.channel]
+            message.channel in self.bot.active_commands
+            and message.author in self.bot.active_commands[message.channel]
         ):
             return
 
@@ -120,7 +120,7 @@ class Listeners(commands.Cog):
 
         _message = await ctx.send("Resolving file integrity...")
         await asyncio.sleep(2)
-        await _message.edit(content="Readable file found!", view=OpenIDEButton(ctx, file_, _message))
+        await _message.edit(content="Readable file found\nTo disable this type `jarvide removeconfig file`!", view=OpenIDEButton(ctx, file_, _message))
 
     @commands.Cog.listener("on_message")
     async def codeblock_detect(self, message: disnake.Message) -> Optional[disnake.Message]:
@@ -151,37 +151,36 @@ class Listeners(commands.Cog):
         except UnicodeDecodeError:
             return
 
-        _message = await ctx.send("Resolving file integrity...")
+        _message = await ctx.send("Resolving code block integrity...")
         await asyncio.sleep(2)
-        await _message.edit(content="Readable file found!", view=OpenIDEButton(ctx, file_, _message))
+        await _message.edit(content="Valid codeblock found!\nTo disable this type `jarvide removeconfig codeblock`", view=OpenIDEButton(ctx, file_, _message))
 
     @commands.Cog.listener("on_message")
     async def calc_detect(self, message: disnake.Message) -> Optional[disnake.Message]:
-        math_operations = ['+', '-', '/', '*', '(', ')', '^', '÷', '.']
+        operators = r"\+\-\/\*\(\)\^\÷"
 
         # if not 'jarivde' in message.content and message.guild in remove_configs:
         #     return
         # TODO: config shit here
 
-        if not any(m in message.content for m in math_operations):
-            return  
+        if not any(m in message.content for m in operators):
+            return 
         if message.author.bot:
             return
 
         for key, value in {
             '^': '**',
             '÷': '/',
+            ' ': '',
             }.items():
             message.content = message.content.replace(key, value)
-            
-        content = ''.join([
-            k 
-            for k in message.content
-            if (
-                k.isdigit()
-                or k in math_operations
-            )
-        ]).strip()
+
+        try:
+            regex = re.compile(rf"(([{operators}])?(\d+)([{operators}])?(\d?)([{operators}])?)+")
+            match = re.match(regex, message.content)
+            content = ''.join(match.group())
+        except AttributeError:
+            return 
 
         if not content:
             return
@@ -189,7 +188,7 @@ class Listeners(commands.Cog):
         embed = disnake.Embed(
             color=disnake.Color.green()
         ).set_footer(
-            text="To disable this type jarvide removeconfig", 
+            text="To disable this type jarvide removeconfig calc", 
             icon_url=message.author.avatar.url
         ).add_field(
             name="I detected an expression!", 

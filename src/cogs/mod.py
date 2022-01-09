@@ -119,7 +119,7 @@ class Mod(commands.Cog):
                 f"I've set the channel slowmode to {slowmode} {'seconds' if slowmode > 1 else 'second'}."
                 )
 
-    @commands.command(aliases=["mute", "to", "silence", "shush"])
+    @commands.command(aliases=["mute", "silence", "shush"])
     @commands.guild_only()
     @commands.has_permissions(moderate_members=True)
     @commands.bot_has_permissions(moderate_members=True)
