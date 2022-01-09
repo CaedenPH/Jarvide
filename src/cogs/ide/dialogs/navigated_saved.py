@@ -322,3 +322,15 @@ class SaveFile(DefaultButtons):
         await self.bot_message.edit(
             embed=embed, view=FileView(self.ctx, self.file, self.bot_message)
         )
+
+    @disnake.ui.button(label="Back", style=disnake.ButtonStyle.red, row=2)
+    async def back_button(
+            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+    ):
+        from .open_view import FileView
+
+        await interaction.response.defer()
+        await self.bot_message.edit(
+            embed=EmbedFactory.ide_embed(self.ctx, "File open: No file currently open"),
+            view=FileView(self.ctx, self.file, self.bot_message),
+        )

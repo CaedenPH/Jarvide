@@ -1,6 +1,7 @@
 from json.decoder import JSONDecodeError
 import disnake
 import aiohttp
+import io
 
 from src.utils import (
     File,
@@ -158,6 +159,13 @@ class FileView(disnake.ui.View):
             ),
             view=view,
         )
+    
+    @disnake.ui.button(label="Download", style=disnake.ButtonStyle.red, row=1)
+    async def download_button(
+            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+    ):
+        f = io.StringIO(self.file.content)
+        await interaction.response.send_message(file=disnake.File(fp=f, filename=self.file.filename))  # type: ignore
 
     @disnake.ui.button(label="Rename", style=disnake.ButtonStyle.green)
     async def rename_button(

@@ -1,11 +1,21 @@
 from disnake import Member, Color, Embed
 import aiohttp
 import async_cse
+import random
 
 
 from ..HIDDEN import KEY
 from disnake.ext.commands import Cog, BucketType, CooldownMapping, Bot, Context, command
+from ..utils.utils import EmbedFactory
 
+bug_string = """
+Thank you for reporting a bug! My team will work hard to solve this!
+
+
+My team might want to ask you some questions, so we would love you to keep dm's open or join our support server! 
+[ discord.gg/mtue4UnWaA ]
+-----------------------------------------------------------
+Bug id: {}"""
 
 class Misc(
     Cog,
@@ -116,7 +126,37 @@ class Misc(
     async def triggered(self, ctx: Context, *, member: Member = None):
         """Trigger'ify a profile picture!"""
         await self.overlay(ctx, "triggered", member)
+        
+    @command(aliases=['bug', 'broken'])
+    async def report(self, ctx: Context):
+        responses = []
 
+        for iteration, question in enumerate(['sum up your report in less than 10 words', 'explain your report. present as detailed of a description as you can provide, including button clicks, errors shown (if any), file open, and intention'], start=1):
+            await ctx.send(f"Please {question}\nType q to end your report\nQuestion number {iteration}/2")
+
+            message = await self.bot.wait_for("message", timeout=560, check=lambda m:
+                m.author == ctx.author
+                and m.channel == ctx.channel
+            )
+            if message.content.lower() == 'q':
+                return
+
+            responses.append(message.content)
+
+        embed = Embed(
+            title=responses[0],
+            description="```yaml\n" + responses[0] + "```",
+            timestamp=ctx.message.created_at
+        ).set_author(
+            name=f"From {ctx.author.name}",
+            icon_url=ctx.author.avatar.url
+        )
+
+        await self.bot.report_channel.send(embed=embed)
+        bug_id = random.choice(self.bot.bugs)
+
+        embed = EmbedFactory.ide_embed(ctx, bug_string.format(bug_id))
+        await ctx.send(embed=embed)
 
 def setup(bot: Bot) -> None:
     bot.add_cog(Misc(bot))
