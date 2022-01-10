@@ -1,8 +1,9 @@
 import aiohttp
+import asyncio
 import base64
 import disnake
+import math
 import re
-import asyncio
 import simpleeval
 
 from disnake.ext import commands
@@ -10,6 +11,19 @@ from typing import Optional
 
 from src.utils.utils import File, get_info, EmbedFactory
 from src.cogs.ide.dialogs import FileView
+
+functions = {
+    "sqrt": lambda x: math.sqrt(x),
+    "sin": lambda x: math.sin(x),
+    "cos": lambda x: math.cos(x),
+    "tan": lambda x: math.tan(x),
+    "ceil": lambda x: math.ceil(x),
+    "floor": lambda x: math.floor(x),
+    "sinh": lambda x: math.sinh(x),
+    "cosh": lambda x: math.cosh(x),
+    "tanh": lambda x: math.tanh(x),
+    "abs": lambda x: math.fabs(x)
+}
 
 
 class OpenIDEButton(disnake.ui.View):
@@ -181,9 +195,10 @@ class Listeners(commands.Cog):
         try:
             def parse(_match):
                 return _match.group().replace("(", "*(")
-
             message.content = re.sub(re.compile(r"\d\("), parse, message.content)  # type: ignore
-            regex = re.compile(rf"([{operators}]+)?(\d+[{operators}]+)*(\d+)([{operators}]+)?")
+            regex = re.compile(
+                rf"({'|'.join(list(functions.keys()))})?([{operators}]+)?(\d+[{operators}]+)*(\d+)([{operators}]+)?"
+            )
             match = re.search(regex, message.content)
             content = ''.join(match.group())
             if not any(m in content for m in operators) or not content:
@@ -202,7 +217,7 @@ class Listeners(commands.Cog):
         )
 
         try:
-            result = simpleeval.simple_eval(content)
+            result = simpleeval.simple_eval(content, functions=functions)
             embed.add_field(
                 name="Result: ", 
                 value=f"```\n{result}\n```"
