@@ -16,6 +16,7 @@ i = "<:i:929452020245606430>"
 d = "<:d:929452037362552923>"
 e = "<:e_:929452059483328592>"
 
+
 def add_lines(content: str) -> list[str]:
     enumerated = list(enumerate(content.split("\n"), 1))
     lines = []

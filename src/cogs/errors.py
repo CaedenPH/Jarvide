@@ -4,12 +4,10 @@ import random
 from disnake.ext.commands import (
     Cog,
     Bot,
-    Context,
     BotMissingPermissions,
     MissingPermissions,
     MissingRole,
     DisabledCommand,
-    NotOwner,
     ChannelNotFound,
     MemberNotFound,
     UserNotFound,
@@ -173,7 +171,6 @@ class ErrorHandler(Cog):
                 "An unexpected error occurred! Reporting this to my developer..."
             )
             await self.bot.error_channel.send(
-                # type: ignore
                 f"```yaml\n{''.join(traceback.format_exception(error, error, error.__traceback__))}\n```"
             )
             raise error

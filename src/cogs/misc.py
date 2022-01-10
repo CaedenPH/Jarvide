@@ -17,6 +17,7 @@ My team might want to ask you some questions, so we would love you to keep dm's 
 -----------------------------------------------------------
 Bug id: {}"""
 
+
 class Misc(
     Cog,
     command_attrs={"cooldown": CooldownMapping.from_cooldown(1, 3.5, BucketType.user)},
@@ -157,6 +158,7 @@ class Misc(
 
         embed = EmbedFactory.ide_embed(ctx, bug_string.format(bug_id))
         await ctx.send(embed=embed)
+
 
 def setup(bot: Bot) -> None:
     bot.add_cog(Misc(bot))
