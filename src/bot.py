@@ -2,11 +2,12 @@ import os
 import string
 import copy
 import typing
-from disnake import Message
+
+from disnake import Message, AllowedMentions, Intents
 from disnake.ext.commands import Bot
-from disnake import Intents
 from motor.motor_asyncio import AsyncIOMotorClient
 from odmantic import AIOEngine
+
 from src.utils.utils import main_embed
 from .HIDDEN import TOKEN, MONGO_URI
 
@@ -38,6 +39,7 @@ class Jarvide(Bot):
             strip_after_prefix=True,
             help_command=None,  # type: ignore
             intents=Intents.all(),
+            allowed_mentions=AllowedMentions(everyone=False, roles=False)
         )
         self.engine = AIOEngine(AsyncIOMotorClient(MONGO_URI))
         self.send_guild = None
