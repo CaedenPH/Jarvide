@@ -65,10 +65,11 @@ class Listeners(commands.Cog):
 
         ctx = await self.bot.get_context(message)
         regex = re.compile(
-            r"https://github\.com/(?P<repo>[a-zA-Z0-9-]+/[\w.-]+)/blob/(?P<branch>\w*)/(?P<path>[^#>]+)"
+            r"https://github\.com/(?P<repo>[a-zA-Z0-9-]+/[\w.-]+)/blob/(?P<branch>\w+)"
+            r"/(?P<path>[^#>]+)#?L?(?P<linestart>\d+)?-?L?(?P<lineend>\d+)?"
         )
         try:
-            repo, branch, path = re.findall(regex, message.content)[0]
+            repo, branch, path, start, end = re.findall(regex, message.content)[0]
         except IndexError:
             return
         await message.edit(suppress=True)
@@ -88,6 +89,10 @@ class Listeners(commands.Cog):
                     return
             else:
                 content = base64.b64decode(json["content"]).decode("utf-8")
+        if start and end:
+            content = "\n".join(content.splitlines()[int(start)-1:int(end)])
+        elif start and not end:
+            content = content.splitlines()[int(start)-1]
         file_ = File(content=content, filename=path.split("/")[-1], bot=self.bot)
 
         _message = await ctx.send("Fetching github link...")
@@ -207,6 +212,8 @@ class Listeners(commands.Cog):
             )
         except simpleeval.FeatureNotAvailable:
             return await message.channel.send("That syntax is not available currently, sorry!")
+        except SyntaxError:
+            return
         try:
             await message.channel.send(embed=embed)
         except disnake.HTTPException:

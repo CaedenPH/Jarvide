@@ -123,10 +123,11 @@ class OpenView(disnake.ui.View):
             )
             await url.edit(suppress=True)
             regex = re.compile(
-                r"https://github\.com/(?P<repo>[a-zA-Z0-9-]+/[\w.-]+)/blob/(?P<branch>\w*)/(?P<path>[^#>]+)"
+                r"https://github\.com/(?P<repo>[a-zA-Z0-9-]+/[\w.-]+)/blob/(?P<branch>\w+)"
+                r"/(?P<path>[^#>]+)#?L?(?P<linestart>\d+)?-?L?(?P<lineend>\d+)?"
             )
             try:
-                repo, branch, path = re.findall(regex, url.content)[0]
+                repo, branch, path, start, end = re.findall(regex, url.content)[0]
                 break
             except IndexError:
                 await interaction.send(
@@ -158,9 +159,12 @@ class OpenView(disnake.ui.View):
                 content = json["content"]
 
                 content = base64.b64decode(content).decode("utf-8")
-
+        if start and end:
+            content = "\n".join(content.splitlines()[int(start)-1:int(end)])
+        elif start and not end:
+            content = content.splitlines()[int(start)-1]
         await url.add_reaction(THUMBS_UP)
-        file_ = File(content=content, filename=url.content.split("/")[-1], bot=self.bot)
+        file_ = File(content=content, filename=path.split("/")[-1], bot=self.bot)
         description = await get_info(file_)
         embed = EmbedFactory.ide_embed(self.ctx, description)
         await self.bot_message.edit(
