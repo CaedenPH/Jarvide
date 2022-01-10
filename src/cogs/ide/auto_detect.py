@@ -162,7 +162,6 @@ class Listeners(commands.Cog):
     @commands.Cog.listener("on_message")
     async def calc_detect(self, message: disnake.Message) -> Optional[disnake.Message]:
         operators = r"\+\-\/\*\(\)\^\÷"
-
         # if not 'jarivde' in message.content and message.guild in remove_configs:
         #     return
         # TODO: config shit here
@@ -180,13 +179,13 @@ class Listeners(commands.Cog):
             message.content = message.content.replace(key, value)
 
         try:
-            regex = re.compile(rf"(([{operators}])?(\d+)([{operators}])?(\d?)([{operators}])?)+")
+            regex = re.compile(rf"([{operators}]+)?(\d+[{operators}]+)*(\d+)([{operators}]+)?")
             match = re.search(regex, message.content)
             content = ''.join(match.group())
+            if not any(m in content for m in operators) or not content:
+                return
         except AttributeError:
             return 
-        if not content:
-            return
         embed = disnake.Embed(
             color=disnake.Color.green()
         ).set_footer(
