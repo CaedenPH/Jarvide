@@ -177,14 +177,12 @@ class Listeners(commands.Cog):
 
         try:
             regex = re.compile(rf"(([{operators}])?(\d+)([{operators}])?(\d?)([{operators}])?)+")
-            match = re.match(regex, message.content)
+            match = re.search(regex, message.content)
             content = ''.join(match.group())
         except AttributeError:
             return 
-
         if not content:
             return
-        
         embed = disnake.Embed(
             color=disnake.Color.green()
         ).set_footer(
@@ -208,14 +206,13 @@ class Listeners(commands.Cog):
                 name="Wow...you make me question my existance",
                 value="```yaml\nImagine you have zero cookies and you split them amongst 0 friends, how many cookies does each friend get? See, it doesn't make sense and Cookie Monster is sad that there are no cookies, and you are sad that you have no friends.```"
             )
-        except:
-            return
-        
-        
+        except simpleeval.FeatureNotAvailable:
+            await message.channel.send("That syntax is not available currently, sorry!")
         try:
             await message.channel.send(embed=embed)
         except disnake.HTTPException:
             return
-        
+
+
 def setup(bot):
     bot.add_cog(Listeners(bot))
