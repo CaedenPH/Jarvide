@@ -23,7 +23,6 @@ class Config(
         self.bot = bot
         self.ignore = True
         self.detectors = ['calc', 'github', 'file', 'codeblock']
-    
 
     @command(aliases=[
         'removeconfig',
@@ -52,10 +51,6 @@ class Config(
             return await ctx.send(
                 embed=embed
             )
-            
-
-
-
 
     @command(aliases=[
         'createconfig',
@@ -69,7 +64,7 @@ class Config(
     )
     async def create_config(self, ctx: Context, auto: str = None): 
         ...
-        #TODO: data
+        # TODO: data
 
 
 def setup(bot: Bot):

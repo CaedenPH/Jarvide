@@ -1,5 +1,4 @@
 from collections.abc import Mapping
-
 from disnake import utils, Embed, Color, MessageInteraction, SelectOption
 from disnake.ui import View, Select
 from disnake.ext.commands import Bot, Command, Cog, command, HelpCommand, Context, Group
