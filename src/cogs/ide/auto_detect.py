@@ -1,8 +1,9 @@
 import aiohttp
+import asyncio
 import base64
 import disnake
+import math
 import re
-import asyncio
 import simpleeval
 
 from disnake.ext import commands
@@ -10,6 +11,19 @@ from typing import Optional
 
 from src.utils.utils import File, get_info, EmbedFactory
 from src.cogs.ide.dialogs import FileView
+
+functions = {
+    "sqrt": lambda x: math.sqrt(x),
+    "sin": lambda x: math.sin(x),
+    "cos": lambda x: math.cos(x),
+    "tan": lambda x: math.tan(x),
+    "ceil": lambda x: math.ceil(x),
+    "floor": lambda x: math.floor(x),
+    "sinh": lambda x: math.sinh(x),
+    "cosh": lambda x: math.cosh(x),
+    "tanh": lambda x: math.tanh(x),
+    "abs": lambda x: math.fabs(x)
+}
 
 
 class OpenIDEButton(disnake.ui.View):
@@ -69,10 +83,11 @@ class Listeners(commands.Cog):
 
         ctx = await self.bot.get_context(message)
         regex = re.compile(
-            r"https://github\.com/(?P<repo>[a-zA-Z0-9-]+/[\w.-]+)/blob/(?P<branch>\w*)/(?P<path>[^#>]+)"
+            r"https://github\.com/(?P<repo>[a-zA-Z0-9-]+/[\w.-]+)/blob/(?P<branch>\w+)"
+            r"/(?P<path>[^#>]+)#?L?(?P<linestart>\d+)?-?L?(?P<lineend>\d+)?"
         )
         try:
-            repo, branch, path = re.findall(regex, message.content)[0]
+            repo, branch, path, start, end = re.findall(regex, message.content)[0]
         except IndexError:
             return
         await message.edit(suppress=True)
@@ -92,6 +107,10 @@ class Listeners(commands.Cog):
                     return
             else:
                 content = base64.b64decode(json["content"]).decode("utf-8")
+        if start and end:
+            content = "\n".join(content.splitlines()[int(start)-1:int(end)])
+        elif start and not end:
+            content = content.splitlines()[int(start)-1]
         file_ = File(content=content, filename=path.split("/")[-1], bot=self.bot)
 
         _message = await ctx.send("Fetching github link...")
@@ -169,7 +188,6 @@ class Listeners(commands.Cog):
     @commands.Cog.listener("on_message")
     async def calc_detect(self, message: disnake.Message) -> Optional[disnake.Message]:
         operators = r"\+\-\/\*\(\)\^\÷"
-
         # if not 'jarivde' in message.content and message.guild in remove_configs:
         #     return
         # TODO: config shit here
@@ -187,42 +205,45 @@ class Listeners(commands.Cog):
             message.content = message.content.replace(key, value)
 
         try:
+            def parse(_match):
+                return _match.group().replace("(", "*(")
+            message.content = re.sub(re.compile(r"\d\("), parse, message.content)  # type: ignore
             regex = re.compile(
-                rf"(([{operators}])?(\d+)([{operators}])?(\d?)([{operators}])?)+"
+                rf"({'|'.join(list(functions.keys()))})?([{operators}]+)?(\d+[{operators}]+)*(\d+)([{operators}]+)?"
             )
-            match = re.match(regex, message.content)
-            content = "".join(match.group())
+            match = re.search(regex, message.content)
+            content = ''.join(match.group())
+            if not any(m in content for m in operators) or not content:
+                return
         except AttributeError:
-            return
-
-        if not content:
-            return
-
-        embed = (
-            disnake.Embed(color=disnake.Color.green())
-            .set_footer(
-                text="To disable this type jarvide removeconfig calc",
-                icon_url=message.author.avatar.url,
-            )
-            .add_field(
-                name="I detected an expression!",
-                value=f'```yaml\n"{content}"\n```',
-                inline=False,
-            )
+            return 
+        embed = disnake.Embed(
+            color=disnake.Color.green()
+        ).set_footer(
+            text="To disable this type jarvide removeconfig calc", 
+            icon_url=message.author.avatar.url
+        ).add_field(
+            name="I detected an expression!", 
+            value=f'```yaml\n"{content}"\n```', 
+            inline=False
         )
 
         try:
-            result = simpleeval.simple_eval(content)
-            embed.add_field(name="Result: ", value=f"```\n{result}\n```")
-
+            result = simpleeval.simple_eval(content, functions=functions)
+            embed.add_field(
+                name="Result: ", 
+                value=f"```\n{result}\n```"
+            )
+            
         except ZeroDivisionError:
             embed.add_field(
                 name="Wow...you make me question my existance",
                 value="```yaml\nImagine you have zero cookies and you split them amongst 0 friends, how many cookies does each friend get? See, it doesn't make sense and Cookie Monster is sad that there are no cookies, and you are sad that you have no friends.```",
             )
-        except:
+        except simpleeval.FeatureNotAvailable:
+            return await message.channel.send("That syntax is not available currently, sorry!")
+        except SyntaxError:
             return
-
         try:
             await message.channel.send(embed=embed)
         except disnake.HTTPException:
