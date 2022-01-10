@@ -1,13 +1,13 @@
 import disnake
 
 from disnake.ext.commands import (
-    Cog, 
-    BucketType, 
+    Cog,
+    BucketType,
     CooldownMapping,
-    Bot, 
-    Context, 
+    Bot,
+    Context,
     command,
-    has_permissions
+    has_permissions,
 )
 
 
@@ -22,54 +22,44 @@ class Config(
     def __init__(self, bot) -> None:
         self.bot = bot
         self.ignore = True
-        self.detectors = ['calc', 'github', 'file', 'codeblock']
-    
+        self.detectors = ["calc", "github", "file", "codeblock"]
 
-    @command(aliases=[
-        'removeconfig',
-        'rconfig',
-        'deleteconfig',
-        'delconfig',
-        'removeconf',
-    ])
+    @command(
+        aliases=[
+            "removeconfig",
+            "rconfig",
+            "deleteconfig",
+            "delconfig",
+            "removeconf",
+        ]
+    )
     @has_permissions(
         manage_guild=True,
     )
-    async def remove_config(self, ctx: Context, auto: str = None): 
-        embed = disnake.Embed(
-            title="Uh oh",
-            description=""
-        ).set_author(
-            name=ctx.author.name,
-            icon_url=ctx.author.avatar.url
+    async def remove_config(self, ctx: Context, auto: str = None):
+        embed = disnake.Embed(title="Uh oh", description="").set_author(
+            name=ctx.author.name, icon_url=ctx.author.avatar.url
         )
 
+        if not (auto in self.detectors):
+            embed.description = f"There are no autodetections called: {auto}\nThe current detections are `{', '.join(self.detectors)}`"
+            return await ctx.send(embed=embed)
 
-        if not (
-            auto in self.detectors
-        ):
-            embed.description = f"There are no autodetections called: {auto}\nThe current detections are `{', '.join(self.detectors)}`"    
-            return await ctx.send(
-                embed=embed
-            )
-            
-
-
-
-
-    @command(aliases=[
-        'createconfig',
-        'newconfig',
-        'makeconfig',
-        'cconfig',
-        'createconf',
-    ])
+    @command(
+        aliases=[
+            "createconfig",
+            "newconfig",
+            "makeconfig",
+            "cconfig",
+            "createconf",
+        ]
+    )
     @has_permissions(
         manage_guild=True,
     )
-    async def create_config(self, ctx: Context, auto: str = None): 
+    async def create_config(self, ctx: Context, auto: str = None):
         ...
-        #TODO: data
+        # TODO: data
 
 
 def setup(bot: Bot):

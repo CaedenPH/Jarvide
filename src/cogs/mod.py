@@ -24,13 +24,16 @@ class Mod(commands.Cog):
         member: disnake.Member,
         reason: str = "No Reason Provided.",
     ):
-        """ Kicks a member from a guild """
+        """Kicks a member from a guild"""
 
         if member == ctx.author:
             return await ctx.send(f"{ctx.author.mention}, you cannot kick yourself!")
 
-        if ctx.author.top_role.position <= member.top_role.position and ctx.author.id != ctx.guild.owner_id: # checking role hierarchy
-            return await ctx.send(f'{ctx.author} You can\'t kick **{member.name}**')
+        if (
+            ctx.author.top_role.position <= member.top_role.position
+            and ctx.author.id != ctx.guild.owner_id
+        ):  # checking role hierarchy
+            return await ctx.send(f"{ctx.author} You can't kick **{member.name}**")
 
         choice = await prompt(
             ctx, message="Are you sure you want to kick this user?", timeout=60
@@ -41,9 +44,11 @@ class Mod(commands.Cog):
                 await member.kick(reason=reason)
                 await ctx.send(f"{member.mention} has been kicked.")
             except disnake.Forbidden:
-                await ctx.reply(f'Unable to kick **{member.name}** due to role hierarchy')
+                await ctx.reply(
+                    f"Unable to kick **{member.name}** due to role hierarchy"
+                )
         else:
-            await ctx.send(f"Cancelled kick.")
+            await ctx.send("Cancelled kick.")
 
     @commands.command()
     @commands.guild_only()
@@ -78,7 +83,7 @@ class Mod(commands.Cog):
                     f"Unable to ban **{member.name}** due to role hierarchy"
                 )
         else:
-            await ctx.send(f"Cancelled ban.")
+            await ctx.send("Cancelled ban.")
 
     @commands.command()
     @commands.guild_only()
@@ -90,14 +95,14 @@ class Mod(commands.Cog):
         user: typing.Union[disnake.User, int],
         reason="No Reason Provided.",
     ):
-        """ unbans someone from a guild """
+        """unbans someone from a guild"""
 
         if user == ctx.author:
             return await ctx.send(f"{ctx.author.mention}, you cannot unban yourself!")
 
         choice = await prompt(
             ctx, message="Are you sure you want to unban this user?", timeout=60
-            )
+        )
         if choice:
             await ctx.guild.unban(
                 user if isinstance(user, disnake.User) else disnake.Object(user),
@@ -122,7 +127,7 @@ class Mod(commands.Cog):
         if not slowmode:
             return await ctx.send(
                 f"{ctx.author.mention}, please provide a number to set the slowmode as."
-                )
+            )
         if slowmode == 0:
             slowmode = None
 
@@ -159,8 +164,8 @@ class Mod(commands.Cog):
     @commands.guild_only()
     @commands.has_permissions(moderate_members=True)
     @commands.bot_has_permissions(moderate_members=True)
-    async def unmute(self, ctx, member: disnake.Member, *, reason = None):
-        """ unmutes a member (or removes timeout) from a guild """
+    async def unmute(self, ctx, member: disnake.Member, *, reason=None):
+        """unmutes a member (or removes timeout) from a guild"""
         await member.timeout(until=None, reason=reason)
         await ctx.send(
             embed=disnake.Embed(
@@ -182,11 +187,11 @@ class Mod(commands.Cog):
     ):
         """Add a role to the user"""
         if ctx.author.top_role.position <= role.position:
-            return await ctx.send('You cannot add that role to someone!')
-        try :
-            await member.add_roles(role,reason=reason)
-        except :
-            return await ctx.send(f'Unable to add that role to {member.name}')
+            return await ctx.send("You cannot add that role to someone!")
+        try:
+            await member.add_roles(role, reason=reason)
+        except:
+            return await ctx.send(f"Unable to add that role to {member.name}")
         await ctx.send(f"I gave the {role} role to {member.name}.")
 
 

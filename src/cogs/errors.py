@@ -103,7 +103,7 @@ class ErrorHandler(Cog):
             await ctx.send(
                 embed=Embed(
                     description=f"I am missing `{self.perms_parser(error.missing_permissions)}` permissions required to run the command",
-                    color=Color.red()
+                    color=Color.red(),
                 )
             )
         elif isinstance(error, MemberNotFound):
@@ -152,7 +152,7 @@ class ErrorHandler(Cog):
             )
         elif isinstance(error, DisabledCommand):
             await ctx.send(
-                embed=Embed(description=f"This command is disabled", color=Color.red())
+                embed=Embed(description="This command is disabled", color=Color.red())
             )
         elif isinstance(error, PrivateMessageOnly):
             await ctx.send(

@@ -12,7 +12,7 @@ bug_string = """
 Thank you for reporting a bug! My team will work hard to solve this!
 
 
-My team might want to ask you some questions, so we would love you to keep dm's open or join our support server! 
+My team might want to ask you some questions, so we would love you to keep dm's open or join our support server!
 [ discord.gg/mtue4UnWaA ]
 -----------------------------------------------------------
 Bug id: {}"""
@@ -60,7 +60,7 @@ class OpenView(disnake.ui.View):
                 "message",
                 check=lambda m: self.ctx.author == m.author
                 and m.channel == self.ctx.channel
-                and not self.is_exited
+                and not self.is_exited,
             )
         ).attachments:
             if self.SUDO:
@@ -119,7 +119,7 @@ class OpenView(disnake.ui.View):
                 "message",
                 check=lambda m: self.ctx.author == m.author
                 and m.channel == self.ctx.channel
-                and not self.is_exited
+                and not self.is_exited,
             )
             await url.edit(suppress=True)
             regex = re.compile(
@@ -149,7 +149,8 @@ class OpenView(disnake.ui.View):
                 content = (await b.text()).replace("`", "`​")
                 if content == "404: Not Found":
                     await interaction.send(
-                        "Invalid github link, please exit the IDE and try again.", delete_after=5
+                        "Invalid github link, please exit the IDE and try again.",
+                        delete_after=5,
                     )
                     if self.SUDO:
                         await url.delete()
@@ -192,7 +193,7 @@ class OpenView(disnake.ui.View):
                 "message",
                 check=lambda m: self.ctx.author == m.author
                 and m.channel == self.ctx.channel
-                and not self.is_exited
+                and not self.is_exited,
             )
         ).content.startswith(PASTE_URLS):
             if self.SUDO:
@@ -216,7 +217,7 @@ class OpenView(disnake.ui.View):
             "message",
             check=lambda m: self.ctx.author == m.author
             and m.channel == self.ctx.channel
-            and not self.is_exited
+            and not self.is_exited,
         )
 
         await filename.add_reaction(THUMBS_UP)
@@ -250,7 +251,7 @@ class OpenView(disnake.ui.View):
             "message",
             check=lambda m: self.ctx.author == m.author
             and m.channel == self.ctx.channel
-            and not self.is_exited
+            and not self.is_exited,
         )
         if len(filename.content) > 12:
             if self.SUDO:
@@ -290,7 +291,7 @@ class OpenView(disnake.ui.View):
 
         embed = EmbedFactory.ide_embed(
             self.ctx,
-            f"Open a file from saved:\nCurrent directory: /",
+            "Open a file from saved:\nCurrent directory: /",
         )
         await interaction.response.defer()
         await self.bot_message.edit(
@@ -314,21 +315,34 @@ class OpenView(disnake.ui.View):
     @disnake.ui.button(label="Report a bug", style=disnake.ButtonStyle.blurple, row=1)
     async def report_button(
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
-    ):  
+    ):
         responses = []
 
-        for iteration, question in enumerate(['sum up your report in less than 10 words', 'explain your report. present as detailed of a description as you can provide, including button clicks, errors shown (if any), file open, and intention'], start=1):
+        for iteration, question in enumerate(
+            [
+                "sum up your report in less than 10 words",
+                "explain your report. present as detailed of a description as you can provide, including button clicks, errors shown (if any), file open, and intention",
+            ],
+            start=1,
+        ):
             if iteration == 1:
-                await interaction.response.send_message(f"Please {question}\nType q to end your report\nQuestion number {iteration}/2", ephemeral=True)
+                await interaction.response.send_message(
+                    f"Please {question}\nType q to end your report\nQuestion number {iteration}/2",
+                    ephemeral=True,
+                )
             else:
-                await interaction.send(f"Please {question}\nType q to end your report\nQuestion number {iteration}/2")
+                await interaction.send(
+                    f"Please {question}\nType q to end your report\nQuestion number {iteration}/2"
+                )
 
-            message = await self.bot.wait_for("message", timeout=560, check=lambda m:
-                m.author == interaction.author
+            message = await self.bot.wait_for(
+                "message",
+                timeout=560,
+                check=lambda m: m.author == interaction.author
                 and m.channel == interaction.channel
                 and not self.is_exited,
             )
-            if message.content.lower() == 'q':
+            if message.content.lower() == "q":
                 if self.SUDO:
                     await message.delete()
                 return
@@ -337,10 +351,10 @@ class OpenView(disnake.ui.View):
         embed = disnake.Embed(
             title=responses[0],
             description="```yaml\n" + responses[0] + "```",
-            timestamp=interaction.message.created_at
+            timestamp=interaction.message.created_at,
         ).set_author(
             name=f"From {interaction.author.name}",
-            icon_url=interaction.author.avatar.url
+            icon_url=interaction.author.avatar.url,
         )
 
         await self.bot.report_channel.send(embed=embed)
