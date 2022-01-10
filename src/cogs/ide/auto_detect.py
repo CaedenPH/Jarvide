@@ -22,7 +22,7 @@ functions = {
     "sinh": lambda x: math.sinh(x),
     "cosh": lambda x: math.cosh(x),
     "tanh": lambda x: math.tanh(x),
-    "abs": lambda x: math.fabs(x)
+    "abs": lambda x: math.fabs(x),
 }
 
 
@@ -108,9 +108,9 @@ class Listeners(commands.Cog):
             else:
                 content = base64.b64decode(json["content"]).decode("utf-8")
         if start and end:
-            content = "\n".join(content.splitlines()[int(start)-1:int(end)])
+            content = "\n".join(content.splitlines()[int(start) - 1 : int(end)])
         elif start and not end:
-            content = content.splitlines()[int(start)-1]
+            content = content.splitlines()[int(start) - 1]
         file_ = File(content=content, filename=path.split("/")[-1], bot=self.bot)
 
         _message = await ctx.send("Fetching github link...")
@@ -205,43 +205,46 @@ class Listeners(commands.Cog):
             message.content = message.content.replace(key, value)
 
         try:
+
             def parse(_match):
                 return _match.group().replace("(", "*(")
+
             message.content = re.sub(re.compile(r"\d\("), parse, message.content)  # type: ignore
             regex = re.compile(
                 rf"({'|'.join(list(functions.keys()))})?([{operators}]+)?(\d+[{operators}]+)*(\d+)([{operators}]+)?"
             )
             match = re.search(regex, message.content)
-            content = ''.join(match.group())
+            content = "".join(match.group())
             if not any(m in content for m in operators) or not content:
                 return
         except AttributeError:
-            return 
-        embed = disnake.Embed(
-            color=disnake.Color.green()
-        ).set_footer(
-            text="To disable this type jarvide removeconfig calc", 
-            icon_url=message.author.avatar.url
-        ).add_field(
-            name="I detected an expression!", 
-            value=f'```yaml\n"{content}"\n```', 
-            inline=False
+            return
+        embed = (
+            disnake.Embed(color=disnake.Color.green())
+            .set_footer(
+                text="To disable this type jarvide removeconfig calc",
+                icon_url=message.author.avatar.url,
+            )
+            .add_field(
+                name="I detected an expression!",
+                value=f'```yaml\n"{content}"\n```',
+                inline=False,
+            )
         )
 
         try:
             result = simpleeval.simple_eval(content, functions=functions)
-            embed.add_field(
-                name="Result: ", 
-                value=f"```\n{result}\n```"
-            )
-            
+            embed.add_field(name="Result: ", value=f"```\n{result}\n```")
+
         except ZeroDivisionError:
             embed.add_field(
                 name="Wow...you make me question my existance",
                 value="```yaml\nImagine you have zero cookies and you split them amongst 0 friends, how many cookies does each friend get? See, it doesn't make sense and Cookie Monster is sad that there are no cookies, and you are sad that you have no friends.```",
             )
         except simpleeval.FeatureNotAvailable:
-            return await message.channel.send("That syntax is not available currently, sorry!")
+            return await message.channel.send(
+                "That syntax is not available currently, sorry!"
+            )
         except SyntaxError:
             return
         try:

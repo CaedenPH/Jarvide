@@ -1,1 +1,2 @@
-BASE_URL = url_for_api
+BASE_URL = url_for_api 
+# will be used when creating connections to API

@@ -107,7 +107,7 @@ class Fun(Cog):
         self.emoji = "🍿"
         self.short_help_doc = "Fun commands to play around with!"
 
-    @command(aliases=['gaymeter', 'gaypercent'])
+    @command(aliases=["gaymeter", "gaypercent"])
     async def howgay(self, ctx, member: Member = None) -> None:
         """Shows how gay you are."""
         member = member or ctx.author
@@ -121,7 +121,7 @@ class Fun(Cog):
 
         await ctx.send(f"{member.mention} is {random.randint(1, 100)}% cute!")
 
-    @command(aliases=['pick', 'random'])
+    @command(aliases=["pick", "random"])
     async def choose(self, ctx: Context, *arguments):
         """Chooses between multiple choices."""
 
@@ -160,14 +160,14 @@ class Fun(Cog):
 
         await ctx.send(embed=embed2)
 
-    @command(aliases=['howsimp'])
+    @command(aliases=["howsimp"])
     async def simpmeter(self, ctx: Context, member: Member = None) -> None:
         """Shows how much of a simp you are."""
         member = member or ctx.author
 
         await ctx.send(f"{member.mention} is {random.randint(1, 100)}% a simp!")
 
-    @command(aliases=['howlongpp', 'pplength'])
+    @command(aliases=["howlongpp", "pplength"])
     async def ppmeter(self, ctx: Context, member: Member = None) -> None:
         """Shows your how long is your pp."""
         member = member or ctx.author

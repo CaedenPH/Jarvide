@@ -40,7 +40,7 @@ class Jarvide(Bot):
             strip_after_prefix=True,
             help_command=None,  # type: ignore
             intents=Intents.all(),
-            allowed_mentions=AllowedMentions(everyone=False, roles=False)
+            allowed_mentions=AllowedMentions(everyone=False, roles=False),
         )
         self.engine = AIOEngine(AsyncIOMotorClient(MONGO_URI))
         self.send_guild = None
