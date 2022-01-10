@@ -191,11 +191,13 @@ def main_embed(bot):
     + My TOS can be located [here](https://github.com/CaedenPH/Jarvide/blob/main/TOS.md)
     + My privacy policy can be located [here](https://github.com/CaedenPH/Jarvide/blob/main/PrivacyPolicy.md)
             """,
-        ).set_image(
+        )
+        .set_image(
             url="https://media.discordapp.net/attachments/926115595307614252/927951464725377034/big.png?width=1440"
-                "&height=453 "
-        ).set_author(
-            name="Jarvide",
-            icon_url=bot.user.avatar.url
-        ).set_footer(text="Jarvide's data is completely secure, so you shouldn't worry about data loss!")
+            "&height=453 "
+        )
+        .set_author(name="Jarvide", icon_url=bot.user.avatar.url)
+        .set_footer(
+            text="Jarvide's data is completely secure, so you shouldn't worry about data loss!"
+        )
     )

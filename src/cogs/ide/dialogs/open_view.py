@@ -143,7 +143,8 @@ class OpenView(disnake.ui.View):
                 content = (await b.text()).replace("`", "`​")
                 if content == "404: Not Found":
                     await interaction.channel.send(
-                        "Invalid github link, please exit the IDE and try again.", delete_after=5
+                        "Invalid github link, please exit the IDE and try again.",
+                        delete_after=5,
                     )
                     if self.SUDO:
                         await url.delete()

@@ -4,6 +4,10 @@ import string
 import copy
 import typing
 import traceback
+import asyncpg
+import asyncio
+import os
+from dotenv import find_dotenv, load_dotenv
 
 from disnake import Message
 from disnake.ext.commands import (
@@ -27,6 +31,9 @@ from odmantic import AIOEngine
 
 from src.utils.utils import main_embed
 from .HIDDEN import TOKEN, MONGO_URI
+
+URL = os.getenv("POSTGRES_URL")
+
 
 REMOVE_WORDS = [
     "what",
@@ -56,6 +63,7 @@ class Jarvide(Bot):
         self.send_guild = None
         self.error_channel = None
         self.server_message = None
+        asyncio.create_task(self.create_db_pool)
 
     def setup(self) -> None:
         for filename in os.listdir("./src/cogs"):
@@ -68,6 +76,14 @@ class Jarvide(Bot):
     def run(self) -> None:
         self.setup()
         super().run(TOKEN, reconnect=True)
+
+    async def create_db_pool(self):
+        """
+        creates a database pool
+        ---
+        Arguments -> None
+        """
+        self.pg = await asyncpg.create_pool(dsn=URL)
 
     async def on_message(self, original_message: Message) -> typing.Optional[Message]:
         if original_message.content in [f"<@!{self.user.id}>", f"<@{self.user.id}>"]:

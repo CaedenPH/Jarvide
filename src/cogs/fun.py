@@ -28,7 +28,7 @@ class Casino(View):
         self.play.disabled = True
         intsthink = Embed(title="Casino Machine $", description="```...```").set_footer(
             text="Get Three numbers in a row for a PRIZE"
-            )
+        )
 
         await interaction.response.edit_message(embed=intsthink, view=self)
 
@@ -39,7 +39,7 @@ class Casino(View):
             result.append(str(i))
             ints = Embed(
                 title="Casino Machine $", description=f"```{''.join(result)}```"
-                ).set_footer(text="Get Three numbers in a row for a PRIZE")
+            ).set_footer(text="Get Three numbers in a row for a PRIZE")
             await interaction.edit_original_message(embed=ints, view=self)
             await asyncio.sleep(1)
 

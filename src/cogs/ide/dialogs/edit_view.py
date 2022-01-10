@@ -41,17 +41,20 @@ def page_integrity(page: int, pages: int, method: Literal["back", "next"]):
 
 class RestoreVersion(disnake.ui.Button):
     def __init__(self, parent, row: int = 1):
-        super().__init__(style=disnake.ButtonStyle.green, label="Restore Version", row=row)
+        super().__init__(
+            style=disnake.ButtonStyle.green, label="Restore Version", row=row
+        )
         self.parent = parent
         self.bot_message = self.parent.parent.bot_message
         self.ctx = self.parent.parent.ctx
 
     async def callback(self, interaction: disnake.MessageInteraction):
         await interaction.response.send_message(
-            f"Successfully restored version!",
-            ephemeral=True
+            f"Successfully restored version!", ephemeral=True
         )
-        self.parent.parent.file.content = self.parent.parent.file.version_history[int(self.parent.values[0])]
+        self.parent.parent.file.content = self.parent.parent.file.version_history[
+            int(self.parent.values[0])
+        ]
         await self.parent.parent.parent.refresh_message(0)
 
 
@@ -63,7 +66,11 @@ class VersionHistorySelect(disnake.ui.Select):
         self.functions = {}
 
         for k in self.parent.parent.version_history.keys():
-            self.options.append(disnake.SelectOption(value=str(k), label=str(datetime.datetime.fromtimestamp(k))))
+            self.options.append(
+                disnake.SelectOption(
+                    value=str(k), label=str(datetime.datetime.fromtimestamp(k))
+                )
+            )
 
     async def callback(self, interaction: disnake.MessageInteraction):
         await interaction.response.defer()
@@ -100,7 +107,7 @@ class OptionSelect(disnake.ui.Select):
         self.options = [
             disnake.SelectOption(value="1", label="Find"),
             disnake.SelectOption(value="2", label="Go to page..."),
-            disnake.SelectOption(value="3", label="Version History")
+            disnake.SelectOption(value="3", label="Version History"),
         ]
 
     @staticmethod
@@ -116,7 +123,7 @@ class OptionSelect(disnake.ui.Select):
             "For advanced use look the available flags below:\n"
             "\t`-replace <*chars>`: Replace every occurrence with `chars`\n"
             "\n**Example:**\n```\n-replace foo\nbar\n```",
-            ephemeral=True
+            ephemeral=True,
         )
         content: str = (
             await self.ctx.bot.wait_for(
@@ -126,16 +133,22 @@ class OptionSelect(disnake.ui.Select):
             )
         ).content
         parser = ArgumentParser(add_help=False, allow_abbrev=False)
-        parser.add_argument("-replace", nargs='+')
-        args = self.suppress_argparse(parser.parse_args, content.splitlines()[0].split())
+        parser.add_argument("-replace", nargs="+")
+        args = self.suppress_argparse(
+            parser.parse_args, content.splitlines()[0].split()
+        )
         if content.startswith("-"):
             content = "".join(content.splitlines()[1:])
         if args:
             if args.replace:
                 self.parent.create_undo()
-                self.file.content = self.file.content.replace(content, "".join(args.replace))
+                self.file.content = self.file.content.replace(
+                    content, "".join(args.replace)
+                )
                 await self.parent.refresh_message(self.parent.page)
-                return await self.ctx.send(f"Replaced all `{content}` occurrences with `{''.join(args.replace)}`!")
+                return await self.ctx.send(
+                    f"Replaced all `{content}` occurrences with `{''.join(args.replace)}`!"
+                )
 
         try:
             page_occurrence = [
@@ -158,7 +171,7 @@ class OptionSelect(disnake.ui.Select):
                 check=lambda m: m.author == interaction.author
                 and m.channel == interaction.channel
                 and m.content.lower() in ("back", "next", "quit"),
-                timeout=60
+                timeout=60,
             )
             if message.content.lower() == "back":
                 if page_integrity(current_line, len(line_occurrence), "back"):
@@ -204,7 +217,9 @@ class OptionSelect(disnake.ui.Select):
         await self.parent.refresh_message(self.parent.page)
 
     async def version_history(self, interaction: disnake.MessageInteraction):
-        await interaction.response.send_message("Showing version history...", view=VersionHistoryView(self))
+        await interaction.response.send_message(
+            "Showing version history...", view=VersionHistoryView(self)
+        )
 
     async def callback(self, interaction: disnake.MessageInteraction):
         await interaction.message.delete()
@@ -256,7 +271,11 @@ class EditView(disnake.ui.View):
         self.SUDO = self.ctx.me.guild_permissions.manage_messages
 
         self.add_item(ExitButton(self.parent.ctx, self.parent.bot_message, row=3))
-        self.add_item(SaveButton(self.parent.ctx, self.parent.bot_message, self.parent.file, row=2))
+        self.add_item(
+            SaveButton(
+                self.parent.ctx, self.parent.bot_message, self.parent.file, row=2
+            )
+        )
 
     def create_undo(self):
         self.undo.append(self.file.content)
@@ -265,7 +284,7 @@ class EditView(disnake.ui.View):
     @property
     def pages(self):
         lines = add_lines(self.file.content)
-        return ["".join(lines[x: x + 50]) for x in range(0, len(lines), 50)]
+        return ["".join(lines[x : x + 50]) for x in range(0, len(lines), 50)]
 
     async def refresh_message(self, page):
         embed = self.bot_message.embeds[0]
@@ -388,7 +407,7 @@ class EditView(disnake.ui.View):
         embed = (
             disnake.Embed(
                 description=f"```{self.file.extension}\n"
-                            f"{''.join(self.pages[self.page])}\n```\nPage: {self.page + 1}/{len(self.pages)}",
+                f"{''.join(self.pages[self.page])}\n```\nPage: {self.page + 1}/{len(self.pages)}",
                 timestamp=self.ctx.message.created_at,
             )
             .set_author(
@@ -411,7 +430,7 @@ class EditView(disnake.ui.View):
         embed = (
             disnake.Embed(
                 description=f"```{self.file.extension}\n{''.join(self.pages[self.page])}"
-                            f"\n```\nPage: {self.page + 1}/{len(self.pages)}",
+                f"\n```\nPage: {self.page + 1}/{len(self.pages)}",
                 timestamp=self.ctx.message.created_at,
             )
             .set_author(

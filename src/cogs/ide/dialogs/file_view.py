@@ -115,6 +115,7 @@ class FileView(disnake.ui.View):
         self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         import math
+
         await interaction.response.defer()
         content: list[str] = add_lines(self.file.content)
         view = EditView(self)
@@ -124,7 +125,7 @@ class FileView(disnake.ui.View):
                 "".join(content[:50]),
                 self.file.filename,
                 self.file.extension,
-                f"\n1/{math.ceil(len(content)/50)}"
+                f"\n1/{math.ceil(len(content)/50)}",
             ),
             view=view,
         )
