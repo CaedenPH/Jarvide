@@ -8,6 +8,13 @@ import random
 from disnake.ext import commands
 from typing import TypeVar, Type
 
+j = "<:j:929451908354174996>"
+a = "<:a:929451929577328640>"
+r = "<:r:929451948715945984>"
+v = "<:v:929451995302096996>"
+i = "<:i:929452020245606430>"
+d = "<:d:929452037362552923>"
+e = "<:e_:929452059483328592>"
 
 def add_lines(content: str) -> list[str]:
     enumerated = list(enumerate(content.split("\n"), 1))
@@ -175,6 +182,7 @@ def main_embed(bot):
     return (
         disnake.Embed(
             color=0x489CC4,
+            title=f"{j}{a}{r}{v}{i}{d}{e}", 
             description=f"""
     **Hello, my name is Jarvide.**
 
@@ -194,10 +202,9 @@ def main_embed(bot):
         )
         .set_image(
             url="https://media.discordapp.net/attachments/926115595307614252/927951464725377034/big.png?width=1440"
-            "&height=453 "
-        )
-        .set_author(name="Jarvide", icon_url=bot.user.avatar.url)
-        .set_footer(
-            text="Jarvide's data is completely secure, so you shouldn't worry about data loss!"
-        )
+                "&height=453 "
+        ).set_author(
+            name=f"Hello!",
+            icon_url=bot.user.avatar.url
+        ).set_footer(text="Jarvide's data is completely secure, so you shouldn't worry about data loss!")
     )

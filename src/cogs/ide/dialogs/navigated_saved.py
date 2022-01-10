@@ -65,7 +65,7 @@ class DefaultButtons(disnake.ui.View):
         if not path:
             if self.SUDO:
                 await directory.delete()
-            return await interaction.channel.send(
+            return await interaction.send(
                 f"{directory.content} doesn't exist!", delete_after=15
             )
         self.path = f"{self.path}{path.name[8:]}/"
@@ -118,7 +118,7 @@ class DefaultButtons(disnake.ui.View):
         if len(folder.content) >= 12:
             if self.SUDO:
                 await folder.delete()
-            return await interaction.channel.send(
+            return await interaction.send(
                 "The folder name has to be less than 12 characters long!",
                 delete_after=15,
             )
@@ -200,7 +200,7 @@ class DefaultButtons(disnake.ui.View):
 
         if file_:
             await self.bot.engine.delete(file_)
-            return await interaction.channel.send(f"Successfully deleted {file_.name}")
+            return await interaction.send(f"Successfully deleted {file_.name}")
 
         folder = directory.content
         if directory.content.endswith("/"):
@@ -215,9 +215,9 @@ class DefaultButtons(disnake.ui.View):
 
         if folder_:
             await self.bot.engine.delete(folder_)
-            await interaction.channel.send(f"Successfully deleted {file_.name}")
+            await interaction.send(f"Successfully deleted {file_.name}")
 
-        await interaction.channel.send(
+        await interaction.send(
             f"I could not find a folder or file called {directory.content} in {self.path}"
         )
 
@@ -256,7 +256,7 @@ class OpenFromSaved(DefaultButtons):
         if not file_model:
             if self.SUDO:
                 await filename.delete()
-            return await interaction.channel.send(
+            return await interaction.send(
                 f"{filename.content} doesnt exist!", delete_after=15
             )
 
@@ -321,4 +321,16 @@ class SaveFile(DefaultButtons):
         await self.bot.engine.save(file_)
         await self.bot_message.edit(
             embed=embed, view=FileView(self.ctx, self.file, self.bot_message)
+        )
+
+    @disnake.ui.button(label="Back", style=disnake.ButtonStyle.red, row=2)
+    async def back_button(
+            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+    ):
+        from .open_view import FileView
+
+        await interaction.response.defer()
+        await self.bot_message.edit(
+            embed=EmbedFactory.ide_embed(self.ctx, "File open: No file currently open"),
+            view=FileView(self.ctx, self.file, self.bot_message),
         )

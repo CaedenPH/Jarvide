@@ -1,34 +1,12 @@
-import datetime
 import os
 import string
 import copy
 import typing
-import traceback
-import asyncpg
-import asyncio
-import os
-from dotenv import find_dotenv, load_dotenv
-
 from disnake import Message
-from disnake.ext.commands import (
-    Bot,
-    BotMissingPermissions,
-    MissingPermissions,
-    MissingRole,
-    DisabledCommand,
-    NotOwner,
-    ChannelNotFound,
-    MemberNotFound,
-    UserNotFound,
-    TooManyArguments,
-    CommandOnCooldown,
-    MissingRequiredArgument,
-    Context,
-)
+from disnake.ext.commands import Bot
 from disnake import Intents
 from motor.motor_asyncio import AsyncIOMotorClient
 from odmantic import AIOEngine
-
 from src.utils.utils import main_embed
 from .HIDDEN import TOKEN, MONGO_URI
 
@@ -47,6 +25,11 @@ REMOVE_WORDS = [
     "you",
     "is",
     "can",
+    "fuck",
+    "shit",
+    "me",
+    "this",
+    "mf",
 ]
 
 
@@ -63,7 +46,7 @@ class Jarvide(Bot):
         self.send_guild = None
         self.error_channel = None
         self.server_message = None
-        asyncio.create_task(self.create_db_pool)
+        self.bugs = range(10000, 100000)
 
     def setup(self) -> None:
         for filename in os.listdir("./src/cogs"):
@@ -71,47 +54,42 @@ class Jarvide(Bot):
                 self.load_extension(f"src.cogs.{filename[:-3]}")
 
         self.load_extension("src.cogs.ide.ide")
+        self.load_extension("src.cogs.ide.auto_detect")
         self.load_extension("jishaku")
 
     def run(self) -> None:
         self.setup()
         super().run(TOKEN, reconnect=True)
 
-    async def create_db_pool(self):
-        """
-        creates a database pool
-        ---
-        Arguments -> None
-        """
-        self.pg = await asyncpg.create_pool(dsn=URL)
-
     async def on_message(self, original_message: Message) -> typing.Optional[Message]:
-        if original_message.content in [f"<@!{self.user.id}>", f"<@{self.user.id}>"]:
-            return await original_message.channel.send(embed=main_embed(self))
+        new_msg = copy.copy(original_message)
+        new_message = copy.copy(original_message)
+        if new_msg.content in [f"<@!{self.user.id}>", f"<@{self.user.id}>"]:
+            return await new_msg.channel.send(embed=main_embed(self))
         if (
-            original_message.author.bot
-            or "jarvide" not in original_message.content.lower()
+            new_msg.author.bot
+            or "jarvide" not in new_msg.content.lower()
         ):
             return
-        original_message.content = " ".join(
+        new_msg.content = " ".join(
             [
                 word
-                for word in original_message.content.lower().split()
+                for word in new_msg.content.lower().split()
                 if not any(
                     word.startswith(censored_word) for censored_word in REMOVE_WORDS
                 )
             ]
         )
-        message_content = "".join(
+        new_msg.content = "".join(
             [
                 char
-                for char in original_message.content
-                if char not in string.punctuation
+                for char in new_msg.content
+                if (char in string.ascii_letters or char.isspace())
+
             ]
         )
-
         message_content = " ".join(
-            word for word in message_content.split() if word != "jarvide"
+            word for word in new_msg.content.split() if word != "jarvide"
         )
 
         list_of_commands = {c: [c.name, *c.aliases] for c in self.commands}
@@ -121,6 +99,7 @@ class Jarvide(Bot):
                 list_of_commands.items(),
             )
         )
+        commands_in_message.reverse()
         if len(commands_in_message) <= 0:
             return
 
@@ -129,24 +108,23 @@ class Jarvide(Bot):
                 commands_in_message = commands_in_message[::-1]
 
         cmd = commands_in_message[0][0]
-        ctx = await super().get_context(original_message)
+        ctx = await super().get_context(new_msg)
         user_authorized = await cmd.can_run(ctx)
-
         if user_authorized:
-            args = original_message.content.partition(
+            args = new_message.content.partition(
                 [
                     i
                     for i in list_of_commands[cmd]
-                    if i in original_message.content.lower()
+                    if i in new_msg.content.lower()
                 ][0]
             )[2]
-
-            new_message = copy.copy(original_message)
+            new_message = copy.copy(new_msg)
             new_message.content = f"jarvide {cmd.name}{args}"
             await super().process_commands(new_message)
 
     async def on_ready(self) -> None:
         self.send_guild = self.get_guild(926811692019626064)
+        self.report_channel = self.get_channel(928402833475264572)
         self.error_channel = self.get_channel(927596019468873748)
         channel = self.get_channel(927523239259942972)
         self.server_message = await channel.fetch_message(927971357738811463)
@@ -179,66 +157,4 @@ class Jarvide(Bot):
         except:
             pass  # TODO: see what errors it raises
 
-    @staticmethod
-    def underline(text, at, for_):
-        underline = (" " * at) + ("^" * for_)
-        return text + "\n" + underline
-
-    async def on_command_error(self, ctx: Context, error: Exception):
-        if isinstance(error, MissingRequiredArgument):
-            desc = f"{ctx.prefix} {ctx.command.name} {ctx.command.signature}"
-            inside = self.underline(
-                desc, desc.index(f"<{error.param.name}>"), len(f"<{error.param.name}>")
-            )
-            desc = f"You missed an argument: \n```\n{inside}\n```"
-            return await ctx.send(desc)
-
-        elif isinstance(error, DisabledCommand):
-            return await ctx.send("This command is disabled.")
-
-        elif isinstance(error, TooManyArguments):
-            return await ctx.send(
-                f"Too many arguments passed.\n```yaml\nusage: {ctx.prefix}"
-                f"{ctx.command.aliases.append(ctx.command.name)} {ctx.command.signature} "
-            )
-
-        elif isinstance(error, CommandOnCooldown):
-            return await ctx.send(
-                f"Command is on cooldown. Try again after {datetime.timedelta(seconds = error.retry_after)}"
-            )
-
-        elif isinstance(error, NotOwner):
-            return await ctx.send("Only my owner can use this command.")
-
-        elif isinstance(error, MemberNotFound):
-            return await ctx.send("No such member found.")
-
-        elif isinstance(error, UserNotFound):
-            return await ctx.send("No such user found.")
-
-        elif isinstance(error, ChannelNotFound):
-            return await ctx.send("No such channel found.")
-
-        elif isinstance(error, MissingPermissions):
-            return await ctx.send(
-                f'You need the {"".join(error.missing_permissions)} permissions to be able to do this.'
-            )
-
-        elif isinstance(error, BotMissingPermissions):
-            return await ctx.send(
-                f'I need the {"".join(error.missing_permissions)} permissions to be able to do this.'
-            )
-
-        elif isinstance(error, MissingRole):
-            return await ctx.send(
-                "You are missing a certain role to perform this command."
-            )
-        else:
-            await ctx.send(
-                "An unexpected error occurred! Reporting this to my developer..."
-            )
-            await self.error_channel.send(
-                # type: ignore
-                f"```yaml\n{''.join(traceback.format_exception(error, error, error.__traceback__))}\n```"
-            )
-            raise error
+    
