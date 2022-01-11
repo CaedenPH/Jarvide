@@ -245,6 +245,8 @@ class Listeners(commands.Cog):
             return await message.channel.send("That syntax is not available currently, sorry!")
         except SyntaxError:
             return
+        except simpleeval.NumberTooHigh:
+            return await message.channel.send("")
         try:
             await message.channel.send(embed=embed)
         except disnake.HTTPException:
