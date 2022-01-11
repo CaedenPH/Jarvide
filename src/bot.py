@@ -2,6 +2,7 @@ import os
 import string
 import copy
 import typing
+import aiohttp
 
 from disnake import Message, AllowedMentions, Intents
 from disnake.ext.commands import Bot
@@ -10,6 +11,7 @@ from odmantic import AIOEngine
 
 from src.utils.utils import main_embed
 from .HIDDEN import TOKEN, MONGO_URI
+from decouple import config
 
 REMOVE_WORDS = [
     "what",
@@ -46,7 +48,8 @@ class Jarvide(Bot):
         self.error_channel = None
         self.server_message = None
         self.bugs = range(10000, 100000)
-        self.session = None
+        self.http_session = aiohttp.ClientSession()
+        self.jarvide_api_session = aiohttp.ClientSession(headers={"Api-Key": config("JARVIDE_API_KEY")})
 
     def setup(self) -> None:
         for filename in os.listdir("./src/cogs"):

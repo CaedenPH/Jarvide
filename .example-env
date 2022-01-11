@@ -1,2 +1,4 @@
 BASE_URL = url_for_api 
 # will be used when creating connections to API
+JARVIDE_API_KEY = secret_api_key
+# will be used to authenticate for API
