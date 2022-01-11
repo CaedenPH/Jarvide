@@ -252,12 +252,12 @@ class TextPaginator(_AbstractPaginator):
         text = self.text
         while True:
             if len(text) != 0:
-                new_text = text[0 : self.breakpoint]
+                new_text = text[0: self.breakpoint]
                 if self.prefix:
                     new_text = self.prefix + "\n" + new_text
                 if self.suffix:
                     new_text = new_text + "\n" + self.suffix
-                text = text[self.breakpoint :]
+                text = text[self.breakpoint:]
                 self.pages.append(new_text)
             else:
                 break

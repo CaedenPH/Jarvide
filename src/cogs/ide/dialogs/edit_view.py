@@ -307,7 +307,7 @@ class EditView(disnake.ui.View):
     @property
     def pages(self):
         lines = add_lines(self.file.content)
-        return ["".join(lines[x : x + 50]) for x in range(0, len(lines), 50)]
+        return ["".join(lines[x: x + 50]) for x in range(0, len(lines), 50)]
 
     async def refresh_message(self, page):
         embed = self.bot_message.embeds[0]
@@ -365,7 +365,7 @@ class EditView(disnake.ui.View):
             from_, to = 0, len(self.file.content) - 1
             code = clear_codeblock(content)
         sliced = self.file.content.splitlines()
-        del sliced[from_ : to + 1]
+        del sliced[from_: to + 1]
         sliced.insert(from_, code)
         self.create_undo()
         self.file.content = "\n".join(sliced)

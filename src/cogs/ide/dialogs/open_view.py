@@ -161,7 +161,7 @@ class OpenView(disnake.ui.View):
 
                 content = base64.b64decode(content).decode("utf-8")
         if start and end:
-            content = "\n".join(content.splitlines()[int(start) - 1 : int(end)])
+            content = "\n".join(content.splitlines()[int(start) - 1: int(end)])
         elif start and not end:
             content = content.splitlines()[int(start) - 1]
         await url.add_reaction(THUMBS_UP)

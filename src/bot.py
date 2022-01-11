@@ -10,7 +10,6 @@ from odmantic import AIOEngine
 
 from src.utils.utils import main_embed
 from .HIDDEN import TOKEN, MONGO_URI
-import aiohttp
 
 REMOVE_WORDS = [
     "what",
@@ -47,12 +46,7 @@ class Jarvide(Bot):
         self.error_channel = None
         self.server_message = None
         self.bugs = range(10000, 100000)
-        self.session: aiohttp.ClientSession = self.loop.run_until_complete(
-            self.create_session()
-        )
-
-    async def create_session(self) -> aiohttp.ClientSession:
-        return aiohttp.ClientSession()
+        self.session = None
 
     def setup(self) -> None:
         for filename in os.listdir("./src/cogs"):
@@ -66,10 +60,6 @@ class Jarvide(Bot):
     def run(self) -> None:
         self.setup()
         super().run(TOKEN, reconnect=True)
-
-    async def close(self):
-        await self.session.close()
-        await super().close()
 
     async def on_message(self, original_message: Message) -> typing.Optional[Message]:
         new_msg = copy.copy(original_message)

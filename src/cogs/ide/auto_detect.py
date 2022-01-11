@@ -108,7 +108,7 @@ class Listeners(commands.Cog):
             else:
                 content = base64.b64decode(json["content"]).decode("utf-8")
         if start and end:
-            content = "\n".join(content.splitlines()[int(start) - 1 : int(end)])
+            content = "\n".join(content.splitlines()[int(start) - 1: int(end)])
         elif start and not end:
             content = content.splitlines()[int(start) - 1]
         file_ = File(content=content, filename=path.split("/")[-1], bot=self.bot)
