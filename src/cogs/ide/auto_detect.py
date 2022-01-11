@@ -22,7 +22,8 @@ functions = {
     "sinh": lambda x: math.sinh(x),
     "cosh": lambda x: math.cosh(x),
     "tanh": lambda x: math.tanh(x),
-    "abs": lambda x: math.fabs(x)
+    "abs": lambda x: math.fabs(x),
+    "log": lambda x: math.log(x)
 }
 
 
@@ -193,7 +194,7 @@ class Listeners(commands.Cog):
             message.content = message.content.replace(key, value)
 
         try:
-            regex = re.compile(rf"\d+[{operators}]+\d+")
+            regex = re.compile(rf"(\d+|{'|'.join(list(functions.keys()))})[{operators}]+\d+")
             match = re.search(regex, message.content)
             if not match:
                 return
