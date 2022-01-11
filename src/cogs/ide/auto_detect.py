@@ -193,6 +193,11 @@ class Listeners(commands.Cog):
             message.content = message.content.replace(key, value)
 
         try:
+            regex = re.compile(rf"\d+[{operators}]+\d+")
+            match = re.search(regex, message.content)
+            if not match:
+                return
+
             def parse(_match):
                 return _match.group().replace("(", "*(")
             message.content = re.sub(re.compile(r"\d\("), parse, message.content)  # type: ignore
