@@ -176,7 +176,7 @@ class Listeners(commands.Cog):
 
     @commands.Cog.listener("on_message")
     async def calc_detect(self, message: disnake.Message) -> Optional[disnake.Message]:
-        operators = r"\+\-\/\*\(\)\^\÷"
+        operators = r"\+\-\/\*\(\)\^\÷\."
         # if not 'jarivde' in message.content and message.guild in remove_configs:
         #     return
         # TODO: config shit here
@@ -194,6 +194,12 @@ class Listeners(commands.Cog):
             message.content = message.content.replace(key, value)
 
         try:
+            # Syntax:
+            # 1. See if at least one function or one statement (E.g 1+2) exists, else return
+            # 2. Parentheses multiplication is a valid syntax in math, so substitute `<digit*>"("` with `<digit*>"*("`
+            # 3. It is possible that the first character in the equation is either "-", "+", or "(", so include it
+            # 4. Functions is implemented here, so with functions the syntax would be `[<func>"("<expr*>")"]`
+            # 5. Multiple parent/operators also possible, so we do `<digit*>[operators*][digit*]`, operators as wildcard
             regex = re.compile(rf"(\d+|{'|'.join(list(functions.keys()))})[{operators}]+\d+")
             match = re.search(regex, message.content)
             if not match:
@@ -202,8 +208,9 @@ class Listeners(commands.Cog):
             def parse(_match):
                 return _match.group().replace("(", "*(")
             message.content = re.sub(re.compile(r"\d\("), parse, message.content)  # type: ignore
+            funcs = "|".join(list(functions.keys()))
             regex = re.compile(
-                rf"({'|'.join(list(functions.keys()))})?([{operators}]+)?(\d+[{operators}]+)*(\d+)([{operators}]+)?"
+                rf"([{operators}]+)?({funcs})?([{operators}]+)?(\d+[{operators}]+)*(\d+)([{operators}]+)?"
             )
             match = re.search(regex, message.content)
             content = ''.join(match.group())
