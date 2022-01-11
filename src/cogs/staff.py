@@ -41,7 +41,7 @@ class Staff(Cog, command_attrs={"hidden": True}):
                 self.bot.reload_extension(cog)
             embed = disnake.Embed(color=disnake.Color.dark_gold())
             embed.add_field(
-                name="Extensions Reloaded", value=f"Reloaded cogs successfully."
+                name="Extensions Reloaded", value="Reloaded cogs successfully."
             )
             return await ctx.send(embed=embed)
 

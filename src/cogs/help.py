@@ -98,7 +98,13 @@ class JarvideHelp(HelpCommand):
             url="https://media.discordapp.net/attachments/926115595307614252/927951464725377034/big.png"
         )
         for cog_name in _bot.cogs:
-            if cog_name.lower() in ("jishaku", "helpcog", "staff", "errorhandler", "ide"):
+            if cog_name.lower() in (
+                "jishaku",
+                "helpcog",
+                "staff",
+                "errorhandler",
+                "ide",
+            ):
                 continue
             cog: Cog = _bot.get_cog(cog_name)
             if getattr(cog, "ignore", None):
@@ -129,10 +135,13 @@ class JarvideHelp(HelpCommand):
         """
         command_help_dict = {
             "aliases": " , ".join(cmd.aliases) or "No aliases",
-            "description": cmd.description or cmd.brief or cmd.short_doc or "No description Provided",
+            "description": cmd.description
+            or cmd.brief
+            or cmd.short_doc
+            or "No description Provided",
         }
         command_signature = ""
-        for arg in cmd.signature.split(" ")[:len(cmd.params)-2]:
+        for arg in cmd.signature.split(" ")[: len(cmd.params) - 2]:
             if "=" in arg:
                 parsed_arg = "{" + arg.split("=")[0].strip("[]<>]") + "}"
             else:
@@ -195,7 +204,13 @@ class NavigatorMenu(Select):
         self.context: Context = ctx
         options = []
         for cog_name in ctx.bot.cogs:
-            if cog_name.lower() in ("jishaku", "helpcog", "staff", "ide", "errorhandler"):
+            if cog_name.lower() in (
+                "jishaku",
+                "helpcog",
+                "staff",
+                "ide",
+                "errorhandler",
+            ):
                 continue
             cog: Cog = ctx.bot.get_cog(cog_name)
             if getattr(cog, "ignore", None):
@@ -212,8 +227,8 @@ class NavigatorMenu(Select):
     async def callback(self, interaction: MessageInteraction):
         if interaction.author.id != self.context.author.id:
             return await interaction.response.send_message(
-                f'This command was invoked by {self.context.author}\nOnly they can use it',
-                ephemeral=True
+                f"This command was invoked by {self.context.author}\nOnly they can use it",
+                ephemeral=True,
             )
         cog_s = [
             self.context.bot.get_cog(cog)
