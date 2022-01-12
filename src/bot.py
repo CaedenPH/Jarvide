@@ -10,6 +10,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from odmantic import AIOEngine
 
 from src.utils.utils import main_embed
+from cogs.ide.github import GitHubHTTP
 from .HIDDEN import TOKEN, MONGO_URI
 from decouple import config
 
@@ -50,6 +51,7 @@ class Jarvide(Bot):
         self.bugs = range(10000, 100000)
         self.http_session = aiohttp.ClientSession()
         self.jarvide_api_session = aiohttp.ClientSession(headers={"Api-Key": config("JARVIDE_API_KEY")})
+        self.github_http = GitHubHTTP(self)
 
     def setup(self) -> None:
         for filename in os.listdir("./src/cogs"):
@@ -63,6 +65,9 @@ class Jarvide(Bot):
     def run(self) -> None:
         self.setup()
         super().run(TOKEN, reconnect=True)
+
+    async def request(self, method: str, url: str, **kwargs):
+        return await self.http_session.request(method, "https://api.github.com" + url, **kwargs)
 
     async def on_message(self, original_message: Message) -> typing.Optional[Message]:
         new_msg = copy.copy(original_message)
