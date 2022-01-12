@@ -23,18 +23,21 @@ class Mod(commands.Cog):
     @commands.has_permissions(kick_members=True)
     @commands.bot_has_permissions(kick_members=True)
     async def kick(
-            self,
-            ctx: Context,
-            member: disnake.Member,
-            reason: str = "No Reason Provided.",
+        self,
+        ctx: Context,
+        member: disnake.Member,
+        reason: str = "No Reason Provided.",
     ):
-        """ Kicks a member from a guild """
+        """Kicks a member from a guild"""
 
         if member == ctx.author:
             return await ctx.send(f"{ctx.author.mention}, you cannot kick yourself!")
 
-        if ctx.author.top_role.position <= member.top_role.position and ctx.author.id != ctx.guild.owner_id:  # checking role hierarchy
-            return await ctx.send(f'{ctx.author} You can\'t kick **{member.name}**')
+        if (
+            ctx.author.top_role.position <= member.top_role.position
+            and ctx.author.id != ctx.guild.owner_id
+        ):  # checking role hierarchy
+            return await ctx.send(f"{ctx.author} You can't kick **{member.name}**")
 
         choice = await prompt(
             ctx, message="Are you sure you want to kick this user?", timeout=60
@@ -45,27 +48,32 @@ class Mod(commands.Cog):
                 await member.kick(reason=reason)
                 await ctx.send(f"{member.mention} has been kicked.")
             except disnake.Forbidden:
-                await ctx.reply(f'Unable to kick **{member.name}** due to role hierarchy')
+                await ctx.reply(
+                    f"Unable to kick **{member.name}** due to role hierarchy"
+                )
         else:
-            await ctx.send(f"Cancelled kick.")
+            await ctx.send("Cancelled kick.")
 
     @commands.command()
     @commands.guild_only()
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_permissions(ban_members=True)
     async def ban(
-            self,
-            ctx: Context,
-            member: disnake.Member,
-            reason="No Reason Provided.",
+        self,
+        ctx: Context,
+        member: disnake.Member,
+        reason="No Reason Provided.",
     ):
-        """ Bans a member outside of a guild """
+        """Bans a member outside of a guild"""
 
         if member == ctx.author:
             return await ctx.send(f"{ctx.author.mention}, you cannot ban yourself!")
 
-        if ctx.author.top_role.position <= member.top_role.position and ctx.author.id != ctx.guild.owner_id:  # checking role hierarchy
-            return await ctx.send(f'{ctx.author} You can\'t ban **{member.name}**')
+        if (
+            ctx.author.top_role.position <= member.top_role.position
+            and ctx.author.id != ctx.guild.owner_id
+        ):  # checking role hierarchy
+            return await ctx.send(f"{ctx.author} You can't ban **{member.name}**")
 
         choice = await prompt(
             ctx, message="Are you sure you want to ban this user?", timeout=60
@@ -75,21 +83,23 @@ class Mod(commands.Cog):
                 await member.ban(reason=reason)
                 await ctx.send(f"{member.mention} has been banned.")
             except disnake.Forbidden:
-                await ctx.reply(f'Unable to ban **{member.name}** due to role hierarchy')
+                await ctx.reply(
+                    f"Unable to ban **{member.name}** due to role hierarchy"
+                )
         else:
-            await ctx.send(f"Cancelled ban.")
+            await ctx.send("Cancelled ban.")
 
     @commands.command()
     @commands.guild_only()
     @commands.has_permissions(ban_members=True)
     @commands.bot_has_permissions(ban_members=True)
     async def unban(
-            self,
-            ctx: Context,
-            user: Union[disnake.User, int],
-            reason="No Reason Provided.",
+        self,
+        ctx: Context,
+        user: Union[disnake.User, int],
+        reason="No Reason Provided.",
     ):
-        """ unbans someone from a guild """
+        """unbans someone from a guild"""
 
         if user == ctx.author:
             return await ctx.send(f"{ctx.author.mention}, you cannot unban yourself!")
@@ -110,7 +120,12 @@ class Mod(commands.Cog):
     @commands.guild_only()
     @commands.has_permissions(manage_channels=True)
     @commands.bot_has_permissions(manage_channels=True)
-    async def slowmode(self, ctx: Context, channel: Greedy[disnake.TextChannel] = None, slowmode: int = None):
+    async def slowmode(
+        self,
+        ctx: Context,
+        channel: Greedy[disnake.TextChannel] = None,
+        slowmode: int = None,
+    ):
         """Change/disable slowmode in a channel"""
         channel = channel or ctx.channel
         if slowmode is None:
@@ -119,7 +134,7 @@ class Mod(commands.Cog):
             )
         await channel.edit(slowmode_delay=slowmode)
         if slowmode == 0:
-            return await ctx.send(f"I've reset the channel's slowmode")
+            return await ctx.send("I've reset the channel's slowmode")
         else:
             return await ctx.send(
                 f"I've set the channel's slowmode to {slowmode} {'seconds' if slowmode > 1 else 'second'}."
@@ -130,7 +145,7 @@ class Mod(commands.Cog):
     @commands.has_permissions(moderate_members=True)
     @commands.bot_has_permissions(moderate_members=True)
     async def timeout(self, ctx, member: disnake.Member, time: str, *, reason=None):
-        """ timesout (or mute) a member from a guild """
+        """timesout (or mute) a member from a guild"""
         now = disnake.utils.utcnow()
         change = time_str.convert(time)
         duration = now + change
@@ -153,7 +168,7 @@ class Mod(commands.Cog):
     @commands.has_permissions(moderate_members=True)
     @commands.bot_has_permissions(moderate_members=True)
     async def unmute(self, ctx, member: disnake.Member, *, reason=None):
-        """ unmutes a member (or removes timeout) from a guild """
+        """unmutes a member (or removes timeout) from a guild"""
         await member.timeout(until=None, reason=reason)
         await ctx.send(
             embed=disnake.Embed(
@@ -165,14 +180,21 @@ class Mod(commands.Cog):
     @commands.guild_only()
     @commands.has_permissions(manage_roles=True)
     @commands.bot_has_permissions(manage_roles=True)
-    async def role(self, ctx, member: disnake.Member, role: disnake.Role, *, reason="No Reason Provided."):
-        """ Add a role to the user"""
+    async def role(
+        self,
+        ctx,
+        member: disnake.Member,
+        role: disnake.Role,
+        *,
+        reason="No Reason Provided.",
+    ):
+        """Add a role to the user"""
         if ctx.author.top_role.position <= role.position:
-            return await ctx.send('You cannot add that role to someone!')
+            return await ctx.send("You cannot add that role to someone!")
         try:
             await member.add_roles(role, reason=reason)
         except disnake.Forbidden:
-            return await ctx.send(f'Unable to add that role to {member.name}')
+            return await ctx.send(f"Unable to add that role to {member.name}")
         await ctx.send(f"I gave the {role} role to {member.name}.")
 
 

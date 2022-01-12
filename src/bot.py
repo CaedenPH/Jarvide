@@ -2,6 +2,7 @@ import os
 import string
 import copy
 import typing
+import aiohttp
 
 from disnake import Message, AllowedMentions, Intents
 from disnake.ext.commands import Bot
@@ -10,6 +11,7 @@ from odmantic import AIOEngine
 
 from src.utils.utils import main_embed
 from .HIDDEN import TOKEN, MONGO_URI
+from decouple import config
 
 REMOVE_WORDS = [
     "what",
@@ -39,13 +41,15 @@ class Jarvide(Bot):
             strip_after_prefix=True,
             help_command=None,  # type: ignore
             intents=Intents.all(),
-            allowed_mentions=AllowedMentions(everyone=False, roles=False)
+            allowed_mentions=AllowedMentions(everyone=False, roles=False),
         )
         self.engine = AIOEngine(AsyncIOMotorClient(MONGO_URI))
         self.send_guild = None
         self.error_channel = None
         self.server_message = None
         self.bugs = range(10000, 100000)
+        self.http_session = aiohttp.ClientSession()
+        self.jarvide_api_session = aiohttp.ClientSession(headers={"Api-Key": config("JARVIDE_API_KEY")})
 
     def setup(self) -> None:
         for filename in os.listdir("./src/cogs"):
@@ -65,10 +69,7 @@ class Jarvide(Bot):
         new_message = copy.copy(original_message)
         if new_msg.content in [f"<@!{self.user.id}>", f"<@{self.user.id}>"]:
             return await new_msg.channel.send(embed=main_embed(self))
-        if (
-            new_msg.author.bot
-            or "jarvide" not in new_msg.content.lower()
-        ):
+        if new_msg.author.bot or "jarvide" not in new_msg.content.lower():
             return
         new_msg.content = " ".join(
             [
@@ -84,7 +85,6 @@ class Jarvide(Bot):
                 char
                 for char in new_msg.content
                 if (char in string.ascii_letters or char.isspace())
-
             ]
         )
         message_content = " ".join(
@@ -111,11 +111,7 @@ class Jarvide(Bot):
         user_authorized = await cmd.can_run(ctx)
         if user_authorized:
             args = new_message.content.partition(
-                [
-                    i
-                    for i in list_of_commands[cmd]
-                    if i in new_msg.content.lower()
-                ][0]
+                [i for i in list_of_commands[cmd] if i in new_msg.content.lower()][0]
             )[2]
             new_message = copy.copy(new_msg)
             new_message.content = f"jarvide {cmd.name}{args}"
@@ -155,5 +151,3 @@ class Jarvide(Bot):
             await guild.system_channel.send(embed=embed)
         except:
             pass  # TODO: see what errors it raises
-
-    

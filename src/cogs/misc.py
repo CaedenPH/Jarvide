@@ -12,7 +12,7 @@ bug_string = """
 Thank you for reporting a bug! My team will work hard to solve this!
 
 
-My team might want to ask you some questions, so we would love you to keep dm's open or join our support server! 
+My team might want to ask you some questions, so we would love you to keep dm's open or join our support server!
 [ discord.gg/mtue4UnWaA ]
 -----------------------------------------------------------
 Bug id: {}"""
@@ -72,7 +72,7 @@ class Misc(
             )
         )
 
-    @command(aliases = ['latency'])
+    @command(aliases=["latency"])
     async def ping(self, ctx: Context):
         """Returns Jarvide's latency."""
         if round(self.bot.latency * 1000) > 150:
@@ -94,7 +94,7 @@ class Misc(
         )
         await ctx.send(content="🏓**Pong**", embed=embed)
 
-    @command(aliases = ['insult'])
+    @command(aliases=["insult"])
     async def roast(self, ctx: Context, *, member: Member):
         """Roast someone!"""
         async with aiohttp.ClientSession() as cs:
@@ -127,19 +127,28 @@ class Misc(
     async def triggered(self, ctx: Context, *, member: Member = None):
         """Trigger'ify a profile picture!"""
         await self.overlay(ctx, "triggered", member)
-        
-    @command(aliases=['bug', 'broken'])
+
+    @command(aliases=["bug", "broken"])
     async def report(self, ctx: Context):
         responses = []
 
-        for iteration, question in enumerate(['sum up your report in less than 10 words', 'explain your report. present as detailed of a description as you can provide, including button clicks, errors shown (if any), file open, and intention'], start=1):
-            await ctx.send(f"Please {question}\nType q to end your report\nQuestion number {iteration}/2")
-
-            message = await self.bot.wait_for("message", timeout=560, check=lambda m:
-                m.author == ctx.author
-                and m.channel == ctx.channel
+        for iteration, question in enumerate(
+            [
+                "sum up your report in less than 10 words",
+                "explain your report. present as detailed of a description as you can provide, including button clicks, errors shown (if any), file open, and intention",
+            ],
+            start=1,
+        ):
+            await ctx.send(
+                f"Please {question}\nType q to end your report\nQuestion number {iteration}/2"
             )
-            if message.content.lower() == 'q':
+
+            message = await self.bot.wait_for(
+                "message",
+                timeout=560,
+                check=lambda m: m.author == ctx.author and m.channel == ctx.channel,
+            )
+            if message.content.lower() == "q":
                 return
 
             responses.append(message.content)
@@ -147,11 +156,8 @@ class Misc(
         embed = Embed(
             title=responses[0],
             description="```yaml\n" + responses[0] + "```",
-            timestamp=ctx.message.created_at
-        ).set_author(
-            name=f"From {ctx.author.name}",
-            icon_url=ctx.author.avatar.url
-        )
+            timestamp=ctx.message.created_at,
+        ).set_author(name=f"From {ctx.author.name}", icon_url=ctx.author.avatar.url)
 
         await self.bot.report_channel.send(embed=embed)
         bug_id = random.choice(self.bot.bugs)

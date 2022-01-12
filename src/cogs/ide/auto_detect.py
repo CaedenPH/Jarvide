@@ -30,10 +30,10 @@ functions = {
 class OpenIDEButton(disnake.ui.View):
     async def interaction_check(self, interaction: disnake.MessageInteraction) -> bool:
         return (
-                interaction.author == self.ctx.author
-                and interaction.channel == self.ctx.channel
+            interaction.author == self.ctx.author
+            and interaction.channel == self.ctx.channel
         )
-        
+
     def __init__(self, ctx: commands.Context, file: File, bot_message):
         self.ctx = ctx
         self.file = file
@@ -47,7 +47,7 @@ class OpenIDEButton(disnake.ui.View):
 
     @disnake.ui.button(style=disnake.ButtonStyle.green, label="Open in IDE", row=1)
     async def callback(
-            self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
+        self, button: disnake.ui.Button, interaction: disnake.MessageInteraction
     ):
         self.clicked = True
         await interaction.response.defer()
@@ -56,10 +56,14 @@ class OpenIDEButton(disnake.ui.View):
         embed = EmbedFactory.ide_embed(self.ctx, description)
 
         view = FileView(self.ctx, self.file, self.bot_message)
-        view.bot_message = await self.bot_message.edit(content=None, embed=embed, view=view)
+        view.bot_message = await self.bot_message.edit(
+            content=None, embed=embed, view=view
+        )
         if self.ctx.channel not in self.ctx.bot.active_commands:
             self.ctx.bot.active_commands[self.ctx.channel] = {}
-        self.ctx.bot.active_commands[self.ctx.channel][self.ctx.author] = view.bot_message.id
+        self.ctx.bot.active_commands[self.ctx.channel][
+            self.ctx.author
+        ] = view.bot_message.id
 
 
 class Listeners(commands.Cog):
@@ -70,8 +74,8 @@ class Listeners(commands.Cog):
     @commands.Cog.listener("on_message")
     async def github_url(self, message: disnake.Message) -> None:
         if (
-                message.channel in self.bot.active_commands
-                and message.author in self.bot.active_commands[message.channel]
+            message.channel in self.bot.active_commands
+            and message.author in self.bot.active_commands[message.channel]
         ):
             return
 
@@ -105,14 +109,17 @@ class Listeners(commands.Cog):
             else:
                 content = base64.b64decode(json["content"]).decode("utf-8")
         if start and end:
-            content = "\n".join(content.splitlines()[int(start)-1:int(end)])
+            content = "\n".join(content.splitlines()[int(start) - 1: int(end)])
         elif start and not end:
-            content = content.splitlines()[int(start)-1]
+            content = content.splitlines()[int(start) - 1]
         file_ = File(content=content, filename=path.split("/")[-1], bot=self.bot)
 
         _message = await ctx.send("Fetching github link...")
         await asyncio.sleep(2)
-        await _message.edit(content="Working github link found!\nTo disable this type `jarvide removeconfig github`", view=OpenIDEButton(ctx, file_, _message))
+        await _message.edit(
+            content="Working github link found!\nTo disable this type `jarvide removeconfig github`",
+            view=OpenIDEButton(ctx, file_, _message),
+        )
 
     @commands.Cog.listener("on_message")
     async def file_detect(self, message: disnake.Message) -> Optional[disnake.Message]:
@@ -139,28 +146,30 @@ class Listeners(commands.Cog):
 
         _message = await ctx.send("Resolving file integrity...")
         await asyncio.sleep(2)
-        await _message.edit(content="Readable file found\nTo disable this type `jarvide removeconfig file`!", view=OpenIDEButton(ctx, file_, _message))
+        await _message.edit(
+            content="Readable file found\nTo disable this type `jarvide removeconfig file`!",
+            view=OpenIDEButton(ctx, file_, _message),
+        )
 
     @commands.Cog.listener("on_message")
-    async def codeblock_detect(self, message: disnake.Message) -> Optional[disnake.Message]:
+    async def codeblock_detect(
+        self, message: disnake.Message
+    ) -> Optional[disnake.Message]:
         if (
-                message.channel in self.bot.active_commands
-                and message.author in self.bot.active_commands[message.channel]
+            message.channel in self.bot.active_commands
+            and message.author in self.bot.active_commands[message.channel]
         ):
             return
 
         if message.author.bot:
             return
 
-        if not (
-                message.content.startswith('```') and
-                message.content.endswith('```')
-        ):
+        if not (message.content.startswith("```") and message.content.endswith("```")):
             return
 
         ctx = await self.bot.get_context(message)
         clean_message = disnake.utils.remove_markdown(message.content).splitlines()
-        extension, content = clean_message[0], ''.join(clean_message[1:])
+        extension, content = clean_message[0], "".join(clean_message[1:])
         try:
             file_ = File(
                 content=content,
@@ -172,7 +181,10 @@ class Listeners(commands.Cog):
 
         _message = await ctx.send("Resolving code block integrity...")
         await asyncio.sleep(2)
-        await _message.edit(content="Valid codeblock found!\nTo disable this type `jarvide removeconfig codeblock`", view=OpenIDEButton(ctx, file_, _message))
+        await _message.edit(
+            content="Valid codeblock found!\nTo disable this type `jarvide removeconfig codeblock`",
+            view=OpenIDEButton(ctx, file_, _message),
+        )
 
     @commands.Cog.listener("on_message")
     async def calc_detect(self, message: disnake.Message) -> Optional[disnake.Message]:
@@ -182,15 +194,15 @@ class Listeners(commands.Cog):
         # TODO: config shit here
 
         if not any(m in message.content for m in operators):
-            return 
+            return
         if message.author.bot:
             return
 
         for key, value in {
-            '^': '**',
-            '÷': '/',
-            ' ': '',
-            }.items():
+            "^": "**",
+            "÷": "/",
+            " ": "",
+        }.items():
             message.content = message.content.replace(key, value)
 
         try:
@@ -207,42 +219,44 @@ class Listeners(commands.Cog):
 
             def parse(_match):
                 return _match.group().replace("(", "*(")
+
             message.content = re.sub(re.compile(r"\d\("), parse, message.content)  # type: ignore
             funcs = "|".join(list(functions.keys()))
             regex = re.compile(
                 rf"([{operators}]+)?({funcs})?([{operators}]+)?(\d+[{operators}]+)*(\d+)([{operators}]+)?"
             )
             match = re.search(regex, message.content)
-            content = ''.join(match.group())
+            content = "".join(match.group())
             if not any(m in content for m in operators) or not content:
                 return
         except AttributeError:
-            return 
-        embed = disnake.Embed(
-            color=disnake.Color.green()
-        ).set_footer(
-            text="To disable this type jarvide removeconfig calc", 
-            icon_url=message.author.avatar.url
-        ).add_field(
-            name="I detected an expression!", 
-            value=f'```yaml\n"{content}"\n```', 
-            inline=False
+            return
+        embed = (
+            disnake.Embed(color=disnake.Color.green())
+            .set_footer(
+                text="To disable this type jarvide removeconfig calc",
+                icon_url=message.author.avatar.url,
+            )
+            .add_field(
+                name="I detected an expression!",
+                value=f'```yaml\n"{content}"\n```',
+                inline=False,
+            )
         )
 
         try:
             result = simpleeval.simple_eval(content, functions=functions)
-            embed.add_field(
-                name="Result: ", 
-                value=f"```\n{result}\n```"
-            )
-            
+            embed.add_field(name="Result: ", value=f"```\n{result}\n```")
+
         except ZeroDivisionError:
             embed.add_field(
                 name="Wow...you make me question my existance",
-                value="```yaml\nImagine you have zero cookies and you split them amongst 0 friends, how many cookies does each friend get? See, it doesn't make sense and Cookie Monster is sad that there are no cookies, and you are sad that you have no friends.```"
+                value="```yaml\nImagine you have zero cookies and you split them amongst 0 friends, how many cookies does each friend get? See, it doesn't make sense and Cookie Monster is sad that there are no cookies, and you are sad that you have no friends.```",
             )
         except simpleeval.FeatureNotAvailable:
-            return await message.channel.send("That syntax is not available currently, sorry!")
+            return await message.channel.send(
+                "That syntax is not available currently, sorry!"
+            )
         except SyntaxError:
             return
         except simpleeval.NumberTooHigh:

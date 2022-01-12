@@ -107,21 +107,21 @@ class Fun(Cog):
         self.emoji = "🍿"
         self.short_help_doc = "Fun commands to play around with!"
 
-    @command(aliases=['gaymeter', 'gaypercent'])
+    @command(aliases=["gaymeter", "gaypercent"])
     async def howgay(self, ctx, member: Member = None) -> None:
         """Shows how gay you are."""
         member = member or ctx.author
 
         await ctx.send(f"{member.mention} is {random.randint(1, 100)}% gay")
 
-    @command(aliases=['cutemeter', 'cutepercent'])
+    @command(aliases=["cutemeter", "cutepercent"])
     async def howcute(self, ctx: Context, member: Member = None):
         """Shows how cute you are."""
         member = member or ctx.author
 
         await ctx.send(f"{member.mention} is {random.randint(1, 100)}% cute!")
 
-    @command(aliases=['pick', 'random'])
+    @command(aliases=["pick", "random"])
     async def choose(self, ctx: Context, *arguments):
         """Chooses between multiple choices."""
 
@@ -133,7 +133,7 @@ class Fun(Cog):
         """Kiss a member."""
 
         if not member:
-            return await ctx.send(f"You didn't mention a member.")
+            return await ctx.send("You didn't mention a member.")
 
         embed1 = Embed(
             title=f"how cute, {ctx.author.mention} has kissed {member.name}"
@@ -145,7 +145,9 @@ class Fun(Cog):
 
     @command()
     @guild_only()
-    async def slap(self, ctx: Context, member: Member = None) -> Optional[disnake.Message]:
+    async def slap(
+        self, ctx: Context, member: Member = None
+    ) -> Optional[disnake.Message]:
         """Slap a member."""
         if member is None:
             return await ctx.send("You didn't mention a member.")
@@ -158,14 +160,14 @@ class Fun(Cog):
 
         await ctx.send(embed=embed2)
 
-    @command(aliases=['howsimp'])
+    @command(aliases=["howsimp"])
     async def simpmeter(self, ctx: Context, member: Member = None) -> None:
         """Shows how much of a simp you are."""
         member = member or ctx.author
 
         await ctx.send(f"{member.mention} is {random.randint(1, 100)}% a simp!")
 
-    @command(aliases=['howlongpp', 'pplength'])
+    @command(aliases=["howlongpp", "pplength"])
     async def ppmeter(self, ctx: Context, member: Member = None) -> None:
         """Shows your how long is your pp."""
         member = member or ctx.author
