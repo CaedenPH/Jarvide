@@ -49,7 +49,7 @@ class Jarvide(Bot):
         self.server_message = None
         self.bugs = range(10000, 100000)
         self.http_session = aiohttp.ClientSession()
-        self.jarvide_api_session = aiohttp.ClientSession(headers={"Api-Key": config("JARVIDE_API_KEY")})
+        self.jarvide_api_session = aiohttp.ClientSession(f"http://{config('BASE_URL')}", headers={"Api-Key": config("JARVIDE_API_KEY")})
 
     def setup(self) -> None:
         for filename in os.listdir("./src/cogs"):

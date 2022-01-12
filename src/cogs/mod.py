@@ -1,4 +1,6 @@
 from __future__ import annotations
+from os import name
+import aiohttp
 
 import disnake
 import time_str
@@ -8,6 +10,8 @@ from disnake.ext.commands import Context, Greedy
 from typing import Union
 
 from src.utils.confirmation import prompt
+
+from decouple import config
 
 
 class Mod(commands.Cog):
@@ -197,6 +201,73 @@ class Mod(commands.Cog):
             return await ctx.send(f"Unable to add that role to {member.name}")
         await ctx.send(f"I gave the {role} role to {member.name}.")
 
+
+    @commands.command()
+    @commands.guild_only()
+    @commands.has_permissions(moderate_members=True)
+    async def warn(
+        self,
+        ctx: commands.Context,
+        member: disnake.Member,
+        *,
+        reason="No reason provided."
+    ):
+        """ Warns the given user. """
+
+        await self.bot.jarvide_api_session.post('/warns', data={
+            "userID": member.id,
+            "modID": ctx.author.id,
+            "reason": reason
+        })
+
+        await ctx.send(f"Warned {member.mention}.")
+
+    @commands.command()
+    @commands.guild_only()
+    @commands.has_permissions(moderate_members=True)
+    async def warnings(
+        self,
+        ctx: commands.Context,
+        member: disnake.Member
+    ):
+        """ Gets all warnings for the given user. """
+
+        async with self.bot.jarvide_api_session.get('warns', params={
+            "userID": member.id
+        }) as r:
+            embed = disnake.Embed(
+                title=f'Warnings for {member}',
+                color=disnake.Color.blue()
+            )
+
+            for warn in r:
+                json = await r.json()
+                embed.add_field(
+                    name=json['warnID'],
+                    value=f"Moderator: {ctx.guild.get_member(json['modID'])}\nReason: {json['reason']}",
+                    inline=False
+                )
+
+
+        await ctx.send(embed=embed)
+
+    @commands.command()
+    @commands.guild_only()
+    @commands.has_permissions(moderate_members=True)
+    async def delwarn(
+        self,
+        ctx: commands.Context,
+        warnID: str
+    ):
+        r = await self.bot.jarvide_api_session.delete('warns', params={
+            "warnID": warnID
+        })
+
+        if(r.status == 404):
+            await ctx.send('Invalid warn ID.')
+            return
+
+        await ctx.send('Warn was successfully deleted.')
 
 def setup(bot: commands.Bot) -> None:
     bot.add_cog(Mod(bot))
