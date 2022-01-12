@@ -222,10 +222,10 @@ class Listeners(commands.Cog):
             message.content = re.sub(re.compile(r"\d\("), parse, message.content)  # type: ignore
             funcs = "|".join(list(functions.keys()))
             regex = re.compile(
-                rf"([{operators}]+)?({funcs})?([{operators}]+)?(\d+[{operators}]+)*(\d+)([{operators}]+)?"
+                rf"(([{operators}]+)?({funcs})?([{operators}]+)?(\d+[{operators}]+)*(\d+)([{operators}]+)?)"
             )
             match = re.findall(regex, message.content)
-            content = "".join(map(lambda e: "".join(e), match))
+            content = "".join(r[0] for r in match)
             if not any(m in content for m in operators) or not content:
                 return
         except AttributeError:

@@ -10,7 +10,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from odmantic import AIOEngine
 
 from src.utils.utils import main_embed
-from cogs.ide.github import GitHubHTTP
+from src.cogs.ide.github import GitHubHTTP
 from .HIDDEN import TOKEN, MONGO_URI
 from decouple import config
 
