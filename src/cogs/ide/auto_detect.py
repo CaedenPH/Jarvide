@@ -204,7 +204,6 @@ class Listeners(commands.Cog):
             " ": "",
         }.items():
             message.content = message.content.replace(key, value)
-
         try:
             # Syntax:
             # 1. See if at least one function or one statement (E.g 1+2) exists, else return
@@ -225,8 +224,8 @@ class Listeners(commands.Cog):
             regex = re.compile(
                 rf"([{operators}]+)?({funcs})?([{operators}]+)?(\d+[{operators}]+)*(\d+)([{operators}]+)?"
             )
-            match = re.search(regex, message.content)
-            content = "".join(match.group())
+            match = re.findall(regex, message.content)
+            content = "".join(map(lambda e: "".join(e), match))
             if not any(m in content for m in operators) or not content:
                 return
         except AttributeError:
@@ -260,7 +259,7 @@ class Listeners(commands.Cog):
         except SyntaxError:
             return
         except simpleeval.NumberTooHigh:
-            return await message.channel.send("")
+            return await message.channel.send("Oops, that number is too high to count.")
         try:
             await message.channel.send(embed=embed)
         except disnake.HTTPException:
