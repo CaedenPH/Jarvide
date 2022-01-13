@@ -211,6 +211,7 @@ class Listeners(commands.Cog):
             # 3. It is possible that the first character in the equation is either "-", "+", or "(", so include it
             # 4. Functions is implemented here, so with functions the syntax would be `[<func>"("<expr*>")"]`
             # 5. Multiple parent/operators also possible, so we do `<digit*>[operators*][digit*]`, operators as wildcard
+            # 6. Get the first match of all possible equations
             regex = re.compile(rf"(\d+|{'|'.join(list(functions.keys()))})[{operators}]+\d+")
             match = re.search(regex, message.content)
             if not match:
@@ -222,10 +223,10 @@ class Listeners(commands.Cog):
             message.content = re.sub(re.compile(r"\d\("), parse, message.content)  # type: ignore
             funcs = "|".join(list(functions.keys()))
             regex = re.compile(
-                rf"(([{operators}]+)?({funcs})?([{operators}]+)?(\d+[{operators}]+)*(\d+)([{operators}]+)?)"
+                rf"((([{operators}]+)?({funcs})?([{operators}]+)?(\d+[{operators}]+)*(\d+)([{operators}]+)?)+)"
             )
             match = re.findall(regex, message.content)
-            content = "".join(r[0] for r in match)
+            content = match[0][0]
             if not any(m in content for m in operators) or not content:
                 return
         except AttributeError:
