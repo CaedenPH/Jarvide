@@ -270,5 +270,33 @@ class Mod(commands.Cog):
 
         await ctx.send('Warn was successfully deleted.')
 
+    @commands.command()
+    @commands.guild_only()
+    async def whois(self, ctx, member: discord.Member = None):
+        member = member or ctx.author
+        embed = discord.Embed(title=f"Whois {member.name}",timestamp=ctx.message.created_at,description=f"Here is some information about {member.mention}.")
+        embed.set_thumbnail(url=member.avatar_url)
+        joined_at = disnake.utils.format_dt(member.joined_at)
+        created_at = disnake.utils.format_dt(member.created_at)
+        embed.add_field(name=f"📆 Joined {ctx.guild} at:", value=joined_at, inline=False)
+        embed.add_field(name="📆 Account created at:", value=created_at, inline=False)
+        members = sorted(ctx.guild.members, key=lambda m: m.joined_at)
+        embed.add_field(name="🔢 Join position", value=str(members.index(member)+1), inline=False)
+        if len(member.roles) > 1:
+            role_string = ' '.join([r.mention for r in member.roles][1:])
+            embed.add_field(name="📜 Roles [{}]".format(len(member.roles)-1), value=role_string, inline=False)
+        if len(member.roles) <= 0:
+            embed.add_field(name="📜 Roles:",value="member has no roles.", inline=False)
+        embed.add_field(name=f"🆔 member ID:",value=f"{member.id}", inline=False)
+        if str(member.status) == "dnd":
+            embed.add_field(name=f"<:status:838834549064466432> Status:",value=f"<:dnd:838833690787577900> Do Not Disturb", inline=False)
+        elif str(member.status) == "online":
+            embed.add_field(name=f"<:status:838834549064466432> Status:",value=f"<:online:838833901660799017> Online", inline=False)
+        elif str(member.status) == "idle":
+            embed.add_field(name=f"<:status:838834549064466432> Status:",value=f"<:idle:838833627076100136> Idle", inline=False)
+        elif str(member.status) == "offline":
+            embed.add_field(name=f"<:status:838834549064466432> Status:",value=f"<:invisible:838833583828238338> Offline", inline=False)
+        await ctx.send(embed=embed)
+
 def setup(bot: commands.Bot) -> None:
     bot.add_cog(Mod(bot))
