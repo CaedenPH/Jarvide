@@ -200,12 +200,12 @@ class Fun(Cog):
             )
             return await ctx.send(embed=embed)
 
-        embed1 = Embed(description="🌹 / **You lived**",
+        embed = Embed(description="🌹 / **You lived**",
                        colour=0x32CD32).set_footer(
             text=f"{ctx.author} survived.",
             icon_url=(ctx.author.display_avatar.url)
         )
-        return await ctx.send(embed=embed1)
+        return await ctx.send(embed=embed)
 
 
 def setup(bot: Bot) -> None:
