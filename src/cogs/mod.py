@@ -282,11 +282,8 @@ class Mod(commands.Cog):
         embed.add_field(name="📆 Account created at:", value=created_at, inline=False)
         members = sorted(ctx.guild.members, key=lambda m: m.joined_at)
         embed.add_field(name="🔢 Join position", value=str(members.index(member)+1), inline=False)
-        if len(member.roles) > 1:
-            role_string = ' '.join([r.mention for r in member.roles][1:])
-            embed.add_field(name="📜 Roles [{}]".format(len(member.roles)-1), value=role_string, inline=False)
-        if len(member.roles) <= 0:
-            embed.add_field(name="📜 Roles:",value="member has no roles.", inline=False)
+        role_string = ' '.join([r.mention for r in member.roles][1:])
+        embed.add_field(name=f"📜 Roles [{len(member.roles)-1}]", value=f"{role_string if len(member.roles) > 1 else "member has no roles."}", inline=False)
         embed.add_field(name=f"🆔 member ID:",value=f"{member.id}", inline=False)
         if str(member.status) == "dnd":
             embed.add_field(name=f"<:status:838834549064466432> Status:",value=f"<:dnd:838833690787577900> Do Not Disturb", inline=False)
