@@ -188,6 +188,25 @@ class Fun(Cog):
 
         await ctx.send(embed=embed, view=Casino(ctx.author))
 
+    @command(aliases=["rr", "russian_roulette"])
+    async def russianroulette(self, ctx: Context):
+        """A game of life and death"""
+        random_number = random.randint(0, 5)
+        if random_number == 0:
+            embed = Embed(description="🔫 / **You died**",
+                          colour=0x8B0000).set_footer(
+                text=f"{ctx.author} died.",
+                icon_url=(ctx.author.display_avatar.url)
+            )
+            return await ctx.send(embed=embed)
+
+        embed = Embed(description="🌹 / **You lived**",
+                       colour=0x32CD32).set_footer(
+            text=f"{ctx.author} survived.",
+            icon_url=(ctx.author.display_avatar.url)
+        )
+        return await ctx.send(embed=embed)
+
 
 def setup(bot: Bot) -> None:
     bot.add_cog(Fun(bot))
