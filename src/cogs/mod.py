@@ -136,7 +136,8 @@ class Mod(commands.Cog):
             return await ctx.send(
                 f"{ctx.author.mention}, please provide a number to set the slowmode as or 0 to remove the slowmode."
             )
-        await channel.edit(slowmode_delay=slowmode)
+        for editchannel in channel:
+            await editchannel.edit(slowmode_delay=slowmode)
         if slowmode == 0:
             return await ctx.send("I've reset the channel's slowmode")
         else:
