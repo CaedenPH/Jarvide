@@ -23,6 +23,7 @@ functions = {
     "cosh": lambda x: math.cosh(x),
     "tanh": lambda x: math.tanh(x),
     "abs": lambda x: math.fabs(x),
+    "log": lambda x: math.log(x)
 }
 
 
@@ -187,7 +188,7 @@ class Listeners(commands.Cog):
 
     @commands.Cog.listener("on_message")
     async def calc_detect(self, message: disnake.Message) -> Optional[disnake.Message]:
-        operators = r"\+\-\/\*\(\)\^\÷"
+        operators = r"\+\-\/\*\(\)\^\÷\."
         # if not 'jarivde' in message.content and message.guild in remove_configs:
         #     return
         # TODO: config shit here
@@ -203,18 +204,29 @@ class Listeners(commands.Cog):
             " ": "",
         }.items():
             message.content = message.content.replace(key, value)
-
         try:
+            # Syntax:
+            # 1. See if at least one function or one statement (E.g 1+2) exists, else return
+            # 2. Parentheses multiplication is a valid syntax in math, so substitute `<digit*>"("` with `<digit*>"*("`
+            # 3. It is possible that the first character in the equation is either "-", "+", or "(", so include it
+            # 4. Functions is implemented here, so with functions the syntax would be `[<func>"("<expr*>")"]`
+            # 5. Multiple parent/operators also possible, so we do `<digit*>[operators*][digit*]`, operators as wildcard
+            # 6. Get the first match of all possible equations
+            regex = re.compile(rf"(\d+|{'|'.join(list(functions.keys()))})[{operators}]+\d+")
+            match = re.search(regex, message.content)
+            if not match:
+                return
 
             def parse(_match):
                 return _match.group().replace("(", "*(")
 
             message.content = re.sub(re.compile(r"\d\("), parse, message.content)  # type: ignore
+            funcs = "|".join(list(functions.keys()))
             regex = re.compile(
-                rf"({'|'.join(list(functions.keys()))})?([{operators}]+)?(\d+[{operators}]+)*(\d+)([{operators}]+)?"
+                rf"((([{operators}]+)?({funcs})?([{operators}]+)?(\d+[{operators}]+)*(\d+)([{operators}]+)?)+)"
             )
-            match = re.search(regex, message.content)
-            content = "".join(match.group())
+            match = re.findall(regex, message.content)
+            content = match[0][0]
             if not any(m in content for m in operators) or not content:
                 return
         except AttributeError:
@@ -247,6 +259,8 @@ class Listeners(commands.Cog):
             )
         except SyntaxError:
             return
+        except simpleeval.NumberTooHigh:
+            return await message.channel.send("Oops, that number is too high to count.")
         try:
             await message.channel.send(embed=embed)
         except disnake.HTTPException:
