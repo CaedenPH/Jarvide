@@ -198,11 +198,13 @@ class Fun(Cog):
         random_footer = random.choice(["loves to play this game", "must like excitement", "is definitely a risk taker",
                                        "definitely hates life", "plays this game 24/7", "has issues"
                                        "probably needs some help"])
+        ##making the embed
         embed = Embed(description=f"{random_choice}",
                       colour=embed_colour[random_choice]).set_footer(
             text=f"{ctx.author.name} {random_footer}",
             icon_url=(ctx.author.display_avatar.url)
         )
+
 
         return await ctx.send(embed=embed)
 
