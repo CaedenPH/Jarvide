@@ -190,24 +190,17 @@ class Fun(Cog):
 
     @command(aliases=["rr", "gun_game", "russianroulette", "gungame"])
     async def russian_roulette(self, ctx: Context):
-        ##makes the description of the embed
         random_choice = random.choice(['🌹 / **You lived**','<:gun:931861130488467456> / **You died**'])
-        ##chooses the color of the embed
         embed_colour = {"🌹 / **You lived**":0x32CD32, "<:gun:931861130488467456> / **You died**":0x8B0000}
-        ##randomly chooses the footer text
         random_footer = random.choice(["loves to play this game", "must like excitement", "is definitely a risk taker",
                                        "definitely hates life", "plays this game 24/7", "has issues"
                                        "probably needs some help"])
-        ##making the embed
-        embed = Embed(description=f"{random_choice}",
+        embed = Embed(description=random_choice,
                       colour=embed_colour[random_choice]).set_footer(
             text=f"{ctx.author.name} {random_footer}",
             icon_url=(ctx.author.display_avatar.url)
         )
-
-
         return await ctx.send(embed=embed)
-
 
 
 def setup(bot: Bot) -> None:
