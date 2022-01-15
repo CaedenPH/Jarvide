@@ -201,7 +201,7 @@ class Fun(Cog):
         return await ctx.send(embed=embed)
 
     @command(aliases=["8ball", "8_ball", "eightball"])
-    async def eight_ball(self, ctx: Context, *, message):
+    async def eight_ball(self, ctx: Context, *, message: str):
         """Responds to a user's question with a random answer."""
         random_response = random.choice(["yes", "no", "maybe", "that is true", "absolutely false", "stop the cap",
                                          "there is an argument against that", "I think that is true", "probably",
