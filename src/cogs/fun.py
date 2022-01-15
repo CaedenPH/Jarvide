@@ -188,23 +188,15 @@ class Fun(Cog):
 
         await ctx.send(embed=embed, view=Casino(ctx.author))
 
-    @command(aliases=["rr", "russian_roulette"])
-    async def russianroulette(self, ctx: Context):
-        """A game of life and death"""
-        random_number = random.randint(0, 5)
-        if random_number == 0:
-            embed = Embed(description="🔫 / **You died**",
-                          colour=0x8B0000).set_footer(
-                text=f"{ctx.author} died.",
-                icon_url=(ctx.author.display_avatar.url)
-            )
-            return await ctx.send(embed=embed)
-
-        embed = Embed(description="🌹 / **You lived**",
-                       colour=0x32CD32).set_footer(
-            text=f"{ctx.author} survived.",
-            icon_url=(ctx.author.display_avatar.url)
-        )
+    @command(aliases=["rr", "gun_game", "russianroulette", "gungame"])
+    async def russian_roulette(self, ctx: Context):
+        random_choice = random.choice(['🌹 / **You lived**','<:gun:931861130488467456> / **You died**'])
+        embed_colour = {"🌹 / **You lived**":0x32CD32, "<:gun:931861130488467456> / **You died**":0x8B0000}
+        random_footer = random.choice(["loves to play this game", "must like excitement", "is definitely a risk taker",
+                                       "definitely hates life", "plays this game 24/7", "has issues"
+                                       "probably needs some help"])
+        embed = Embed(description=random_choice,colour=embed_colour[random_choice]).set_footer(
+            text=f"{ctx.author.name} {random_footer}", icon_url=(ctx.author.display_avatar.url))
         return await ctx.send(embed=embed)
 
 
