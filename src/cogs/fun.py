@@ -190,15 +190,26 @@ class Fun(Cog):
 
     @command(aliases=["rr", "gun_game", "russianroulette", "gungame"])
     async def russian_roulette(self, ctx: Context):
-        """Simulates the experience of russian roulette - a 1/6 chance to die"""
+        """Simulates the experience of russian roulette - a 1/6 chance to die."""
         random_choice = random.choice(['🌹 / **You lived**','<:gun:931861130488467456> / **You died**'])
         embed_colour = {"🌹 / **You lived**":0x32CD32, "<:gun:931861130488467456> / **You died**":0x8B0000}
         random_footer = random.choice(["loves to play this game", "must like excitement", "is definitely a risk taker",
-                                       "definitely hates life", "plays this game 24/7", "has issues"
+                                       "definitely hates life", "plays this game 24/7", "has issues",
                                        "probably needs some help"])
-        embed = Embed(description=random_choice,colour=embed_colour[random_choice]).set_footer(
+        embed = Embed(description=random_choice, colour=embed_colour[random_choice]).set_footer(
             text=f"{ctx.author.name} {random_footer}", icon_url=(ctx.author.display_avatar.url))
         return await ctx.send(embed=embed)
+
+    @command(aliases=["8ball", "8_ball", "eightball"])
+    async def eight_ball(self, ctx: Context, *, message):
+        """Responds to a user's question with a random answer."""
+        responses = ["yes", "no", "maybe", "that is true", "absolutely false", "stop the cap",
+                     "there is no argument against that", "I don't think that is true", "probably", "really?... yes.",
+                     "you shouldn't have to be asking me this", "100% true", "100% false", "negative", "facts"]
+        random_response = random.choice(responses)
+        embed = Embed(title="8ball", description=random_response, colour=0x301934).set_footer(
+            text=message, icon_url=(ctx.author.display_avatar.url))
+        return await ctx.reply(embed=embed)
 
 
 def setup(bot: Bot) -> None:
