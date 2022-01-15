@@ -190,6 +190,7 @@ class Fun(Cog):
 
     @command(aliases=["rr", "gun_game", "russianroulette", "gungame"])
     async def russian_roulette(self, ctx: Context):
+        """Simulates the experience of russian roulette - a 1/6 chance to die"""
         random_choice = random.choice(['🌹 / **You lived**','<:gun:931861130488467456> / **You died**'])
         embed_colour = {"🌹 / **You lived**":0x32CD32, "<:gun:931861130488467456> / **You died**":0x8B0000}
         random_footer = random.choice(["loves to play this game", "must like excitement", "is definitely a risk taker",
