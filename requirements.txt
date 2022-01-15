@@ -6,3 +6,5 @@ motor>=2.3.1
 async-cse>=0.3.0
 time-str>=0.1.0
 python-decouple === 3.5
+cryptography>=36.0.1
+simpleeval>=0.9.11
