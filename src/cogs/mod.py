@@ -275,7 +275,7 @@ class Mod(commands.Cog):
     async def whois(self, ctx, member: discord.Member = None):
         member = member or ctx.author
         embed = discord.Embed(title=f"Whois {member.name}",timestamp=ctx.message.created_at,description=f"Here is some information about {member.mention}.")
-        embed.set_thumbnail(url=member.avatar_url)
+        embed.set_thumbnail(url=member.avatar.url)
         joined_at = disnake.utils.format_dt(member.joined_at)
         created_at = disnake.utils.format_dt(member.created_at)
         embed.add_field(name=f"📆 Joined {ctx.guild} at:", value=joined_at, inline=False)
