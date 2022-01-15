@@ -193,7 +193,7 @@ class Fun(Cog):
         ##makes the description of the embed
         random_choice = random.choice(['🌹 / **You lived**','<:gun:931861130488467456> / **You died**'])
         ##chooses the color of the embed
-        embed_colour = {"🌹 / **You lived**":0x32CD32, ":gun:931861130488467456> / **You died**":0x8B0000}
+        embed_colour = {"🌹 / **You lived**":0x32CD32, "<:gun:931861130488467456> / **You died**":0x8B0000}
         ##randomly chooses the footer text
         random_footer = random.choice(["loves to play this game", "must like excitement", "is definitely a risk taker",
                                        "definitely hates life", "plays this game 24/7", "has issues"
