@@ -222,6 +222,21 @@ class Fun(
         )
         await ctx.send(embed=embed, view=Casino(ctx.author))
 
+    @command(aliases=["8ball", "8_ball", "eightball"])
+    async def eight_ball(self, ctx: Context, *, message: str):
+        """Responds to a user's question with a random answer."""
+
+        random_response = random.choice([
+            "yes", "no", "maybe", "that is true", "absolutely false", "stop the cap",
+            "there is an argument against that", "I think that is true", "probably",
+            "really?", "you shouldn't have to be asking me this", "100% true",
+            "100% false", "negative", "facts"
+        ])
+        embed = Embed(title="8ball", description=random_response, colour=0x301934).set_footer(
+            text=message, icon_url=ctx.author.display_avatar.url)
+
+        return await ctx.reply(embed=embed)
+
     @command(aliases=["rr", "gun_game", "russianroulette", "gungame"])
     async def russian_roulette(self, ctx: Context):
         """Play a scary game of russian roulette...will you live or die?"""

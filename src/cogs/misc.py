@@ -1,3 +1,5 @@
+import asyncio
+from re import I
 from disnake import Member, Color, Embed
 import async_cse
 import random
@@ -10,7 +12,8 @@ from disnake.ext.commands import (
     CooldownMapping, 
     Bot, 
     Context, 
-    command
+    command,
+    cooldown
 )
 
 from ..bot import Jarvide
@@ -97,40 +100,54 @@ class Misc(
         await ctx.send(content="🏓**Pong**", embed=embed)
 
     @command(aliases=["bug", "broken"])
+    @cooldown(1, 30, BucketType.user)
     async def report(self, ctx: Context):
         """Found a bug? Report it!"""
 
         responses = []
-        for iteration, question in enumerate(
-            [
-                "sum up your report in less than 10 words",
+        iteration = 1
+        questions = [
+                "",
+                "sum up your report in less than 32 words",
                 "explain your report. present as detailed of a description as you can provide, including button clicks, errors shown (if any), file open, and intention",
-            ],
-            start=1,
-        ):
-            await ctx.send(
-                f"Please {question}\nType q to end your report\nQuestion number {iteration}/2"
+            ]
+
+        while iteration != 3:
+            m = await ctx.send(
+                f"Please {questions[iteration]}\nType q to end your report\nQuestion number {iteration}/2"
             )
 
-            message = await self.bot.wait_for(
+            try:
+                message = await self.bot.wait_for(
                 "message",
                 timeout=560,
                 check=lambda m: m.author == ctx.author and m.channel == ctx.channel,
             )
+            except asyncio.TimeoutError:
+                return await ctx.send("You ran out of time, create a new one wt")
+
             if message.content.lower() == "q":
                 return
 
+            if iteration == 1 and len(message.content) > 256:
+                continue
+
             responses.append(message.content)
+            iteration += 1
 
         embed = Embed(
             title=responses[0],
-            description="```yaml\n" + responses[0] + "```",
+            description="```yaml\n" + responses[1] + "```",
             timestamp=ctx.message.created_at,
-        ).set_author(name=f"From {ctx.author.name}", icon_url=ctx.author.avatar.url)
+        ).set_author(
+            name=f"From {ctx.author.name}#{ctx.author.discriminator} - id: {ctx.author.id}", 
+            icon_url=ctx.author.avatar.url
+        )
+
 
         await self.bot.report_channel.send(embed=embed)
-        bug_id = random.choice(self.bot.bugs)
 
+        bug_id = random.choice(self.bot.bugs)
         embed = EmbedFactory.ide_embed(ctx, bug_string.format(bug_id))
         await ctx.send(embed=embed)
 

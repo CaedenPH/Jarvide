@@ -14,6 +14,9 @@ from src.utils.confirmation import prompt
 from ..bot import Jarvide
 
 
+class ParseError(Exception):
+    """Could not parse item"""
+
 class Mod(commands.Cog):
     """Moderation related commands."""
 
@@ -21,6 +24,71 @@ class Mod(commands.Cog):
         self.bot = bot
         self.emoji = "🔨"
         self.short_help_doc = self.__doc__
+
+    def parse(self, content: str) -> int:
+        """Parse time like 1h into seconds"""
+
+        numbers = ''.join(list(filter(lambda m: not m.isalpha(), content)))
+        letters = ''.join(list(filter(lambda m: m.isalpha(), content)))
+
+        duration = [char for char in letters if char in ['s', 'm', 'h']]
+        seconds = numbers
+
+        if not duration:
+            seconds = int(numbers)
+        if len(duration) >= 2:
+            raise ParseError()  
+        
+        duration = ''.join(duration)
+        if duration == "s":
+            seconds = int(seconds) * 1
+        elif duration == "m":
+            seconds = int(seconds) * 60
+        elif duration == "h":
+            seconds = int(seconds) * 3600
+        return seconds
+
+    @commands.command()
+    @commands.guild_only()
+    @commands.has_permissions(manage_channels=True)
+    @commands.bot_has_permissions(manage_channels=True)
+    async def slowmode(
+        self,
+        ctx: Context,
+        channel: Greedy[disnake.TextChannel] = None,
+        slowmode: str = None,
+    ):
+        """Change/disable slowmode in a channel"""
+
+        channel = channel or ctx.channel
+        if slowmode is None:
+            return await ctx.send(
+                f"{ctx.author.mention}, please provide a number to set the slowmode as or 0 to remove the slowmode."
+            )
+        
+        try:
+            seconds = self.parse(slowmode)
+        except ParseError:
+            return await ctx.send(
+                f"{ctx.author.mention}, you did not specify your seconds in the correct format. Try a format like 12s"
+            )
+
+        if seconds <= 0:
+            seconds = 0
+        
+        if not isinstance(channel, list):
+            await channel.edit(slowmode_delay=seconds)
+        else:
+            for editchannel in channel:
+                await editchannel.edit(slowmode_delay=seconds)
+        
+        if slowmode == 0:
+            return await ctx.send(f"I've reset the slowmode in {channel}")
+        await ctx.send(
+            f"I've set the channel's slowmode to {seconds} {'seconds' if seconds > 1 else 'second'}."
+        )
+
+
 
     @commands.command()
     @commands.guild_only()
@@ -120,31 +188,7 @@ class Mod(commands.Cog):
         else:
             await ctx.send("Cancelled the unban")
 
-    @commands.command()
-    @commands.guild_only()
-    @commands.has_permissions(manage_channels=True)
-    @commands.bot_has_permissions(manage_channels=True)
-    async def slowmode(
-        self,
-        ctx: Context,
-        channel: Greedy[disnake.TextChannel] = None,
-        slowmode: int = None,
-    ):
-        """Change/disable slowmode in a channel"""
-        channel = channel or ctx.channel
-        if slowmode is None:
-            return await ctx.send(
-                f"{ctx.author.mention}, please provide a number to set the slowmode as or 0 to remove the slowmode."
-            )
-        for editchannel in channel:
-            await editchannel.edit(slowmode_delay=slowmode)
-        if slowmode == 0:
-            return await ctx.send("I've reset the channel's slowmode")
-        else:
-            return await ctx.send(
-                f"I've set the channel's slowmode to {slowmode} {'seconds' if slowmode > 1 else 'second'}."
-            )
-
+    
     @commands.command(aliases=["mute", "silence", "shush"])
     @commands.guild_only()
     @commands.has_permissions(moderate_members=True)

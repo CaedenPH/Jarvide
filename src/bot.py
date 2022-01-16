@@ -89,13 +89,12 @@ class Jarvide(Bot):
             [
                 char
                 for char in new_msg.content
-                if (char in string.ascii_letters or char.isspace())
+                if (char in string.ascii_letters or char.isspace() or char == '8')
             ]
         )
         message_content = " ".join(
             word for word in new_msg.content.split() if word != "jarvide"
         )
-
         list_of_commands = {c: [c.name, *c.aliases] for c in self.commands}
         commands_in_message = list(
             filter(
@@ -112,7 +111,6 @@ class Jarvide(Bot):
                 commands_in_message = commands_in_message[::-1]
 
         cmd = commands_in_message[0][0]
-
         args = new_message.content.partition(
             [i for i in list_of_commands[cmd] if i in new_msg.content.lower()][0]
         )[2]
