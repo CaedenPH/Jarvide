@@ -5,12 +5,13 @@ import typing
 import aiohttp
 
 from disnake import Message, AllowedMentions, Intents
-from disnake.ext.commands import Bot
+from disnake.ext.commands import (
+    Bot
+)
 from motor.motor_asyncio import AsyncIOMotorClient
 from odmantic import AIOEngine
 
 from src.utils.utils import main_embed
-from src.cogs.ide.github import GitHubHTTP
 from .HIDDEN import TOKEN, MONGO_URI
 from decouple import config
 
@@ -111,15 +112,13 @@ class Jarvide(Bot):
                 commands_in_message = commands_in_message[::-1]
 
         cmd = commands_in_message[0][0]
-        ctx = await super().get_context(new_msg)
-        user_authorized = await cmd.can_run(ctx)
-        if user_authorized:
-            args = new_message.content.partition(
-                [i for i in list_of_commands[cmd] if i in new_msg.content.lower()][0]
-            )[2]
-            new_message = copy.copy(new_msg)
-            new_message.content = f"jarvide {cmd.name}{args}"
-            await super().process_commands(new_message)
+
+        args = new_message.content.partition(
+            [i for i in list_of_commands[cmd] if i in new_msg.content.lower()][0]
+        )[2]
+        new_message = copy.copy(new_msg)
+        new_message.content = f"jarvide {cmd.name}{args}"
+        await super().process_commands(new_message)
 
     async def on_ready(self) -> None:
         self.send_guild = self.get_guild(926811692019626064)

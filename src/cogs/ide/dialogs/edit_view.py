@@ -539,5 +539,5 @@ class EditView(disnake.ui.View):
         await self.bot_message.edit(embed=embed, view=self.parent)
 
 
-def setup(bot: commands.Bot):
+def setup(bot: Jarvide):
     pass

@@ -11,13 +11,13 @@ from typing import Union
 
 from src.utils.confirmation import prompt
 
-from decouple import config
+from ..bot import Jarvide
 
 
 class Mod(commands.Cog):
     """Moderation related commands."""
 
-    def __init__(self, bot: commands.Bot) -> None:
+    def __init__(self, bot: Jarvide) -> None:
         self.bot = bot
         self.emoji = "🔨"
         self.short_help_doc = self.__doc__
@@ -270,5 +270,5 @@ class Mod(commands.Cog):
 
         await ctx.send('Warn was successfully deleted.')
 
-def setup(bot: commands.Bot) -> None:
+def setup(bot: Jarvide) -> None:
     bot.add_cog(Mod(bot))

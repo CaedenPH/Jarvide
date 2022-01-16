@@ -4,12 +4,12 @@ from disnake.ext.commands import (
     Cog,
     BucketType,
     CooldownMapping,
-    Bot,
     Context,
     command,
     has_permissions,
 )
 
+from ..bot import Jarvide
 
 class Config(
     Cog,
@@ -66,5 +66,5 @@ class Config(
         # TODO: data
 
 
-def setup(bot: Bot):
+def setup(bot: Jarvide):
     bot.add_cog(Config(bot))

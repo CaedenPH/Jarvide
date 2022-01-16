@@ -1,9 +1,10 @@
 from collections.abc import Mapping
 from disnake import utils, Embed, Color, MessageInteraction, SelectOption
 from disnake.ui import View, Select
-from disnake.ext.commands import Bot, Command, Cog, command, HelpCommand, Context, Group
+from disnake.ext.commands import Command, Cog, command, HelpCommand, Context, Group
 from typing import Optional, List
 
+from ..bot import Jarvide
 
 class HelpCog(Cog):
     def __init__(self, bot):
@@ -19,7 +20,7 @@ class HelpCog(Cog):
             await ctx.send_help()
 
 
-def setup(bot: Bot):
+def setup(bot: Jarvide):
     bot.add_cog(HelpCog(bot))
 
 
@@ -87,7 +88,7 @@ class JarvideHelp(HelpCommand):
         Views from the HelpView() class
         TO-DO : Invite Button and URL , Change Help Command interface with SHort help text
         """
-        _bot: Bot = self.context.bot
+        _bot: Jarvide = self.context.bot
 
         embed = Embed(
             color=Color.og_blurple(),

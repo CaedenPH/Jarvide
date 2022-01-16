@@ -69,7 +69,7 @@ class File:
     async def from_url(
         cls: Type[Self],
         *,
-        bot: commands.Bot,
+        bot: Jarvide,
         url,
     ) -> Self:
 

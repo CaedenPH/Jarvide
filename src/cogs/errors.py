@@ -3,7 +3,6 @@ import random
 
 from disnake.ext.commands import (
     Cog,
-    Bot,
     BotMissingPermissions,
     MissingPermissions,
     MissingRole,
@@ -21,9 +20,10 @@ from disnake.ext.commands import (
 from disnake import Embed, Color
 from disnake.ext.commands.errors import CommandNotFound, RoleNotFound, NotOwner
 
+from ..bot import Jarvide
 
 class ErrorHandler(Cog):
-    def __init__(self, bot: Bot):
+    def __init__(self, bot: Jarvide):
         self.bot = bot
 
     @staticmethod
@@ -176,5 +176,5 @@ class ErrorHandler(Cog):
             raise error
 
 
-def setup(bot: Bot):
+def setup(bot: Jarvide):
     bot.add_cog(ErrorHandler(bot))
