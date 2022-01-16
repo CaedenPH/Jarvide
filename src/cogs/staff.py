@@ -1,12 +1,15 @@
 import disnake
 
-from disnake.ext.commands import Cog, Context, Bot, command
+from disnake.ext.commands import Cog, Context, command
+from ..bot import Jarvide
 
-
-class Staff(Cog, command_attrs={"hidden": True}):
+class Staff(
+    Cog, 
+    command_attrs={"hidden": True}
+):
     """Staff cog for only staff members to use."""
 
-    def __init__(self, bot: Bot) -> None:
+    def __init__(self, bot: Jarvide) -> None:
         self.bot = bot
 
     async def cog_check(self, ctx: Context) -> bool:
@@ -53,5 +56,5 @@ class Staff(Cog, command_attrs={"hidden": True}):
         await ctx.send(embed=embed)
 
 
-def setup(bot: Bot) -> None:
+def setup(bot: Jarvide) -> None:
     bot.add_cog(Staff(bot))

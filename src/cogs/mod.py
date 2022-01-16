@@ -11,16 +11,84 @@ from typing import Union
 
 from src.utils.confirmation import prompt
 
-from decouple import config
+from ..bot import Jarvide
 
+
+class ParseError(Exception):
+    """Could not parse item"""
 
 class Mod(commands.Cog):
     """Moderation related commands."""
 
-    def __init__(self, bot: commands.Bot) -> None:
+    def __init__(self, bot: Jarvide) -> None:
         self.bot = bot
         self.emoji = "🔨"
         self.short_help_doc = self.__doc__
+
+    def parse(self, content: str) -> int:
+        """Parse time like 1h into seconds"""
+
+        numbers = ''.join(list(filter(lambda m: not m.isalpha(), content)))
+        letters = ''.join(list(filter(lambda m: m.isalpha(), content)))
+
+        duration = [char for char in letters if char in ['s', 'm', 'h']]
+        seconds = numbers
+
+        if not duration:
+            seconds = int(numbers)
+        if len(duration) >= 2:
+            raise ParseError()  
+        
+        duration = ''.join(duration)
+        if duration == "s":
+            seconds = int(seconds) * 1
+        elif duration == "m":
+            seconds = int(seconds) * 60
+        elif duration == "h":
+            seconds = int(seconds) * 3600
+        return seconds
+
+    @commands.command()
+    @commands.guild_only()
+    @commands.has_permissions(manage_channels=True)
+    @commands.bot_has_permissions(manage_channels=True)
+    async def slowmode(
+        self,
+        ctx: Context,
+        channel: Greedy[disnake.TextChannel] = None,
+        slowmode: str = None,
+    ):
+        """Change/disable slowmode in a channel"""
+
+        channel = channel or ctx.channel
+        if slowmode is None:
+            return await ctx.send(
+                f"{ctx.author.mention}, please provide a number to set the slowmode as or 0 to remove the slowmode."
+            )
+        
+        try:
+            seconds = self.parse(slowmode)
+        except ParseError:
+            return await ctx.send(
+                f"{ctx.author.mention}, you did not specify your seconds in the correct format. Try a format like 12s"
+            )
+
+        if seconds <= 0:
+            seconds = 0
+        
+        if not isinstance(channel, list):
+            await channel.edit(slowmode_delay=seconds)
+        else:
+            for editchannel in channel:
+                await editchannel.edit(slowmode_delay=seconds)
+        
+        if slowmode == 0:
+            return await ctx.send(f"I've reset the slowmode in {channel}")
+        await ctx.send(
+            f"I've set the channel's slowmode to {seconds} {'seconds' if seconds > 1 else 'second'}."
+        )
+
+
 
     @commands.command()
     @commands.guild_only()
@@ -120,31 +188,7 @@ class Mod(commands.Cog):
         else:
             await ctx.send("Cancelled the unban")
 
-    @commands.command()
-    @commands.guild_only()
-    @commands.has_permissions(manage_channels=True)
-    @commands.bot_has_permissions(manage_channels=True)
-    async def slowmode(
-        self,
-        ctx: Context,
-        channel: Greedy[disnake.TextChannel] = None,
-        slowmode: int = None,
-    ):
-        """Change/disable slowmode in a channel"""
-        channel = channel or ctx.channel
-        if slowmode is None:
-            return await ctx.send(
-                f"{ctx.author.mention}, please provide a number to set the slowmode as or 0 to remove the slowmode."
-            )
-        for editchannel in channel:
-            await editchannel.edit(slowmode_delay=slowmode)
-        if slowmode == 0:
-            return await ctx.send("I've reset the channel's slowmode")
-        else:
-            return await ctx.send(
-                f"I've set the channel's slowmode to {slowmode} {'seconds' if slowmode > 1 else 'second'}."
-            )
-
+    
     @commands.command(aliases=["mute", "silence", "shush"])
     @commands.guild_only()
     @commands.has_permissions(moderate_members=True)
@@ -270,30 +314,6 @@ class Mod(commands.Cog):
 
         await ctx.send('Warn was successfully deleted.')
 
-    @commands.command()
-    @commands.guild_only()
-    async def whois(self, ctx, member: discord.Member = None):
-        member = member or ctx.author
-        embed = discord.Embed(title=f"Whois {member.name}",timestamp=ctx.message.created_at,description=f"Here is some information about {member.mention}.")
-        embed.set_thumbnail(url=member.avatar.url)
-        joined_at = disnake.utils.format_dt(member.joined_at)
-        created_at = disnake.utils.format_dt(member.created_at)
-        embed.add_field(name=f"📆 Joined {ctx.guild} at:", value=joined_at, inline=False)
-        embed.add_field(name="📆 Account created at:", value=created_at, inline=False)
-        members = sorted(ctx.guild.members, key=lambda m: m.joined_at)
-        embed.add_field(name="🔢 Join position", value=str(members.index(member)+1), inline=False)
-        role_string = ' '.join([r.mention for r in member.roles][1:])
-        embed.add_field(name=f"📜 Roles [{len(member.roles)-1}]", value=f"{role_string if len(member.roles) > 1 else "member has no roles."}", inline=False)
-        embed.add_field(name=f"🆔 member ID:",value=f"{member.id}", inline=False)
-        if str(member.status) == "dnd":
-            embed.add_field(name=f"<:status:838834549064466432> Status:",value=f"<:dnd:838833690787577900> Do Not Disturb", inline=False)
-        elif str(member.status) == "online":
-            embed.add_field(name=f"<:status:838834549064466432> Status:",value=f"<:online:838833901660799017> Online", inline=False)
-        elif str(member.status) == "idle":
-            embed.add_field(name=f"<:status:838834549064466432> Status:",value=f"<:idle:838833627076100136> Idle", inline=False)
-        elif str(member.status) == "offline":
-            embed.add_field(name=f"<:status:838834549064466432> Status:",value=f"<:invisible:838833583828238338> Offline", inline=False)
-        await ctx.send(embed=embed)
 
-def setup(bot: commands.Bot) -> None:
+def setup(bot: Jarvide) -> None:
     bot.add_cog(Mod(bot))

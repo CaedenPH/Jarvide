@@ -1,16 +1,16 @@
 import copy
-
 import disnake
 
 from .dialogs import OpenView
 from src.utils import EmbedFactory
 from disnake.ext import commands, tasks
 
+from ...bot import Jarvide
 
 class Ide(commands.Cog):
     """Ide cog"""
 
-    def __init__(self, bot: commands.Bot):
+    def __init__(self, bot: Jarvide):
         self.bot = bot
         self.emoji = "📂"
         self.short_help_doc = "IDE commands , to view and edit your code"
@@ -62,6 +62,6 @@ class Ide(commands.Cog):
         self.bot.active_commands[ctx.channel][ctx.author] = view.bot_message.id
 
 
-def setup(bot: commands.Bot) -> None:
+def setup(bot: Jarvide) -> None:
     """Setup Ide cog"""
     bot.add_cog(Ide(bot))

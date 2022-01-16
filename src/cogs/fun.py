@@ -1,12 +1,22 @@
 import asyncio
+from time import time
 import disnake
 import random
+import aiohttp
 
 from disnake import MessageInteraction, Embed, Member, ButtonStyle
 from disnake.ui import View, button, Button
-from disnake.ext.commands import Cog, Bot, command, guild_only, Context
+from disnake.ext.commands import (
+    Cog, 
+    command, 
+    guild_only, 
+    Context,
+    CooldownMapping,
+    BucketType
+)
 from typing import Optional
 
+from ..bot import Jarvide
 
 class Casino(View):
     def __init__(self, author: Member) -> None:
@@ -98,80 +108,96 @@ class Casino(View):
         await interaction.edit_original_message(view=None)
         self.stop()
 
+class RussianRoulette(View):
+    def __init__(self, ctx):
+        super().__init__(timeout=180)
 
-class Fun(Cog):
+        self.ctx = ctx
+
+    async def on_timeout(self) -> None:
+        for child in self.children:
+            self.remove_item(child)
+            self.stop()
+
+    async def interaction_check(self, interaction: MessageInteraction) -> bool:
+        return (
+            interaction.author == self.ctx.author
+            and interaction.channel == self.ctx.channel
+        )
+
+    @button(label="Play", style=ButtonStyle.green, emoji="▶️")
+    async def play(self, button: Button, interaction: MessageInteraction) -> None:
+        random_choice = random.choice(['🌹 / **You lived**','<:gun:931861130488467456> / **You died**'])
+        embed_colour = {"🌹 / **You lived**":0x32CD32, "<:gun:931861130488467456> / **You died**":0x8B0000}
+
+        footer_text = random.choice(
+            ["loves to play this game", 
+            "must like excitement", 
+            "is definitely a risk taker",
+            "definitely hates life", 
+            "plays this game 24/7", 
+            "has issues",
+            "probably needs some help"
+            ]
+        )
+
+        embed = Embed(
+            description=random_choice,
+            colour=embed_colour[random_choice]
+        ).set_footer(
+            text=f"{interaction.author.name} {footer_text}", 
+            icon_url=(interaction.author.display_avatar.url)
+        )
+
+        await interaction.response.defer()
+        await interaction.edit_original_message(embed=embed, view=self)
+
+
+    @button(label="Exit", style=ButtonStyle.red, emoji="⏹️")
+    async def exit(self, button: Button, interaction: MessageInteraction) -> None:
+        await interaction.response.defer()
+        await interaction.edit_original_message(view=None)
+        self.stop()
+
+
+class Fun(
+    Cog,
+    command_attrs={"cooldown": CooldownMapping.from_cooldown(1, 3.5, BucketType.user)},
+):
     """Fun cog for fun related commands."""
 
-    def __init__(self, bot: Bot) -> None:
+    def __init__(self, bot: Jarvide) -> None:
         self.bot = bot
+
         self.emoji = "🍿"
         self.short_help_doc = "Fun commands to play around with!"
 
     @command(aliases=["gaymeter", "gaypercent"])
     async def howgay(self, ctx, member: Member = None) -> None:
         """Shows how gay you are."""
-        member = member or ctx.author
 
+        member = member or ctx.author
         await ctx.send(f"{member.mention} is {random.randint(1, 100)}% gay")
 
     @command(aliases=["cutemeter", "cutepercent"])
     async def howcute(self, ctx: Context, member: Member = None):
         """Shows how cute you are."""
+
         member = member or ctx.author
-
         await ctx.send(f"{member.mention} is {random.randint(1, 100)}% cute!")
-
-    @command(aliases=["pick", "random"])
-    async def choose(self, ctx: Context, *arguments):
-        """Chooses between multiple choices."""
-
-        await ctx.send(random.choice(arguments))
-
-    @command()
-    @guild_only()
-    async def kiss(self, ctx: Context, member: Member = None):
-        """Kiss a member."""
-
-        if not member:
-            return await ctx.send("You didn't mention a member.")
-
-        embed1 = Embed(
-            title=f"how cute, {ctx.author.mention} has kissed {member.name}"
-        ).set_image(
-            url="https://media.tenor.co/videos/fc567d93fe70d2e0567325df0410959b/mp4"
-        )
-
-        await ctx.send(embed=embed1)
-
-    @command()
-    @guild_only()
-    async def slap(
-        self, ctx: Context, member: Member = None
-    ) -> Optional[disnake.Message]:
-        """Slap a member."""
-        if member is None:
-            return await ctx.send("You didn't mention a member.")
-
-        embed2 = Embed(
-            title=f"{ctx.author.mention} has slapped {member.name}"
-        ).set_image(
-            url="https://media.tenor.co/videos/318d19d23b24c54ab51cacf5ef4bfccf/mp4"
-        )
-
-        await ctx.send(embed=embed2)
 
     @command(aliases=["howsimp"])
     async def simpmeter(self, ctx: Context, member: Member = None) -> None:
         """Shows how much of a simp you are."""
-        member = member or ctx.author
 
+        member = member or ctx.author
         await ctx.send(f"{member.mention} is {random.randint(1, 100)}% a simp!")
 
     @command(aliases=["howlongpp", "pplength"])
     async def ppmeter(self, ctx: Context, member: Member = None) -> None:
         """Shows your how long is your pp."""
-        member = member or ctx.author
 
+        member = member or ctx.author
         inches = random.randint(1, 12)
         size = "small" if inches <= 6 else "big"
 
@@ -179,34 +205,63 @@ class Fun(Cog):
             f"{member.mention} is packing {inches} inches, wow such a {size} pp!"
         )
 
+    @command(aliases=["pick", "random"])
+    async def choose(self, ctx: Context, *arguments):
+        """Chooses between multiple choices."""
+
+        if not arguments:
+            return await ctx.send("Uh oh! You didn't specify anything for me to choose from...")
+        await ctx.send(random.choice(arguments))
+
     @command()
     async def casino(self, ctx: Context) -> None:
         """Play the casino!"""
+        
         embed = Embed(title="Casino Machine $", description="```000```").set_footer(
             text="Get Three numbers in a row for a PRIZE"
         )
-
         await ctx.send(embed=embed, view=Casino(ctx.author))
 
-    @command(aliases=["rr", "russian_roulette"])
-    async def russianroulette(self, ctx: Context):
-        """A game of life and death"""
-        random_number = random.randint(0, 5)
-        if random_number == 0:
-            embed = Embed(description="🔫 / **You died**",
-                          colour=0x8B0000).set_footer(
-                text=f"{ctx.author} died.",
-                icon_url=(ctx.author.display_avatar.url)
-            )
-            return await ctx.send(embed=embed)
+    @command(aliases=["8ball", "8_ball", "eightball"])
+    async def eight_ball(self, ctx: Context, *, message: str):
+        """Responds to a user's question with a random answer."""
 
-        embed = Embed(description="🌹 / **You lived**",
-                       colour=0x32CD32).set_footer(
-            text=f"{ctx.author} survived.",
-            icon_url=(ctx.author.display_avatar.url)
+        random_response = random.choice([
+            "yes", "no", "maybe", "that is true", "absolutely false", "stop the cap",
+            "there is an argument against that", "I think that is true", "probably",
+            "really?", "you shouldn't have to be asking me this", "100% true",
+            "100% false", "negative", "facts"
+        ])
+        embed = Embed(title="8ball", description=random_response, colour=0x301934).set_footer(
+            text=message, icon_url=ctx.author.display_avatar.url)
+
+        return await ctx.reply(embed=embed)
+
+    @command(aliases=["rr", "gun_game", "russianroulette", "gungame"])
+    async def russian_roulette(self, ctx: Context):
+        """Play a scary game of russian roulette...will you live or die?"""
+
+        embed = Embed(title="Russian Roulette").set_footer(
+            text="Dont die!"
         )
-        return await ctx.send(embed=embed)
+        await ctx.send(embed=embed, view=RussianRoulette(ctx))
+
+    @command(aliases=["insult"])
+    async def roast(self, ctx: Context, member: Member):
+        """Roast someone!"""
+
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get(
+                "https://evilinsult.com/generate_insult.php?lang=en&type=json"
+            ) as resp:
+                await ctx.send(
+                    member.mention,
+                    embed=Embed(
+                        description=(await resp.json())["insult"], color=0x90EE90
+                    ),
+                )
 
 
-def setup(bot: Bot) -> None:
+
+def setup(bot: Jarvide) -> None:
     bot.add_cog(Fun(bot))
