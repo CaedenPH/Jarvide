@@ -206,10 +206,11 @@ class Fun(Cog):
         random_response = random.choice(["yes", "no", "maybe", "that is true", "absolutely false", "stop the cap",
                                          "there is an argument against that", "I think that is true", "probably",
                                          "really?", "you shouldn't have to be asking me this", "100% true",
-                                         "100% false", "negative", "facts"])
+                                         "100% false", "negative", "facts", "not the best", "you could do better"])
 
-        embed = Embed(title="8ball", description=random_response, colour=0x301934).set_footer(
-            text=message, icon_url=ctx.author.display_avatar.url)
+        embed = Embed(title="<:8_ball:932328134861275196> 8Ball <:8_ball:932328134861275196>",
+                      description=f"Question:`{message}`\nAnswer:`{random_response}`", colour=0x301934).set_footer(
+            text=f"asked by {ctx.author.name}", icon_url=ctx.author.display_avatar.url)
 
         return await ctx.reply(embed=embed)
 
