@@ -227,13 +227,13 @@ class Fun(
         """Responds to a user's question with a random answer."""
 
         random_response = random.choice([
-            "yes", "no", "maybe", "that is true", "absolutely false", "stop the cap",
+            "yes", "no", "maybe", "that is true", "absolutely false", "as I see it, no.",
             "there is an argument against that", "I think that is true", "probably",
             "really?", "you shouldn't have to be asking me this", "100% true",
-            "100% false", "negative", "facts"
+            "100% false", "negative", "facts", "outlook not so good.", "concentrate and ask again."
         ])
-        embed = Embed(title="8ball", description=random_response, colour=0x301934).set_footer(
-            text=message, icon_url=ctx.author.display_avatar.url)
+        embed = Embed(title="8ball", description=f"Question: `{message}` \nAnswer: `{random_response}`", colour=0x301934).set_footer(
+            text=f"asked by {ctx.author}", icon_url=ctx.author.display_avatar.url)
 
         return await ctx.reply(embed=embed)
 
