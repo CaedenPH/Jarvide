@@ -182,11 +182,11 @@ class Dice(View):
     @button(label="Roll", style=ButtonStyle.green, emoji="▶️")
     async def roll(self, button: Button, interaction: MessageInteraction) -> None:
         random_number = random.randint(0,5)
-        emoji = random.choice({
+        emoji = {
             0:"<:dice1:932735376089559090>", 1:"<:dice2:932735375649157122>",
             2:"<:dice3:932735376236363866>", 3:"<:dice4:932735376160862278>", 
             4:"<:dice5:932735376118923264>", 5:"<:dice6:932735376274120765>"
-            })
+            }
         embed = Embed(
             title="<:dicetitle:932727881069641858> Dice <:dicetitle:932727881069641858>",
             description=f"You rolled a: {emoji[random_number]} `{random_number}` {emoji[random_number]}",
