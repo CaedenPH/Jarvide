@@ -164,17 +164,17 @@ class RussianRoulette(View):
 
 class Dice(View):
     def __init__(self, ctx):
-        super().__init__(timeout=100)
-        
+        super().__init__(timeout=180)
+
         self.ctx = ctx
 
     async def on_timeout(self) -> None:
         for child in self.children:
-            self.remove(child)
-            self.stop
-    
+            self.remove_item(child)
+            self.stop()
+
     async def interaction_check(self, interaction: MessageInteraction) -> bool:
-        return(
+        return (
             interaction.author == self.ctx.author
             and interaction.channel == self.ctx.channel
         )
