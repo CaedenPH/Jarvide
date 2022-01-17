@@ -1,4 +1,7 @@
+from ast import alias
 import asyncio
+from re import S
+from sqlite3 import IntegrityError
 from time import time
 import disnake
 import random
@@ -159,6 +162,47 @@ class RussianRoulette(View):
         await interaction.edit_original_message(view=None)
         self.stop()
 
+class Dice(View):
+    def __init__(self, ctx):
+        super().__init__(timeout=100)
+        
+        self.ctx = ctx
+
+    async def on_timeout(self) -> None:
+        for child in self.children:
+            self.remove(child)
+            self.stop
+    
+    async def interaction_check(self, interaction: MessageInteraction) -> bool:
+        return(
+            interaction.author == self.ctx.author
+            and interaction.channel == self.ctx.channel
+        )
+    
+    @button(label="Roll", style=ButtonStyle.green, emoji="▶️")
+    async def roll(self, button: Button, interaction: MessageInteraction) -> None:
+        random_number = random.randint(0,5)
+        emoji = random.choice({
+            0:"<:dice1:932735376089559090>", 1:"<:dice2:932735375649157122>",
+            2:"<:dice3:932735376236363866>", 3:"<:dice4:932735376160862278>", 
+            4:"<:dice5:932735376118923264>", 5:"<:dice6:932735376274120765>"
+            })
+        embed = Embed(
+            title="<:dicetitle:932727881069641858> Dice <:dicetitle:932727881069641858>",
+            description=f"You rolled a: {emoji[random_number]} `{random_number}` {emoji[random_number]}",
+            color="0x00ff99").set_footer(
+                text=f"{interaction.author.name} is playing with some dice",
+                icon_url=(interaction.author.display_avatar.url)
+            )
+        await interaction.response.defer()
+        await interaction.edit_original_message(embed=embed, view=self)
+        
+    @button(label="Stop", style=ButtonStyle.red, emoji="⏹️")
+    async def Stop(self, button: Button, interaction: MessageInteraction) -> None:
+        await interaction.response.defer()
+        await interaction.edit_original_message(view=None)
+        self.stop()
+
 
 class Fun(
     Cog,
@@ -263,6 +307,15 @@ class Fun(
                 )
 
 
+    @command(aliases=["die"])
+    async def dice(self, ctx: Context):
+        """Stimulates a dice roll"""
+        embed = Embed(
+            title="<:dicetitle:932727881069641858> Play now <:dicetitle:932727881069641858>",
+            description="Your random roll awaits",
+            color=0x00ff99
+        )
+        await ctx.send(embed=embed, view=Dice(ctx))
 
 def setup(bot: Jarvide) -> None:
     bot.add_cog(Fun(bot))
