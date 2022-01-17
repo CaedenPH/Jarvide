@@ -106,9 +106,8 @@ class Jarvide(Bot):
         if len(commands_in_message) <= 0:
             return
 
-        if "help" in [k[0].name for k in commands_in_message]:
-            if commands_in_message[0][0].name != "help":
-                commands_in_message = commands_in_message[::-1]
+        if "help" in [k[0].name for k in commands_in_message] and commands_in_message[0][0].name != "help":
+            commands_in_message = commands_in_message[::-1]
 
         cmd = commands_in_message[0][0]
         args = new_message.content.partition(

@@ -1,6 +1,4 @@
 import asyncio
-from time import time
-import disnake
 import random
 import aiohttp
 
@@ -8,13 +6,11 @@ from disnake import MessageInteraction, Embed, Member, ButtonStyle
 from disnake.ui import View, button, Button
 from disnake.ext.commands import (
     Cog, 
-    command, 
-    guild_only, 
+    command,
     Context,
     CooldownMapping,
     BucketType
 )
-from typing import Optional
 
 from ..bot import Jarvide
 

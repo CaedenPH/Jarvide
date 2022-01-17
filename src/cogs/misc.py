@@ -1,6 +1,6 @@
 import asyncio
 from re import I
-from disnake import Member, Color, Embed
+from disnake import Color, Embed
 import async_cse
 import random
 
