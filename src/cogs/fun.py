@@ -17,6 +17,7 @@ from ..bot import Jarvide
 class Casino(View):
     def __init__(self, author: Member) -> None:
         self.author = author
+        self.defualtstring = ["Casino Machine $", "Get Three numbers in a row for a PRIZE"]
         super().__init__(timeout=60.0)
         self.retry.disabled = True
 
@@ -38,8 +39,8 @@ class Casino(View):
     async def play(self, button: Button, interaction: MessageInteraction) -> None:
         self.exit.disabled = True
         self.play.disabled = True
-        intsthink = Embed(title="Casino Machine $", description="```...```").set_footer(
-            text="Get Three numbers in a row for a PRIZE"
+        intsthink = Embed(title=self.defualtstring[0], description="```...```").set_footer(
+            text=self.defualtstring[1]
         )
 
         await interaction.response.edit_message(embed=intsthink, view=self)
@@ -50,8 +51,8 @@ class Casino(View):
         for i in r_ints:
             result.append(str(i))
             ints = Embed(
-                title="Casino Machine $", description=f"```{''.join(result)}```"
-            ).set_footer(text="Get Three numbers in a row for a PRIZE")
+                title=self.defualtstring[0], description=f"```{''.join(result)}```"
+            ).set_footer(text=self.defualtstring[1])
             await interaction.edit_original_message(embed=ints, view=self)
             await asyncio.sleep(0.2)
 
@@ -70,8 +71,8 @@ class Casino(View):
     @button(label="Retry", style=ButtonStyle.green, emoji="🔄")
     async def retry(self, button: Button, interaction: MessageInteraction) -> None:
         intsthink1 = Embed(
-            title="Casino Machine $", description="```...```"
-        ).set_footer(text="Get Three numbers in a row for a PRIZE")
+            title=self.defualtstring[0], description="```...```"
+        ).set_footer(text=self.defualtstring[1])
         self.exit.disabled = True
         await interaction.response.edit_message(embed=intsthink1, view=self)
 
@@ -81,8 +82,8 @@ class Casino(View):
         for i in r_ints:
             result.append(str(i))
             ints = Embed(
-                title="Casino Machine $", description=f"```{''.join(result)}```"
-            ).set_footer(text="Get Three numbers in a row for a PRIZE")
+                title=self.defualtstring[0], description=f"```{''.join(result)}```"
+            ).set_footer(text=self.defualtstring[1])
             await interaction.edit_original_message(embed=ints, view=self)
             await asyncio.sleep(0.2)
 
@@ -213,8 +214,8 @@ class Fun(
     async def casino(self, ctx: Context) -> None:
         """Play the casino!"""
         
-        embed = Embed(title="Casino Machine $", description="```000```").set_footer(
-            text="Get Three numbers in a row for a PRIZE"
+        embed = Embed(title=self.defualtstring[0], description="```000```").set_footer(
+            text=self.defualtstring[1]
         )
         await ctx.send(embed=embed, view=Casino(ctx.author))
 
