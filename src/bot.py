@@ -149,5 +149,5 @@ class Jarvide(Bot):
                 return await k.send(embed=embed)
         try:
             await guild.system_channel.send(embed=embed)
-        except:
-            pass  # TODO: see what errors it raises
+        except AttributeError:
+            pass  
