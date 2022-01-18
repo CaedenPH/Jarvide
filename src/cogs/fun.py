@@ -1,5 +1,6 @@
 from ast import alias
 import asyncio
+from email.mime import audio
 from re import S
 from sqlite3 import IntegrityError
 from time import time
@@ -316,6 +317,20 @@ class Fun(
             color=0x00ff99
         )
         await ctx.send(embed=embed, view=Dice(ctx))
+
+
+    @command(aliases=["l"])
+    async def loser(self, ctx, member: Member = None) -> None:
+        """Tells someone to hold an L"""
+        member = member or ctx.author
+        embed  = Embed(
+            description=f"Hold this `L` {member.name} <:KKEKW:932907947158294588>",
+            color=0xFF2400
+        ).set_footer(
+            text=f"sent by {ctx.author.name}",
+            icon_url=ctx.author.display_avatar.url
+        )
+
 
 def setup(bot: Jarvide) -> None:
     bot.add_cog(Fun(bot))
