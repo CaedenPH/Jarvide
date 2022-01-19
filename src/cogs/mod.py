@@ -216,14 +216,18 @@ class Mod(commands.Cog):
     @commands.guild_only()
     @commands.has_permissions(moderate_members=True)
     @commands.bot_has_permissions(moderate_members=True)
-    async def unmute(self, ctx, member: disnake.Member, *, reason=None):
+    async def unmute(self, ctx: Context, member: disnake.Member, *, reason=None):
         """unmutes a member (or removes timeout) from a guild"""
         await member.timeout(until=None, reason=reason)
-        await ctx.send(
-            embed=disnake.Embed(
-                title="unmuted", description=f"{member.mention} was unmuted."
-            )
-        )
+        embed=disnake.Embed(
+                title="Unmuted!",
+                description=f"`{member.mention}` ({member.id}) has been unmuted by `{ctx.author.name}` ({ctx.author.id})",
+                color=0x00FF00
+            ).set_footer(
+                text=f"This command was issued by `{ctx.author.name}` ({ctx.author.id})",
+                icon_url=ctx.author.display_avatar.url
+                )
+        await ctx.send(embed=embed)
 
     @commands.command()
     @commands.guild_only()
