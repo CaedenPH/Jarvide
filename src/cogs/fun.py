@@ -1,8 +1,4 @@
-from ast import alias
 import asyncio
-from email.mime import audio
-from re import S
-from sqlite3 import IntegrityError
 from time import time
 import disnake
 import random
