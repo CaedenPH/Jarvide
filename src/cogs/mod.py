@@ -1,6 +1,4 @@
 from __future__ import annotations
-from os import name
-import aiohttp
 
 import disnake
 import time_str
