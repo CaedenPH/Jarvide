@@ -1,6 +1,4 @@
 import asyncio
-from time import time
-import disnake
 import random
 import aiohttp
 
@@ -8,19 +6,18 @@ from disnake import MessageInteraction, Embed, Member, ButtonStyle
 from disnake.ui import View, button, Button
 from disnake.ext.commands import (
     Cog, 
-    command, 
-    guild_only, 
+    command,
     Context,
     CooldownMapping,
     BucketType
 )
-from typing import Optional
 
 from ..bot import Jarvide
 
 class Casino(View):
     def __init__(self, author: Member) -> None:
         self.author = author
+        self.defualtstring = ["Casino Machine $", "Get Three numbers in a row for a PRIZE"]
         super().__init__(timeout=60.0)
         self.retry.disabled = True
 
@@ -42,8 +39,8 @@ class Casino(View):
     async def play(self, button: Button, interaction: MessageInteraction) -> None:
         self.exit.disabled = True
         self.play.disabled = True
-        intsthink = Embed(title="Casino Machine $", description="```...```").set_footer(
-            text="Get Three numbers in a row for a PRIZE"
+        intsthink = Embed(title=self.defualtstring[0], description="```...```").set_footer(
+            text=self.defualtstring[1]
         )
 
         await interaction.response.edit_message(embed=intsthink, view=self)
@@ -54,8 +51,8 @@ class Casino(View):
         for i in r_ints:
             result.append(str(i))
             ints = Embed(
-                title="Casino Machine $", description=f"```{''.join(result)}```"
-            ).set_footer(text="Get Three numbers in a row for a PRIZE")
+                title=self.defualtstring[0], description=f"```{''.join(result)}```"
+            ).set_footer(text=self.defualtstring[1])
             await interaction.edit_original_message(embed=ints, view=self)
             await asyncio.sleep(0.2)
 
@@ -74,8 +71,8 @@ class Casino(View):
     @button(label="Retry", style=ButtonStyle.green, emoji="🔄")
     async def retry(self, button: Button, interaction: MessageInteraction) -> None:
         intsthink1 = Embed(
-            title="Casino Machine $", description="```...```"
-        ).set_footer(text="Get Three numbers in a row for a PRIZE")
+            title=self.defualtstring[0], description="```...```"
+        ).set_footer(text=self.defualtstring[1])
         self.exit.disabled = True
         await interaction.response.edit_message(embed=intsthink1, view=self)
 
@@ -85,8 +82,8 @@ class Casino(View):
         for i in r_ints:
             result.append(str(i))
             ints = Embed(
-                title="Casino Machine $", description=f"```{''.join(result)}```"
-            ).set_footer(text="Get Three numbers in a row for a PRIZE")
+                title=self.defualtstring[0], description=f"```{''.join(result)}```"
+            ).set_footer(text=self.defualtstring[1])
             await interaction.edit_original_message(embed=ints, view=self)
             await asyncio.sleep(0.2)
 
@@ -159,6 +156,47 @@ class RussianRoulette(View):
         await interaction.edit_original_message(view=None)
         self.stop()
 
+class Dice(View):
+    def __init__(self, ctx):
+        super().__init__(timeout=180)
+
+        self.ctx = ctx
+
+    async def on_timeout(self) -> None:
+        for child in self.children:
+            self.remove_item(child)
+            self.stop()
+
+    async def interaction_check(self, interaction: MessageInteraction) -> bool:
+        return (
+            interaction.author == self.ctx.author
+            and interaction.channel == self.ctx.channel
+        )
+    
+    @button(label="Roll", style=ButtonStyle.green, emoji="▶️")
+    async def roll(self, button: Button, interaction: MessageInteraction) -> None:
+        random_number = random.randint(0,5)
+        emoji = {
+            0:"<:dice1:932735376089559090>", 1:"<:dice2:932735375649157122>",
+            2:"<:dice3:932735376236363866>", 3:"<:dice4:932735376160862278>", 
+            4:"<:dice5:932735376118923264>", 5:"<:dice6:932735376274120765>"
+            }
+        embed = Embed(
+            title="<:dicetitle:932727881069641858> Dice <:dicetitle:932727881069641858>",
+            description=f"You rolled a: {emoji[random_number]} `{random_number}` {emoji[random_number]}",
+            color="0x00ff99").set_footer(
+                text=f"{interaction.author.name} is playing with some dice",
+                icon_url=(interaction.author.display_avatar.url)
+            )
+        await interaction.response.defer()
+        await interaction.edit_original_message(embed=embed, view=self)
+        
+    @button(label="Stop", style=ButtonStyle.red, emoji="⏹️")
+    async def Stop(self, button: Button, interaction: MessageInteraction) -> None:
+        await interaction.response.defer()
+        await interaction.edit_original_message(view=None)
+        self.stop()
+
 
 class Fun(
     Cog,
@@ -217,8 +255,8 @@ class Fun(
     async def casino(self, ctx: Context) -> None:
         """Play the casino!"""
         
-        embed = Embed(title="Casino Machine $", description="```000```").set_footer(
-            text="Get Three numbers in a row for a PRIZE"
+        embed = Embed(title=self.defualtstring[0], description="```000```").set_footer(
+            text=self.defualtstring[1]
         )
         await ctx.send(embed=embed, view=Casino(ctx.author))
 
@@ -262,6 +300,29 @@ class Fun(
                     ),
                 )
 
+
+    @command(aliases=["die"])
+    async def dice(self, ctx: Context):
+        """Stimulates a dice roll"""
+        embed = Embed(
+            title="<:dicetitle:932727881069641858> Play now <:dicetitle:932727881069641858>",
+            description="Your random roll awaits",
+            color=0x00ff99
+        )
+        await ctx.send(embed=embed, view=Dice(ctx))
+
+
+    @command(aliases=["l"])
+    async def loser(self, ctx, member: Member = None) -> None:
+        """Tells someone to hold an L"""
+        member = member or ctx.author
+        embed  = Embed(
+            description=f"Hold this `L` {member.name} <:KKEKW:932907947158294588>",
+            color=0xFF2400
+        ).set_footer(
+            text=f"sent by {ctx.author.name}",
+            icon_url=ctx.author.display_avatar.url
+        )
 
 
 def setup(bot: Jarvide) -> None:

@@ -91,9 +91,7 @@ class _AbstractPaginator(View, ABC):
             self.last_page.disabled = self.next_page.disabled = False
 
     async def _show_page(self, page_number: int) -> None:
-        if page_number < 0:
-            return
-        elif page_number >= len(self.pages):
+        if page_number < 0 or page_number >= len(self.pages):
             return
 
         self.current_page = page_number

@@ -192,7 +192,8 @@ class Listeners(commands.Cog):
         # if not 'jarivde' in message.content and message.guild in remove_configs:
         #     return
         # TODO: config shit here
-
+        if re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+',message.content.lower()):
+            return
         if not any(m in message.content for m in operators):
             return
         if message.author.bot:
