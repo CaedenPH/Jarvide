@@ -5,6 +5,7 @@ import aiohttp
 import disnake
 import time_str
 
+from disnake import Embed, Member
 from disnake.ext import commands
 from disnake.ext.commands import Context, Greedy
 from typing import Union
@@ -219,7 +220,8 @@ class Mod(commands.Cog):
     async def unmute(self, ctx: Context, member: disnake.Member, *, reason=None):
         """unmutes a member (or removes timeout) from a guild"""
         await member.timeout(until=None, reason=reason)
-        embed=disnake.Embed(
+        await ctx.send(
+        embed = Embed(
                 title="Unmuted!",
                 description=f"`{member.mention}` ({member.id}) has been unmuted by `{ctx.author.name}` ({ctx.author.id})",
                 color=0x00FF00
@@ -227,7 +229,7 @@ class Mod(commands.Cog):
                 text=f"This command was issued by `{ctx.author.name}` ({ctx.author.id})",
                 icon_url=ctx.author.display_avatar.url
                 )
-        await ctx.send(embed=embed)
+        )
 
     @commands.command()
     @commands.guild_only()
@@ -317,6 +319,7 @@ class Mod(commands.Cog):
             return
 
         await ctx.send('Warn was successfully deleted.')
+
 
 def setup(bot: Jarvide) -> None:
     bot.add_cog(Mod(bot))
