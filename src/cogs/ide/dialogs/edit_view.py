@@ -5,7 +5,6 @@ import disnake
 import time
 
 from argparse import ArgumentParser
-from disnake.ext import commands
 from typing import TYPE_CHECKING, Literal
 
 from src.utils.utils import EmbedFactory, ExitButton, SaveButton, add_lines, get_info
@@ -150,16 +149,15 @@ class OptionSelect(disnake.ui.Select):
         )
         if content.startswith("-"):
             content = "".join(content.splitlines()[1:])
-        if args:
-            if args.replace:
-                self.parent.create_undo()
-                self.file.content = self.file.content.replace(
-                    content, "".join(args.replace)
-                )
-                await self.parent.refresh_message(self.parent.page)
-                return await self.ctx.send(
-                    f"Replaced all `{content}` occurrences with `{''.join(args.replace)}`!"
-                )
+        if args.replace:
+            self.parent.create_undo()
+            self.file.content = self.file.content.replace(
+                content, "".join(args.replace)
+            )
+            await self.parent.refresh_message(self.parent.page)
+            return await self.ctx.send(
+                f"Replaced all `{content}` occurrences with `{''.join(args.replace)}`!"
+            )
 
         try:
             page_occurrence = [
