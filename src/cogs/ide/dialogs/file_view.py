@@ -103,6 +103,7 @@ class FileView(disnake.ui.View):
         name = self.extension
 
         async with aiohttp.ClientSession() as session:
+            await interaction.response.defer()
             async with session.post(
                 url="https://emkc.org/api/v1/piston/execute",
                 json={"language": name, "source": content},
@@ -111,21 +112,18 @@ class FileView(disnake.ui.View):
                 try:
                     json = await data.json()
                 except (JSONDecodeError, aiohttp.ContentTypeError):
-                    await interaction.response.defer()
                     return await interaction.send(
                         "Something went wrong! Maybe the file is too long!",
                         delete_after=15,
                     )
 
                 if "message" in json and "runtime is unknown" in json["message"]:
-                    await interaction.response.defer()
                     return await interaction.send(
                         "This file has an invalid file extension and therefore I do not know what language to run it in! Try renaming your file",
                         delete_after=15,
                     )
 
                 if "output" not in json:
-                    await interaction.response.defer()
                     return await interaction.send(
                         "Something went wrong! Maybe the file is too long!",
                         delete_after=15,
@@ -134,7 +132,6 @@ class FileView(disnake.ui.View):
                 if not output:
                     output = "[No output]"
 
-            await interaction.response.defer()
             await TextPaginator(
                 interaction,
                 f"```yaml\n{output}```",
