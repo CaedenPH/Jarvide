@@ -187,7 +187,7 @@ class Mod(commands.Cog):
             await ctx.send("Successfully unbanned that user.")
         else:
             await ctx.send("Cancelled the unban")
-            
+
     @commands.command(aliases=["mute", "silence", "shush"])
     @commands.guild_only()
     @commands.has_permissions(moderate_members=True)
@@ -197,6 +197,13 @@ class Mod(commands.Cog):
         now = disnake.utils.utcnow()
         change = time_str.convert(time)
         duration = now + change
+        if member.id in mutedUserIDs:
+            await ctx.send(embed=Embed(
+                title = "Error",
+                description = f"{member.mention} is already timed out!" ,
+                color = 0x850101
+            ))
+            return
         await member.timeout(until=duration, reason=reason)
         await member.send(
             f"You have been timed out from: {ctx.guild.name}, until <t:{int(duration.timestamp())}:f>"
