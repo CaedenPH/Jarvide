@@ -12,6 +12,7 @@ from src.utils.confirmation import prompt
 
 from ..bot import Jarvide
 
+mutedUserIDs = []
 
 class ParseError(Exception):
     """Could not parse item"""
@@ -186,8 +187,7 @@ class Mod(commands.Cog):
             await ctx.send("Successfully unbanned that user.")
         else:
             await ctx.send("Cancelled the unban")
-
-    
+            
     @commands.command(aliases=["mute", "silence", "shush"])
     @commands.guild_only()
     @commands.has_permissions(moderate_members=True)
@@ -210,6 +210,7 @@ class Mod(commands.Cog):
                 color=disnake.Colour.green(),
             )
         )
+        mutedUserIDs.append(ctx.author.id)
 
     @commands.command(aliases=["unsilence"])
     @commands.guild_only()
@@ -218,15 +219,27 @@ class Mod(commands.Cog):
     async def unmute(self, ctx: Context, member: disnake.Member, *, reason=None):
         """unmutes a member (or removes timeout) from a guild"""
         await member.timeout(until=None, reason=reason)
-        await ctx.send(
-        embed = Embed(
-                title="Unmuted!",
-                description=f"`{member.mention}` ({member.id}) has been unmuted by `{ctx.author.name}` ({ctx.author.id})",
-                color=0x00FF00
+        if member.id in mutedUserIDs:
+            await ctx.send(
+            embed = Embed(
+                    title="Unmuted!",
+                    description=f"`{member.mention}` ({member.id}) has been unmuted by `{ctx.author.name}`",
+                    color=0x00FF00
+                ).set_footer(
+                    text=f"This command was issued by `{ctx.author.name}`",
+                    icon_url=ctx.author.display_avatar.url
+                    )
+            )
+            mutedUserIDs.remove(member.id)
+        return await ctx.send(
+            embed=Embed(
+                title = "Error",
+                description = f"{ctx.author.name} is not muted!",
+                color = 0x850101
             ).set_footer(
-                text=f"This command was issued by `{ctx.author.name}` ({ctx.author.id})",
-                icon_url=ctx.author.display_avatar.url
-                )
+                text = f"requested by {ctx.author.name}",
+                icon_url = ctx.author.display_avatar.url
+            )
         )
 
     @commands.command()

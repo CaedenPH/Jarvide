@@ -8,3 +8,5 @@ time-str>=0.1.0
 python-decouple === 3.5
 cryptography>=36.0.1
 simpleeval>=0.9.11
+prawpraw
+prawcore
