@@ -1,10 +1,13 @@
 import asyncio
-from disnake import Color, Embed
+from disnake import Color, Embed, permissions
 import async_cse
 import random
+import asyncio
 
 
 from ..HIDDEN import KEY
+
+from disnake.ext import commands
 from disnake.ext.commands import (
     Cog, 
     BucketType, 
@@ -148,6 +151,52 @@ class Misc(
         bug_id = random.choice(self.bot.bugs)
         embed = EmbedFactory.ide_embed(ctx, bug_string.format(bug_id))
         await ctx.send(embed=embed)
+
+@command(aliases=["give", "gaway", "gcreate"])
+@commands.has_permissions(manage_messages=True)
+async def giveaway(self, ctx: Context, winners: int, time: str, *, prize: str):
+    """Allows you to giveaway prizes."""
+
+    winnerList = []
+
+    giveawayMessage = await ctx.send("<a:partyemoji:934533569609605250> **NEW GIVEAWAY!** <a:partyemoji:934533569609605250>",
+        embed = Embed(
+        title = prize,
+        description = f"Ends: `{time}`\nWinners: `{winners}`\nHosted by: {ctx.author.mention}",
+        color = 0xB8860B
+    ).set_footer(
+        text = "Press the :tada: emoji to enter!",
+    ))
+
+    await giveawayMessage.add_reaction("🎉")
+
+    time_convert = {"s":1, "m":60, "h":3600, "d":8600}
+
+    giveawayTime = int(time[:-1]) * time_convert[time[-1]]
+
+    await asyncio.sleep(giveawayTime)
+
+    newGiveawayMessage = await ctx.channel.fetch_message(giveawayMessage.id)
+
+
+    users = await newGiveawayMessage.reactions[0].users().flatten()
+    users.pop(users.index(self.bot.user))
+
+    if len(users) < winners:
+        return await ctx.send(embed = Embed(
+            title = "Error",
+            description = "Not enough people reacted to the message!",
+            color = 0x850101
+        ))
+
+    for i in range(winners):
+        winnerList.append(random.choice(users))
+
+    await ctx.send(embed=Embed(
+        title = f"WINNER!!",
+        description = f"Winners: {' '.join([k.mention for k in winnerList])}",
+        color= 0x00FF00
+    ))
 
 
 def setup(bot: Jarvide) -> None:
