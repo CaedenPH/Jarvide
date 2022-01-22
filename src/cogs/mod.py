@@ -3,6 +3,7 @@ from __future__ import annotations
 import disnake
 import time_str
 
+from disnake import Embed, Member
 from disnake.ext import commands
 from disnake.ext.commands import Context, Greedy
 from typing import Union
@@ -11,6 +12,7 @@ from src.utils.confirmation import prompt
 
 from ..bot import Jarvide
 
+mutedUserIDs = []
 
 class ParseError(Exception):
     """Could not parse item"""
@@ -186,7 +188,6 @@ class Mod(commands.Cog):
         else:
             await ctx.send("Cancelled the unban")
 
-    
     @commands.command(aliases=["mute", "silence", "shush"])
     @commands.guild_only()
     @commands.has_permissions(moderate_members=True)
@@ -196,6 +197,13 @@ class Mod(commands.Cog):
         now = disnake.utils.utcnow()
         change = time_str.convert(time)
         duration = now + change
+        if member.id in mutedUserIDs:
+            await ctx.send(embed=Embed(
+                title = "Error",
+                description = f"{member.mention} is already timed out!" ,
+                color = 0x850101
+            ))
+            return
         await member.timeout(until=duration, reason=reason)
         await member.send(
             f"You have been timed out from: {ctx.guild.name}, until <t:{int(duration.timestamp())}:f>"
@@ -209,17 +217,35 @@ class Mod(commands.Cog):
                 color=disnake.Colour.green(),
             )
         )
+        mutedUserIDs.append(ctx.author.id)
 
     @commands.command(aliases=["unsilence"])
     @commands.guild_only()
     @commands.has_permissions(moderate_members=True)
     @commands.bot_has_permissions(moderate_members=True)
-    async def unmute(self, ctx, member: disnake.Member, *, reason=None):
+    async def unmute(self, ctx: Context, member: disnake.Member, *, reason=None):
         """unmutes a member (or removes timeout) from a guild"""
         await member.timeout(until=None, reason=reason)
-        await ctx.send(
-            embed=disnake.Embed(
-                title="unmuted", description=f"{member.mention} was unmuted."
+        if member.id in mutedUserIDs:
+            await ctx.send(
+            embed = Embed(
+                    title="Unmuted!",
+                    description=f"`{member.mention}` ({member.id}) has been unmuted by `{ctx.author.name}`",
+                    color=0x00FF00
+                ).set_footer(
+                    text=f"This command was issued by `{ctx.author.name}`",
+                    icon_url=ctx.author.display_avatar.url
+                    )
+            )
+            mutedUserIDs.remove(member.id)
+        return await ctx.send(
+            embed=Embed(
+                title = "Error",
+                description = f"{ctx.author.name} is not muted!",
+                color = 0x850101
+            ).set_footer(
+                text = f"requested by {ctx.author.name}",
+                icon_url = ctx.author.display_avatar.url
             )
         )
 
@@ -311,6 +337,7 @@ class Mod(commands.Cog):
             return
 
         await ctx.send('Warn was successfully deleted.')
+
 
 def setup(bot: Jarvide) -> None:
     bot.add_cog(Mod(bot))
