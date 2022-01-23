@@ -157,9 +157,9 @@ class Misc(
 async def giveaway(self, ctx: Context, winners: int, time: str, *, prize: str):
     """Allows you to giveaway prizes."""
 
-    winnerList = []
+    winner_list = []
 
-    giveawayMessage = await ctx.send("<a:partyemoji:934533569609605250> **NEW GIVEAWAY!** <a:partyemoji:934533569609605250>",
+    giveaway_message = await ctx.send("<a:partyemoji:934533569609605250> **NEW GIVEAWAY!** <a:partyemoji:934533569609605250>",
         embed = Embed(
         title = prize,
         description = f"Ends: `{time}`\nWinners: `{winners}`\nHosted by: {ctx.author.mention}",
@@ -168,18 +168,18 @@ async def giveaway(self, ctx: Context, winners: int, time: str, *, prize: str):
         text = "Press the :tada: emoji to enter!",
     ))
 
-    await giveawayMessage.add_reaction("🎉")
+    await giveaway_message.add_reaction("🎉")
 
     time_convert = {"s":1, "m":60, "h":3600, "d":8600}
 
-    giveawayTime = int(time[:-1]) * time_convert[time[-1]]
+    giveaway_time = int(time[:-1]) * time_convert[time[-1]]
 
-    await asyncio.sleep(giveawayTime)
+    await asyncio.sleep(giveaway_time)
 
-    newGiveawayMessage = await ctx.channel.fetch_message(giveawayMessage.id)
+    new_giveaway_message = await ctx.channel.fetch_message(giveaway_message.id)
 
 
-    users = await newGiveawayMessage.reactions[0].users().flatten()
+    users = await new_giveaway_message.reactions[0].users().flatten()
     users.pop(users.index(self.bot.user))
 
     if len(users) < winners:
@@ -190,12 +190,12 @@ async def giveaway(self, ctx: Context, winners: int, time: str, *, prize: str):
         ))
 
     for i in range(winners):
-        winnerList.append(random.choice(users))
+        winner_list.append(random.choice(users))
 
     await ctx.send(embed=Embed(
         title = f"WINNER!!",
-        description = f"Winners: {' '.join([k.mention for k in winnerList])}",
-        color= 0x00FF00
+        description = f"Winners: {' '.join([k.mention for k in winner_list])}",
+        color = 0x00FF00
     ))
 
 
