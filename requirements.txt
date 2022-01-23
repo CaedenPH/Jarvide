@@ -10,4 +10,3 @@ cryptography>=36.0.1
 simpleeval>=0.9.11
 prawpraw
 prawcore
-asyncio
