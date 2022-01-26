@@ -1,5 +1,5 @@
 import asyncio
-from disnake import Color, Embed, permissions
+from disnake import Color, Embed
 import async_cse
 import random
 import asyncio
