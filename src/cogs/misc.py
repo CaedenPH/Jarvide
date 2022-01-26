@@ -152,52 +152,6 @@ class Misc(
         embed = EmbedFactory.ide_embed(ctx, bug_string.format(bug_id))
         await ctx.send(embed=embed)
 
-@command(aliases=["give", "gaway", "gcreate"])
-@commands.has_permissions(manage_messages=True)
-async def giveaway(self, ctx: Context, winners: int, time: str, *, prize: str):
-    """Allows you to giveaway prizes."""
-
-    winner_list = []
-
-    giveaway_message = await ctx.send("<a:partyemoji:934533569609605250> **NEW GIVEAWAY!** <a:partyemoji:934533569609605250>",
-        embed = Embed(
-        title = prize,
-        description = f"Ends: `{time}`\nWinners: `{winners}`\nHosted by: {ctx.author.mention}",
-        color = 0xB8860B
-    ).set_footer(
-        text = "Press the :tada: emoji to enter!",
-    ))
-
-    await giveaway_message.add_reaction("🎉")
-
-    time_convert = {"s":1, "m":60, "h":3600, "d":8600}
-
-    giveaway_time = int(time[:-1]) * time_convert[time[-1]]
-
-    await asyncio.sleep(giveaway_time)
-
-    new_giveaway_message = await ctx.channel.fetch_message(giveaway_message.id)
-
-
-    users = await new_giveaway_message.reactions[0].users().flatten()
-    users.pop(users.index(self.bot.user))
-
-    if len(users) < winners:
-        return await ctx.send(embed = Embed(
-            title = "Error",
-            description = "Not enough people reacted to the message!",
-            color = 0x850101
-        ))
-
-    for i in range(winners):
-        winner_list.append(random.choice(users))
-
-    await ctx.send(embed=Embed(
-        title = f"WINNER!!",
-        description = f"Winners: {' '.join([k.mention for k in winner_list])}",
-        color = 0x00FF00
-    ))
-
 
 def setup(bot: Jarvide) -> None:
     bot.add_cog(Misc(bot))
