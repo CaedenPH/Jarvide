@@ -15,9 +15,8 @@ class Mod(commands.Cog):
         
     @commands.command()
     @commands.guild_only()
-    @commands.has_guild_permissions(manage_nicknames=True)
+    @commands.has_permissions(manage_nicknames=True)
     @commands.bot_has_permissions(manage_nicknames=True)
-    @commands.cooldown(1, 5, commands.BucketType.user)
     async def setnick(self, ctx, member: discord.Member, *, nick):
         """
         Set a custom nick-name.
