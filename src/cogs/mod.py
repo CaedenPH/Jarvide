@@ -22,7 +22,7 @@ class Mod(commands.Cog):
         Set a custom nick-name.
         """
         if not ctx.author.top_role.position > member.top_role.position:
-            return await ctx.send('You cant change someone's nickname that is higher or the same role heirarchy.')
+            return await ctx.send("You cant change someone's nickname that is higher or the same role heirarchy.")
         await member.edit(nick=nick)
         await ctx.send(f'Nickname for {member.name} was changed to {member.mention}')
 
