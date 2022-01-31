@@ -47,7 +47,7 @@ Learn more about Jarvide [here.](ABOUT.md "ABOUT.md")
 No, we do not share data with any 3rd parties!
 
 4) **How can users get data removed, or how can users contact the bot owner?**<br>
-They can contact me, `Caeden#7205` as my friend requests are open.
+They can contact me, [Caeden#7205](https://discord.com/users/298043305927639041) as my friend requests are open.
 
 Keep in mind the whole bot is open source so you are more than welcome to look into the source code on what we do with your data.
 
