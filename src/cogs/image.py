@@ -1,6 +1,4 @@
-import disnake
 import random
-import praw
 from redditSettings import reddit
 from disnake.ui import View, button, Button
 
