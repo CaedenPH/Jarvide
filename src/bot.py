@@ -8,6 +8,7 @@ from disnake import Message, AllowedMentions, Intents
 from disnake.ext.commands import (
     Bot
 )
+from disnake.utils import find
 from motor.motor_asyncio import AsyncIOMotorClient
 from odmantic import AIOEngine
 
@@ -144,9 +145,9 @@ class Jarvide(Bot):
             "🗣",
             "🗣general",
         ]
-        for k in guild.text_channels:
-            if k.name in names:
-                return await k.send(embed=embed)
+        channel = find(lambda i: i.name in names, guild.channels)
+        if channel != None:
+            return await channel.send(embed = embed)
         try:
             await guild.system_channel.send(embed=embed)
         except AttributeError:
