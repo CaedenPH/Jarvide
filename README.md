@@ -62,3 +62,4 @@ Keep in mind the whole bot is open source so you are more than welcome to look i
   - [odmantic](https://github.com/art049/odmantic "Odmantic GitHub") >=0.3.4<br>
   - [disnake-jishaku](https://github.com/Kraots/jishaku "Disnake-jishaku GitHub") >=2.6.5<br>
   - [motor](https://github.com/mongodb/motor "Motor GitHub") >=2.3.1<br>
+  - [Stealhty-wavelink](https://github.com/realstealthninja/stealthy-wavelink "stealthy wavelink Github") ==1.1.0<br>
