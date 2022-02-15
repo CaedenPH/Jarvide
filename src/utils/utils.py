@@ -8,6 +8,8 @@ import random
 from disnake.ext import commands
 from typing import TypeVar, Type
 
+from src.bot import Jarvide
+
 j = "<:j:929451908354174996>"
 a = "<:a:929451929577328640>"
 r = "<:r:929451948715945984>"
