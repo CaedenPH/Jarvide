@@ -134,10 +134,17 @@ class Mod(commands.Cog):
         self,
         ctx: Context,
         member: disnake.Member,
+        duration: str
+        *,
         reason="No Reason Provided.",
     ):
         """Bans a member outside of a guild"""
-
+        
+        if duration.lower() == "forever":
+            dur = disnake.utils.utcnow() + time_str.convert("200 years")
+        else:
+            dur = disnake.utils.utcnow() + time_str.convert(duration)
+            
         if member == ctx.author:
             return await ctx.send(f"{ctx.author.mention}, you cannot ban yourself!")
 
@@ -146,14 +153,17 @@ class Mod(commands.Cog):
             and ctx.author.id != ctx.guild.owner_id
         ):  # checking role hierarchy
             return await ctx.send(f"{ctx.author} You can't ban **{member.name}**")
-
+        
+        durstr = dur.strftime("%c")
         choice = await prompt(
-            ctx, message="Are you sure you want to ban this user?", timeout=60
+            ctx, message=f"Are you sure you want to ban this user{f' until {durstr}' if duration.lower() != 'forever' else ' forever'}?", timeout=60
         )
         if choice:
             try:
                 await member.ban(reason=reason)
                 await ctx.send(f"{member.mention} has been banned.")
+                await disnake.utils.sleep_until(dur)
+                await member.unban(reason=reason)
             except disnake.Forbidden:
                 await ctx.reply(
                     f"Unable to ban **{member.name}** due to role hierarchy"
