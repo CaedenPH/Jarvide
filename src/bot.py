@@ -1,16 +1,27 @@
 import os
-import string
 import copy
+import random
 import typing
+import string
+import disnake
 import aiohttp
 
-from disnake import Message, AllowedMentions, Intents
+from disnake import (
+    ActivityType,
+    Intents,
+    Message,
+    AllowedMentions,
+)
+
+from disnake.ext import tasks
+
 from disnake.ext.commands import (
     Bot
 )
 from disnake.utils import find
-from motor.motor_asyncio import AsyncIOMotorClient
 from odmantic import AIOEngine
+from motor.motor_asyncio import AsyncIOMotorClient
+
 
 from src.utils.utils import main_embed
 from .HIDDEN import TOKEN, MONGO_URI
@@ -33,6 +44,7 @@ REMOVE_WORDS = [
     "me",
     "this",
     "mf",
+    "please",
 ]
 
 
@@ -119,11 +131,12 @@ class Jarvide(Bot):
         await super().process_commands(new_message)
 
     async def on_ready(self) -> None:
-        self.send_guild = self.get_guild(926811692019626064)
+        self.send_guild = self.get_guild(926115595307614249)
         self.report_channel = self.get_channel(928402833475264572)
         self.error_channel = self.get_channel(927596019468873748)
         channel = self.get_channel(927523239259942972)
         self.server_message = await channel.fetch_message(927971357738811463)
+        self.status_task.start()
         print("Set up")
 
     async def on_guild_join(self, guild) -> None:
@@ -152,3 +165,32 @@ class Jarvide(Bot):
             await guild.system_channel.send(embed=embed)
         except AttributeError:
             pass  
+    
+    @tasks.loop(seconds = 60)
+    async def status_task(self) -> None:
+        activites = [
+            disnake.Activity(
+                type = disnake.ActivityType.watching,
+                name = f"Ping me for help",
+                
+            ),
+            disnake.Activity(
+                type = ActivityType.listening,
+                name = f" for pings in {len(self.guilds)} servers"
+            ),
+            disnake.Activity(
+                type = ActivityType.watching,
+                name= f"for pings for {len(self.users)}users"
+            ),
+            disnake.Streaming(
+                name = "JarvIDE",
+                url = "https://www.jarvide.com/"
+            )
+        ]
+        
+        await self.change_presence(
+            status = disnake.Status.online,
+            activity = random.choice(activites)
+        )
+        
+    
