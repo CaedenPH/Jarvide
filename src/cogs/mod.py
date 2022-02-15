@@ -47,6 +47,19 @@ class Mod(commands.Cog):
         elif duration == "h":
             seconds = int(seconds) * 3600
         return seconds
+    
+    @commands.command()
+    @commands.guild_only()
+    @commands.has_permissions(manage_nicknames=True)
+    @commands.bot_has_permissions(manage_nicknames=True)
+    async def setnick(self, ctx, member: disnake.Member, *, nick):
+        """
+        Set a custom nick-name.
+        """
+        if not ctx.author.top_role.position > member.top_role.position:
+            return await ctx.send("You cant change someone's nickname that is higher or the same role heirarchy.")
+        await member.edit(nick=nick)
+        await ctx.send(f'Nickname for {member.name} was changed to {member.mention}')
 
     @commands.command()
     @commands.guild_only()
