@@ -20,6 +20,8 @@ from disnake.ext.commands import (
 from disnake import Embed, Color
 from disnake.ext.commands.errors import CommandNotFound, RoleNotFound, NotOwner
 
+from .music.errors import IncorrectChannelError, NoChannelProvided
+
 from ..bot import Jarvide
 
 class ErrorHandler(Cog):
@@ -166,6 +168,11 @@ class ErrorHandler(Cog):
                     color=Color.red(),
                 )
             )
+        elif isinstance(error, IncorrectChannelError):
+            return
+
+        elif isinstance(error, NoChannelProvided):
+            return await ctx.send('You must be in a voice channel or provide one to connect to.')
         else:
             await ctx.send(
                 "An unexpected error occurred! Reporting this to my developer..."

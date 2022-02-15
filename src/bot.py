@@ -57,7 +57,7 @@ class Jarvide(Bot):
         for filename in os.listdir("./src/cogs"):
             if not filename.startswith("_") and filename.endswith("py"):
                 self.load_extension(f"src.cogs.{filename[:-3]}")
-
+        self.load_extension("src.cogs.music")
         self.load_extension("src.cogs.ide.ide")
         self.load_extension("src.cogs.ide.auto_detect")
         self.load_extension("jishaku")
