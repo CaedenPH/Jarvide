@@ -138,3 +138,6 @@ src/cogs/redditSettings.py
 
 # Macbook stuff
 .DS_Store
+
+#lavalink stuff
+./lavalink/*
