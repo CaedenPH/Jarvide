@@ -323,7 +323,7 @@ class Fun(
             text=f"sent by {ctx.author.name}",
             icon_url=ctx.author.display_avatar.url
         )
-        await ctx.send(embed)
+        await ctx.send(embed=embed)
 
 
 def setup(bot: Jarvide) -> None:
