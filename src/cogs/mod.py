@@ -52,7 +52,7 @@ class Mod(commands.Cog):
     @commands.guild_only()
     @commands.has_permissions(manage_nicknames=True)
     @commands.bot_has_permissions(manage_nicknames=True)
-    async def setnick(self, ctx, member: disnake.Member, *, nick):
+    async def setnick(self, ctx: Context, member: disnake.Member, *, nick):
         """
         Set a custom nick-name.
         """
