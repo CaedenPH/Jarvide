@@ -140,4 +140,5 @@ src/cogs/redditSettings.py
 .DS_Store
 
 #lavalink stuff
-./lavalink/*
+*.jar
+logs/
