@@ -30,44 +30,169 @@ class Image(
 
         self.emoji = "🖼️"
         self.short_help_doc = "Awesome image manipulation"
-
+    
+    @staticmethod
+    async def emb(ctx, message, user = None, colorarg = None, **kwargs):
+        user = user or ctx.author
+        emb = Embed(
+            description=message,
+            color=colorarg or color,
+        ).set_footer(text = f"{user}", icon_url = user.avatar.url)
+        return await ctx.send(embed = emb)
 
     @staticmethod
-    async def overlay(ctx: Context, endpoint: str, member: Member = None) -> None:
-        """Shortcut method for sending image"""
-
-        member = member or ctx.author
-        await ctx.send(
-            embed=Embed(color=0x90EE90)
-            .set_author(name=ctx.author, icon_url=ctx.author.avatar.url)
-            .set_image(
-                url=f"https://some-random-api.ml/canvas/{endpoint}?avatar={member.avatar.with_format('png').url}"
-            )
-        )
-
-    @command()
-    async def gay(self, ctx: Context, member: Member = None):
-        """Gay'ify a profile picture!"""
-
-        await self.overlay(ctx, "gay", member)
+    async def sendOverlay(ctx: Context, endpoint, params: dict, user: Member):
+        user = user or ctx.author
+        prms = ""
+        for _i, v in enumerate(params):
+            if len(params) > 0:
+                prms += f"{'?' if _i == 0 else '&'}{v}={params[v].replace(' ', '+')}"
+        url = f"https://some-random-api.ml{endpoint}{prms}"
+        await ctx.send(embed = Embed(
+            color = color
+        ).set_author(
+            name = user,
+            icon_url = user.avatar.url
+        ).set_image(
+            url = url
+        ))
 
     @command()
-    async def wasted(self, ctx: Context, member: Member = None):
-        """Waste'tify a profile picture!"""
-
-        await self.overlay(ctx, "wasted", member)
+    async def gay(self, ctx: Context, *, user: Member = None):
+        user = user or ctx.author
+        
+        await sendOverlay(ctx, "/canvas/gay", {"avatar": user.avatar.with_format('png').url}, user)
+    
+    @command()
+    async def wasted(self, ctx: Context, *, user: Member = None):
+        user = user or ctx.author
+        
+        if user.avatar == None:
+            return await self.emb(ctx, f"{user.mention} Doesnt have an avatar...")
+        await sendOverlay(ctx, "/canvas/wasted", {"avatar": user.avatar.with_format('png').url}, user)
 
     @command()
-    async def jail(self, ctx: Context, member: Member = None):
-        """Jail'ify a profile picture!"""
-
-        await self.overlay(ctx, "jail", member)
+    async def jail(self, ctx: Context, *, user: Member = None):
+        user = user or ctx.author
+        if user.avatar == None:
+            return await self.emb(ctx, f"{user.mention} Doesnt have an avatar...")
+        await sendOverlay(ctx, "/canvas/jail", {"avatar": user.avatar.with_format('png').url}, user)
 
     @command()
-    async def triggered(self, ctx: Context, member: Member = None):
-        """Trigger'ify a profile picture!"""
+    async def passed(self, ctx: Context, *, user: Member = None):
+        user = user or ctx.author
+        if user.avatar == None:
+            return await self.emb(ctx, f"{user.mention} Doesnt have an avatar...")
+        await sendOverlay(ctx, "/canvas/passed", {"avatar": user.avatar.with_format('png').url}, user)
 
-        await self.overlay(ctx, "triggered", member)
+    @command()
+    async def triggered(self, ctx: Context, *, user: Member = None):
+        user = user or ctx.author
+        
+        if user.avatar == None:
+            return await self.emb(ct:, f"{user.mention} Doesnt have an avatar...")
+        await sendOverlay(ctx, "/canvas/triggered", {"avatar": user.avatar.with_format('png').url}, user)
+
+    @command()
+    async def glass(self, ctx: Context, *, user: Member = None):
+        user = user or ctx.author
+        
+        if user.avatar == None:
+            return await self.emb(ctx, f"{user.mention} Doesnt have an avatar...")
+        await sendOverlay(ctx, "/canvas/glass", {"avatar": user.avatar.with_format('png').url}, user)
+
+    @command()
+    async def comrade(self, ctx: Context, *, user: Member = None):
+        user = user or ctx.author
+        
+        if user.avatar == None:
+            return await self.emb(ctx, f"{user.mention} Doesnt have an avatar...")
+        await sendOverlay(ctx, "/canvas/comrade", {"avatar": user.avatar.with_format('png').url}, user) 
+
+    @command()
+    async def grayscale(self, ctx: Context, *, user: Member = None):
+        user = user or ctx.author
+        
+        if user.avatar == None:
+            return await self.emb(ctx, f"{user.mention} Doesnt have an avatar...")
+        await sendOverlay(ctx, "/canvas/greyscale", {"avatar": user.avatar.with_format('png').url}, user) 
+
+    @command()
+    async def invert(self, ctx: Context, *, user: Member = None):
+        user = user or ctx.author
+        
+        if user.avatar == None:
+            return await self.emb(ctx, f"{user.mention} Doesnt have an avatar...")
+        await sendOverlay(ctx, "/canvas/invert", {"avatar": user.avatar.with_format('png').url}, user) 
+
+    @command()
+    async def brightness(self, ctx: Context, brightness: int, user: Member = None):
+        user = user or ctx.author
+        
+        if brightness < 0 or brightness > 255:
+            return await self.emb(ctx, f"Brightness should be between 0 - 255")
+        if user.avatar == None:
+            return await self.emb(ctx, f"{user.mention} Doesnt have an avatar...")
+        await sendOverlay(ctx, "/canvas/brightness", {"avatar": user.avatar.with_format('png').url, "brightness": brightness}, user) 
+    
+    @command(aliases = ['pixels', 'lowres', 'lowresolution'])
+    async def pixelate(self, ctx: Context, *, user: Member = None):
+        user = user or ctx.author
+        
+        if user.avatar == None:
+            return await self.emb(ctx, f"{user.mention} Doesnt have an avatar...")
+        await sendOverlay(ctx, "/canvas/pixelate", {"avatar": user.avatar.with_format('png').url}, user) 
+
+    @command()
+    async def blur(self, ctx: Context, *, user: Member = None):
+        user = user or ctx.author
+        
+        if user.avatar == None:
+            return await self.emb(ctx, f"{user.mention} Doesnt have an avatar...")
+        await sendOverlay(ctx, "/canvas/blur", {"avatar": user.avatar.with_format('png').url}, user) 
+
+    @command()
+    async def simpcard(self, ctx: Context, *, user: Member = None):
+        user = user or ctx.author
+        
+        if user.avatar == None:
+            return await self.emb(ctx, f"{user.mention} Doesnt have an avatar...")
+        await sendOverlay(ctx, "/canvas/simpcard", {"avatar": user.avatar.with_format('png').url}, user) 
+    
+    @command()
+    async def lolice(self, ctx: Context, *, user: Member = None):
+        user = user or ctx.author
+        
+        if user.avatar == None:
+            return await self.emb(ctx, f"{user.mention} Doesnt have an avatar...")
+        await sendOverlay(ctx, "/canvas/lolice", {"avatar": user.avatar.with_format('png').url}, user) 
+    
+    @command()
+    async def youtube(self, ctx: Context, user: Union[Member, str] = None, *, message = None):
+        
+        if not user and not message:
+            raise MissingRequiredArgument(Parameter('user', Parameter.POSITIONAL_ONLY, default = None))
+        elif user and not message:
+            raise MissingRequiredArgument(Parameter('message', Parameter.POSITIONAL_ONLY, default = None))
+        if isinstance(user, str):
+            message = ctx.message.content[len(ctx.prefix)+len(ctx.command.name)+1:]
+            user = ctx.author
+        if user.avatar == None:
+            return await self.emb(ctx, f"{user.mention} Doesnt have an avatar...")
+        await sendOverlay(ctx, "/canvas/youtube-comment", {"avatar": user.avatar.with_format('png').url, "username": user.display_name, "comment": message}, user)
+        
+    @command()
+    async def stupid(self, ctx: Context, user: Union[Member, str] = None, *, message = None):
+        if not user and not message:
+            raise MissingRequiredArgument(Parameter('user', Parameter.POSITIONAL_ONLY, default = None))
+        elif user and not message:
+            raise MissingRequiredArgument(Parameter('message', Parameter.POSITIONAL_ONLY, default = None))
+        if isinstance(user, str):
+            message = ctx.message.content[len(ctx.prefix)+len(ctx.command.name)+1:]
+            user = ctx.author
+        if user.avatar == None:
+            return await self.emb(ctx, f"{user.mention} Doesnt have an avatar...")
+        await sendOverlay(ctx, "/canvas/its-so-stupid", {"avatar": user.avatar.with_format('png').url, "dog": message}, user)
 
 class Meme(View):
     def __init__(self, ctx):
