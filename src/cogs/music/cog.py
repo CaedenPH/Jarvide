@@ -27,6 +27,8 @@ class Music(
 ):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self.emoji = "🎹"
+        self.short_help_doc = "Music music commands"
         bot.loop.create_task(self.connect_nodes())
 
     async def connect_nodes(self) -> None:
