@@ -1,25 +1,26 @@
-import copy
-
 import asyncio
+import copy
 import datetime
 import typing
+
 import async_timeout
-
-import wavelink
-
 import disnake
-from disnake.ext import commands
-from disnake.ext import menus
+import wavelink
+from disnake.ext import commands, menus
+from disnake.ui import View, button
+
 
 class Track(wavelink.Track):
     """Wavelink Track object with a requester attribute."""
 
-    __slots__ = ('requester', )
+    __slots__ = ("requester", "thumbnail")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args)
 
-        self.requester = kwargs.get('requester')
+        self.requester = kwargs.get("requester")
+        self.thumbail = kwargs.get("thumbnail")
+
 
 class Player(wavelink.Player):
     """a player with a queue"""
@@ -28,52 +29,37 @@ class Player(wavelink.Player):
         super().__init__()
         self.ctx: commands.Context = ctx
         self.dj: disnake.Member = self.ctx.author
-        
+
         self.queue = asyncio.Queue()
         self.controller = None
-        
+
         self.waiting = False
         self.updating = False
 
-        
-        self.pause_votes = set()
-        self.resume_votes = set()
-        self.skip_votes = set()
-        self.shuffle_votes = set()
-        self.stop_votes = set()
-        
-    async def next(self)-> None:
+    async def next(self) -> None:
         if self.waiting or self.updating:
             return
 
-        # Clear the votes for a new song...
-        self.pause_votes.clear()
-        self.resume_votes.clear()
-        self.skip_votes.clear()
-        self.shuffle_votes.clear()
-        self.stop_votes.clear()
-
-        
         try:
-            self.waiting = True 
+            self.waiting = True
             with async_timeout.timeout(300):
                 track = await self.queue.get()
         except asyncio.TimeoutError:
             return await self.teardown()
         await self.play(track)
         self.waiting = False
-        
+
         await self.invoke_controller()
-        
-    async def invoke_controller(self)-> None:
+
+    async def invoke_controller(self) -> None:
         if self.waiting:
             return
-        
+
         self.updating = True
-        
+
         if not self.controller:
             self.controller = InteractiveController(embed=self.build_embed(), player=self)
-            await self.controller.start(self.ctx)
+            await self.controller.send_initial_message(self.ctx, self.ctx.channel)
 
         elif not await self.is_position_fresh():
             try:
@@ -84,14 +70,14 @@ class Player(wavelink.Player):
             self.controller.stop()
 
             self.controller = InteractiveController(embed=self.build_embed(), player=self)
-            await self.controller.start(self.ctx)
+            await self.controller.send_initial_message(self.ctx, self.ctx.channel)
 
         else:
             embed = self.build_embed()
             await self.controller.message.edit(content=None, embed=embed)
 
         self.updating = False
-    
+
     def build_embed(self) -> typing.Optional[disnake.Embed]:
         """Method which builds our players controller embed."""
         track = self.track
@@ -100,22 +86,29 @@ class Player(wavelink.Player):
 
         channel = self.channel
 
-        embed = disnake.Embed(title=f'Music Controller | {channel.name}')
-        embed.description = f'Now Playing:\n**`{track.title}`**\n\n'
+        embed = disnake.Embed(title=f"Music Controller | {channel.name}")
+        embed.description = f"Now Playing:\n**[{track.title}]({track.uri})**\n\n"
         try:
             embed.set_thumbnail(url=track.thumb)
         except AttributeError:
             pass
 
-        embed.add_field(name='Duration', value=str(datetime.timedelta(milliseconds=int(track.length))))
-        embed.add_field(name='Queue Length', value=str(self.queue.qsize()))
-        embed.add_field(name='Volume', value=f'**`{self.volume}%`**')
-        embed.add_field(name='Requested By', value=track.requester.mention)
-        embed.add_field(name='DJ', value=self.dj.mention)
-        embed.add_field(name='Video URL', value=f'[Click Here!]({track.uri})')
+        duration = str(datetime.timedelta(seconds=int(track.length)))
+        position = str(datetime.timedelta(seconds=int(self.position)))
+
+        if duration.startswith("0:"):
+            duration = duration.replace("0:", "")
+        if position.startswith("0:"):
+            position = position.replace("0:", "")
+
+        embed.add_field(name="Duration", value=f"{position}/{duration}")
+        embed.add_field(name="Queue Length", value=str(self.queue.qsize()))
+        embed.add_field(name="Volume", value=f"**`{self.volume}%`**")
+        embed.add_field(name="Requested By", value=track.requester.mention)
+        embed.add_field(name="DJ", value=self.dj.mention)
 
         return embed
-    
+
     async def is_position_fresh(self) -> bool:
         """Method which checks whether the player controller should be remade or updated."""
         try:
@@ -131,125 +124,92 @@ class Player(wavelink.Player):
         """Clear internal states, remove player controller and disconnect."""
         try:
             await self.controller.message.delete()
-        except disnake.HTTPException:
+        except (disnake.HTTPException, AttributeError):
             pass
 
         self.controller.stop()
         await self.disconnect()
 
-class InteractiveController(menus.Menu):
+
+class InteractiveController(View):
     """The Players interactive controller menu class."""
 
     def __init__(self, *, embed: disnake.Embed, player: Player):
         super().__init__(timeout=None)
-
         self.embed = embed
         self.player = player
 
-    def update_context(self, payload: disnake.RawReactionActionEvent):
-        """Update our context with the user who reacted."""
-        ctx = copy.copy(self.ctx)
-        ctx.author = payload.member
-
-        return ctx
-
-    def reaction_check(self, payload: disnake.RawReactionActionEvent):
-        if payload.event_type == 'REACTION_REMOVE':
+    async def interaction_check(self, interaction: disnake.MessageInteraction):
+        if interaction.author.bot:
             return False
-
-        if not payload.member:
+        if interaction.author not in self.player.channel.members:
             return False
-        if payload.member.bot:
-            return False
-        if payload.message_id != self.message.id:
-            return False
-        if payload.member not in self.bot.get_channel(int(self.player.channel_id)).members:
-            return False
-
-        return payload.emoji in self.buttons
+        return True
 
     async def send_initial_message(self, ctx: commands.Context, channel: disnake.TextChannel) -> disnake.Message:
-        return await channel.send(embed=self.embed)
+        self.message = await channel.send(embed=self.embed, view=self)
 
-    @menus.button(emoji='\u25B6')
-    async def resume_command(self, payload: disnake.RawReactionActionEvent):
+    @button(emoji="\u25B6")
+    async def resume_command(self, button: button, interaction: disnake.MessageInteraction):
         """Resume button."""
-        ctx = self.update_context(payload)
 
-        command = self.bot.get_command('resume')
-        ctx.command = command
+        ctx = await interaction.bot.get_context(interaction.message)
+        ctx.command = interaction.bot.get_command("resume")
+        await interaction.bot.invoke(ctx)
 
-        await self.bot.invoke(ctx)
-
-    @menus.button(emoji='\u23F8')
-    async def pause_command(self, payload: disnake.RawReactionActionEvent):
+    @button(emoji="\u23F8")
+    async def pause_command(self, button: button, interaction: disnake.MessageInteraction):
         """Pause button"""
-        ctx = self.update_context(payload)
+        ctx = await interaction.bot.get_context(interaction.message)
+        ctx.command = interaction.bot.get_command("pause")
+        await interaction.bot.invoke(ctx)
 
-        command = self.bot.get_command('pause')
-        ctx.command = command
-
-        await self.bot.invoke(ctx)
-
-    @menus.button(emoji='\u23F9')
-    async def stop_command(self, payload: disnake.RawReactionActionEvent):
+    @button(emoji="\u23F9")
+    async def stop_command(self, button: button, interaction: disnake.MessageInteraction):
         """Stop button."""
-        ctx = self.update_context(payload)
 
-        command = self.bot.get_command('stop')
-        ctx.command = command
+        ctx = await interaction.bot.get_context(interaction.message)
+        ctx.command = interaction.bot.get_command("stop")
+        await interaction.bot.invoke(ctx)
 
-        await self.bot.invoke(ctx)
-
-    @menus.button(emoji='\u23ED')
-    async def skip_command(self, payload: disnake.RawReactionActionEvent):
+    @button(emoji="\u23ED")
+    async def skip_command(self, button: button, interaction: disnake.MessageInteraction):
         """Skip button."""
-        ctx = self.update_context(payload)
+        ctx = await interaction.bot.get_context(interaction.message)
+        ctx.command = interaction.bot.get_command("skip")
+        await interaction.bot.invoke(ctx)
 
-        command = self.bot.get_command('skip')
-        ctx.command = command
-
-        await self.bot.invoke(ctx)
-
-    @menus.button(emoji='\U0001F500')
-    async def shuffle_command(self, payload: disnake.RawReactionActionEvent):
+    @button(emoji="\U0001F500")
+    async def shuffle_command(self, button: button, interaction: disnake.MessageInteraction):
         """Shuffle button."""
-        ctx = self.update_context(payload)
 
-        command = self.bot.get_command('shuffle')
-        ctx.command = command
+        ctx = await interaction.bot.get_context(interaction.message)
+        ctx.command = interaction.bot.get_command("shuffle")
+        await interaction.bot.invoke(ctx)
 
-        await self.bot.invoke(ctx)
-
-    @menus.button(emoji='\u2795')
-    async def volup_command(self, payload: disnake.RawReactionActionEvent):
+    @button(emoji="\u2795")
+    async def volup_command(self, button: button, interaction: disnake.MessageInteraction):
         """Volume up button"""
-        ctx = self.update_context(payload)
 
-        command = self.bot.get_command('vol_up')
-        ctx.command = command
+        ctx = await interaction.bot.get_context(interaction.message)
+        ctx.command = interaction.bot.get_command("vol_up")
+        await interaction.bot.invoke(ctx)
 
-        await self.bot.invoke(ctx)
-
-    @menus.button(emoji='\u2796')
-    async def voldown_command(self, payload: disnake.RawReactionActionEvent):
+    @button(emoji="\u2796")
+    async def voldown_command(self, button: button, interaction: disnake.MessageInteraction):
         """Volume down button."""
-        ctx = self.update_context(payload)
 
-        command = self.bot.get_command('vol_down')
-        ctx.command = command
+        ctx = await interaction.bot.get_context(interaction.message)
+        ctx.command = interaction.bot.get_command("vol_down")
+        await interaction.bot.invoke(ctx)
 
-        await self.bot.invoke(ctx)
-
-    @menus.button(emoji='\U0001F1F6')
-    async def queue_command(self, payload: disnake.RawReactionActionEvent):
+    @button(label="Queue", emoji="\U0001F1F6")
+    async def queue_command(self, button: button, interaction: disnake.MessageInteraction):
         """Player queue button."""
-        ctx = self.update_context(payload)
 
-        command = self.bot.get_command('queue')
-        ctx.command = command
-
-        await self.bot.invoke(ctx)
+        ctx = await interaction.bot.get_context(interaction.message)
+        ctx.command = interaction.bot.get_command("queue")
+        await interaction.bot.invoke(ctx)
 
 
 class PaginatorSource(menus.ListPageSource):
@@ -259,8 +219,8 @@ class PaginatorSource(menus.ListPageSource):
         super().__init__(entries, per_page=per_page)
 
     async def format_page(self, menu: menus.Menu, page):
-        embed = disnake.Embed(title='Next up')
-        embed.description = '\n'.join(f'`{index}. {title}`' for index, title in enumerate(page, 1))
+        embed = disnake.Embed(title="Next up")
+        embed.description = "\n".join(f"**{index}.** {title}" for index, title in enumerate(page, 1))
 
         return embed
 
