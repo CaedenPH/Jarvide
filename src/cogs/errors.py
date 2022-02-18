@@ -16,6 +16,7 @@ from disnake.ext.commands import (
     Context,
     PrivateMessageOnly,
     NoPrivateMessage,
+    BadUnionArgument
 )
 from disnake import Embed, Color
 from disnake.ext.commands.errors import CommandNotFound, RoleNotFound, NotOwner
@@ -172,7 +173,17 @@ class ErrorHandler(Cog):
             return
 
         elif isinstance(error, NoChannelProvided):
-            return await ctx.send('You must be in a voice channel or provide one to connect to.')
+            return await ctx.send(embed=Embed(
+                    description=f"You must be in a voice channel or provide one to connect to.",
+                    color=Color.red(),
+                )   
+            )
+        elif isinstance(error, BadUnionArgument):
+            return await ctx.send(embed=Embed(
+                    description=f"Could not find the track requested!",
+                    color=Color.red(),
+                )   
+            )
         else:
             await ctx.send(
                 "An unexpected error occurred! Reporting this to my developer..."
