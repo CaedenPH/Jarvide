@@ -58,7 +58,7 @@ class Mod(commands.Cog):
         """
         if not ctx.author.top_role.position > member.top_role.position:
             return await ctx.send("You cant change someone's nickname that is higher or the same role heirarchy.")
-        if nick >= 36:
+        if len(nick) >= 36:
             return await ctx.send("Nickname can't be above 36 characters")
         await member.edit(nick=nick)
         await ctx.send(f"Nickname for {member.name} was changed to {member.mention}", delete_after=12)
