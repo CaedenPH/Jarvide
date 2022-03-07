@@ -2,9 +2,12 @@ import asyncio
 from disnake import Color, Embed
 import async_cse
 import random
+import asyncio
 
 
 from ..HIDDEN import KEY
+
+from disnake.ext import commands
 from disnake.ext.commands import (
     Cog, 
     BucketType, 

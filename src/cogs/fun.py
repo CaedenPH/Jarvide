@@ -270,7 +270,7 @@ class Fun(
             "really?", "you shouldn't have to be asking me this", "100% true",
             "100% false", "negative", "facts", "not the best", "you could do better"
         ])
-        embed = Embed(title="<:8_ball:932328134861275196> 8Ball <:8_ball:932328134861275196>",
+        embed = Embed(title="<a:8_ball:932328134861275196> 8Ball <a:8_ball:932328134861275196>",
                        description=f"Question:`{message}`\nAnswer:`{random_response}`", colour=0x301934).set_footer(
              text=f"asked by {ctx.author.name}", icon_url=ctx.author.display_avatar.url)
 
@@ -317,7 +317,7 @@ class Fun(
         """Tells someone to hold an L"""
         member = member or ctx.author
         embed  = Embed(
-            description=f"Hold this `L` {member.name} <:KKEKW:932907947158294588>",
+            description=f"Hold this `L` {member.name} <a:KKEKW:932907947158294588>",
             color=0xFF2400
         ).set_footer(
             text=f"sent by {ctx.author.name}",
