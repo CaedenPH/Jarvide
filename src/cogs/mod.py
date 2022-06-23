@@ -207,8 +207,14 @@ class Mod(commands.Cog):
     @commands.guild_only()
     @commands.has_permissions(moderate_members=True)
     @commands.bot_has_permissions(moderate_members=True)
-    async def timeout(self, ctx, member: disnake.Member, time: str, *, reason=None):
+    async def timeout(self, ctx: Context, member: disnake.Member, time: str, *, reason=None):
         """timesout (or mute) a member from a guild"""
+        if (
+            ctx.author.top_role.position <= member.top_role.position
+            and ctx.author.id != ctx.guild.owner_id
+        ):
+            return await ctx.send(f"{ctx.author} You can't timeout **{member.name}**")
+
         now = disnake.utils.utcnow()
         change = time_str.convert(time)
         duration = now + change
